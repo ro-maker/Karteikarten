@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karteikarten</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Interaktive Karteikarten</h1>
+        <div class="card" onclick="flipCard()">
+            <div class="card-inner">
+                <div class="card-front" id="front">Frage: Was ist die Hauptstadt von Deutschland?</div>
+                <div class="card-back" id="back">Antwort: Berlin</div>
+            </div>
+        </div>
+        <button onclick="nextCard()">Nächste Karte</button>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
