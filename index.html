@@ -3,45 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Karteikarten</title>
+    <title>Interaktive Karteikarten</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; }
-        .card { width: 300px; height: 200px; margin: auto; border: 1px solid #ccc; 
-                border-radius: 10px; padding: 20px; cursor: pointer; background-color: #f9f9f9; }
-        .hidden { display: none; }
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            background-color: #f4f4f4;
+        }
+        .card-container {
+            perspective: 1000px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 60vh;
+        }
+        .card {
+            width: 300px;
+            height: 200px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+        }
+        .card.flip {
+            transform: rotateY(180deg);
+        }
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            backface-visibility: hidden;
+            padding: 20px;
+        }
+        .card-front {
+            background: #ffcc00;
+        }
+        .card-back {
+            background: #009688;
+            color: white;
+            transform: rotateY(180deg);
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            border: none;
+            background: #007BFF;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
     </style>
 </head>
 <body>
-    <h1>Interaktive Karteikarten</h1>
-    <div id="card" class="card" onclick="flipCard()">
-        <p id="front">Frage: Was ist die Hauptstadt von Deutschland?</p>
-        <p id="back" class="hidden">Antwort: Berlin</p>
+
+    <h1>Karteikarten Lern-App</h1>
+
+    <div class="card-container">
+        <div class="card" onclick="flipCard()">
+            <div class="card-face card-front" id="front">
+                Frage: Wird aus der Datei script.js geladen...
+            </div>
+            <div class="card-face card-back" id="back">
+                Antwort: Wird aus der Datei script.js geladen...
+            </div>
+        </div>
     </div>
+
     <button onclick="nextCard()">Nächste Karte</button>
 
-    <script>
-        let cards = [
-            { question: "Was ist die Hauptstadt von Deutschland?", answer: "Berlin" },
-            { question: "Was ist 5 + 3?", answer: "8" },
-            { question: "Wer schrieb 'Faust'?", answer: "Goethe" }
-        ];
-        let currentIndex = 0;
-        let flipped = false;
+    <script src="script.js"></script>  <!-- Hier wird jetzt die externe Datei eingebunden -->
 
-        function flipCard() {
-            flipped = !flipped;
-            document.getElementById("front").classList.toggle("hidden", flipped);
-            document.getElementById("back").classList.toggle("hidden", !flipped);
-        }
-
-        function nextCard() {
-            currentIndex = (currentIndex + 1) % cards.length;
-            flipped = false;
-            document.getElementById("front").textContent = "Frage: " + cards[currentIndex].question;
-            document.getElementById("back").textContent = "Antwort: " + cards[currentIndex].answer;
-            document.getElementById("front").classList.remove("hidden");
-            document.getElementById("back").classList.add("hidden");
-        }
-    </script>
 </body>
 </html>
