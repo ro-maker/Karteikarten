@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Retain-Style Karteikarten</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Retain-Style Flip-Karteikarten</title>
   <style>
-    /* Globales Styling */
+    /* --- Globales Styling --- */
     * {
-      margin: 0;
-      padding: 0;
+      margin: 0; 
+      padding: 0; 
       box-sizing: border-box;
       font-family: Arial, sans-serif;
     }
@@ -19,6 +19,8 @@
       align-items: center;
       padding: 20px;
     }
+
+    /* --- Kopfzeile (Fortschritt) --- */
     header {
       text-align: center;
       margin-bottom: 20px;
@@ -31,92 +33,131 @@
       color: #888;
       font-size: 0.9rem;
     }
-    /* Karteikarten-Container */
+
+    /* --- Flip-Karten-Container --- */
     .card-container {
-      width: 100%;
-      max-width: 400px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      background: #fff;
-      padding: 16px;
-      box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
+      perspective: 1000px; /* Wichtig für den 3D-Flip-Effekt */
+      width: 320px;
+      height: 220px;
       margin-bottom: 15px;
     }
-    .card-question {
+    .card {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s;
+      cursor: pointer;
+    }
+    .card.flip {
+      transform: rotateY(180deg);
+    }
+
+    /* --- Vorder- und Rückseite der Karte --- */
+    .card-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden; 
+      border-radius: 8px;
+      box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+    .card-front {
+      background-color: #fff;
+    }
+    .card-back {
+      background-color: #f9f9f9;
+      transform: rotateY(180deg);
+    }
+
+    /* --- Frage & Antwort-Text --- */
+    #frontQuestion {
       font-size: 1.1rem;
       color: #333;
-      margin-bottom: 10px;
       line-height: 1.4;
+      text-align: center;
     }
-    .card-answer {
-      display: none; /* Antwort wird zunächst versteckt */
+    #backAnswer {
       font-size: 1rem;
-      background: #f9f9f9;
-      border-left: 4px solid #ccc;
-      padding: 8px;
-      margin-top: 10px;
-      border-radius: 4px;
       color: #444;
       line-height: 1.4;
+      text-align: center;
+      margin-bottom: 15px;
     }
-    /* Button-Styling */
+
+    /* --- Bewertungs-Buttons (auf der Rückseite) --- */
+    .rating-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
     .btn {
-      display: inline-block;
-      padding: 10px 16px;
       margin: 5px;
+      padding: 10px 16px;
       border: none;
       border-radius: 4px;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       cursor: pointer;
       color: #fff;
     }
     .btn:hover {
       opacity: 0.9;
     }
-    .btn-falsch { background-color: #dc3545; }       /* Rot */
-    .btn-muehsam { background-color: #ffc107; color: #333; } /* Gelb */
-    .btn-gut { background-color: #28a745; }           /* Grün */
-    .btn-einfach { background-color: #17a2b8; }       /* Türkis */
-    .btn-check { background-color: #972D54; margin-top: 10px; }
-    /* Fortschrittsanzeige */
+    .btn-falsch    { background-color: #dc3545; }  /* Rot */
+    .btn-muehsam   { background-color: #ffc107; color: #333; } /* Gelb */
+    .btn-gut       { background-color: #28a745; }  /* Grün */
+    .btn-einfach   { background-color: #17a2b8; }  /* Türkis */
+
+    /* --- Footer-Info --- */
     .info-footer {
       margin-top: 20px;
       color: #666;
       font-size: 0.95rem;
+      text-align: center;
+      min-height: 20px;
     }
   </style>
 </head>
 <body>
-  <!-- Kopfzeile / Fortschritt -->
+
+  <!-- Kopfzeile -->
   <header>
     <h2>Heute: <span id="currentCardIndex">0</span>/<span id="totalCards">0</span></h2>
     <div class="subinfo">Wissensstand: Pro-Funktion</div>
   </header>
 
-  <!-- Karteikarten-Container -->
+  <!-- Flip-Karten-Container -->
   <div class="card-container">
-    <div class="card-question" id="cardQuestion">
-      <!-- Frage wird dynamisch geladen -->
+    <div class="card" id="card" onclick="flipCard()">
+      <!-- Vorderseite -->
+      <div class="card-face card-front">
+        <div id="frontQuestion">Frage wird geladen...</div>
+      </div>
+      <!-- Rückseite -->
+      <div class="card-face card-back">
+        <div id="backAnswer">Antwort wird geladen...</div>
+        <div class="rating-buttons">
+          <!-- event.stopPropagation() verhindert erneutes Flippen bei Klick auf Buttons -->
+          <button class="btn btn-falsch"  onclick="rateCard('Falsch'); event.stopPropagation();">Falsch</button>
+          <button class="btn btn-muehsam" onclick="rateCard('Mühsam'); event.stopPropagation();">Mühsam</button>
+          <button class="btn btn-gut"     onclick="rateCard('Gut'); event.stopPropagation();">Gut</button>
+          <button class="btn btn-einfach"onclick="rateCard('Einfach'); event.stopPropagation();">Einfach</button>
+        </div>
+      </div>
     </div>
-    <button class="btn btn-check" id="checkAnswerBtn">Antwort prüfen</button>
-    <div class="card-answer" id="cardAnswer">
-      <!-- Antwort wird dynamisch geladen -->
-    </div>
-  </div>
-
-  <!-- Bewertungs-Buttons -->
-  <div>
-    <button class="btn btn-falsch" onclick="rateCard('Falsch')">Falsch</button>
-    <button class="btn btn-muehsam" onclick="rateCard('Mühsam')">Mühsam</button>
-    <button class="btn btn-gut" onclick="rateCard('Gut')">Gut</button>
-    <button class="btn btn-einfach" onclick="rateCard('Einfach')">Einfach</button>
   </div>
 
   <!-- Footer-Info -->
   <div class="info-footer" id="infoFooter"></div>
 
   <script>
-    // Beispiel-Karteikarten
+    // Beispiel-Karten
     let cards = [
       {
         question: "Wann besteht ein Anspruch des Verkäufers V gegen den Abkäufer A auf Rückübereignung des Pkw nach § 812 I 1 2?",
@@ -136,45 +177,49 @@
     const totalCards = cards.length;
 
     // DOM-Elemente
-    const questionEl = document.getElementById('cardQuestion');
-    const answerEl = document.getElementById('cardAnswer');
+    const cardEl = document.getElementById('card');
+    const frontQuestionEl = document.getElementById('frontQuestion');
+    const backAnswerEl = document.getElementById('backAnswer');
     const currentCardIndexEl = document.getElementById('currentCardIndex');
     const totalCardsEl = document.getElementById('totalCards');
-    const checkAnswerBtn = document.getElementById('checkAnswerBtn');
-    const infoFooter = document.getElementById('infoFooter');
+    const infoFooterEl = document.getElementById('infoFooter');
 
-    // Initialisierung der Seite
+    // Seite initialisieren
+    document.addEventListener('DOMContentLoaded', init);
+
     function init() {
       totalCardsEl.textContent = totalCards;
       loadCard(currentIndex);
     }
 
-    // Lade die aktuelle Karte
+    // Aktuelle Karte laden
     function loadCard(index) {
       if (cards.length === 0) {
-        questionEl.textContent = "Alle Karten abgeschlossen!";
-        answerEl.style.display = "none";
-        checkAnswerBtn.style.display = "none";
-        infoFooter.textContent = "Du hast alle Karten bearbeitet. Glückwunsch!";
+        frontQuestionEl.textContent = "Alle Karten abgeschlossen!";
+        backAnswerEl.textContent = "Keine Karten mehr vorhanden.";
+        infoFooterEl.textContent = "Glückwunsch, du hast alle Karten durchgearbeitet!";
         return;
       }
-      questionEl.textContent = cards[index].question;
-      answerEl.textContent = cards[index].answer;
-      answerEl.style.display = "none";  // Antwort wieder verbergen
-      checkAnswerBtn.style.display = "inline-block";
+      frontQuestionEl.textContent = cards[index].question;
+      backAnswerEl.textContent = cards[index].answer;
       currentCardIndexEl.textContent = index + 1;
-      infoFooter.textContent = "";
+      infoFooterEl.textContent = "";
+      // Sicherstellen, dass die Karte wieder auf der Vorderseite ist
+      cardEl.classList.remove('flip');
     }
 
-    // Beim Klick auf "Antwort prüfen" wird die Antwort angezeigt
-    checkAnswerBtn.addEventListener('click', () => {
-      answerEl.style.display = "block";
-      checkAnswerBtn.style.display = "none";
-    });
+    // Karte flippen (Vorder-/Rückseite)
+    function flipCard() {
+      // Falls keine Karten mehr da sind, nichts flippen
+      if (cards.length === 0) return;
+      cardEl.classList.toggle('flip');
+    }
 
-    // Bewertungsfunktion: Nur bei "Einfach" wird die Karte entfernt, sonst ans Ende verschoben
+    // Karte bewerten
     function rateCard(rating) {
-      infoFooter.textContent = `Du hast die Karte als "${rating}" bewertet.`;
+      infoFooterEl.textContent = `Du hast die Karte als "${rating}" bewertet.`;
+
+      // Nur bei "Einfach" Karte entfernen, sonst ans Ende verschieben
       if (rating === 'Einfach') {
         cards.splice(currentIndex, 1);
       } else {
@@ -182,18 +227,21 @@
         cards.splice(currentIndex, 1);
         cards.push(currentCard);
       }
+
+      // Wenn alle Karten entfernt wurden
       if (cards.length === 0) {
         loadCard(-1);
         return;
       }
+
+      // Index anpassen (z. B. wenn wir am Ende des Arrays sind)
       if (currentIndex >= cards.length) {
         currentIndex = 0;
       }
+
+      // Nächste Karte laden
       loadCard(currentIndex);
     }
-
-    // Initialisierung starten
-    init();
   </script>
 </body>
 </html>
