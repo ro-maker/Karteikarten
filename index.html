@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
   <title>Retain-Style Karteikarten</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <style>
+    /* Globales Styling */
     * {
       margin: 0;
       padding: 0;
@@ -25,13 +26,12 @@
     header h2 {
       color: #972D54;
     }
-
-    /* --- Flip-Karte --- */
+    /* Flip-Karten-Container */
     .card-container {
+      position: relative;
       perspective: 1000px;
       width: 320px;
       height: 240px;
-      position: relative;
     }
     .card {
       width: 100%;
@@ -51,13 +51,14 @@
       height: 100%;
       backface-visibility: hidden;
       border-radius: 8px;
-      box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       padding: 16px;
       text-align: center;
-      white-space: pre-line; /* Absätze beibehalten */
+      white-space: pre-line; /* Zeilenumbrüche erhalten */
     }
     .card-front {
       background-color: #fff;
@@ -66,16 +67,14 @@
       background-color: #f9f9f9;
       transform: rotateY(180deg);
     }
-
-    /* --- Buttons rechts neben der Karte --- */
+    /* Seiten-Buttons (Bild hochladen, Bearbeiten) – rechts neben der Karte */
     .side-buttons {
       position: absolute;
-      top: 50%;
-      right: -110px;
+      top: 0;
+      right: -130px;
       display: flex;
       flex-direction: column;
       gap: 10px;
-      transform: translateY(-50%);
     }
     .side-buttons button {
       padding: 8px 12px;
@@ -89,26 +88,30 @@
     .side-buttons button:hover {
       opacity: 0.9;
     }
-
-    /* --- Bunte Buttons unter der Karte --- */
+    /* Bottom-Buttons (fünf Buttons) – nur sichtbar, wenn Karte umgedreht */
     .bottom-buttons {
       margin-top: 15px;
-      display: flex;
+      width: 320px;
+      display: none; /* standardmäßig ausblenden */
       gap: 10px;
+      justify-content: space-between;
     }
     .bottom-buttons button {
+      flex: 1;
       padding: 10px;
       border: none;
       border-radius: 5px;
       font-size: 1rem;
       cursor: pointer;
-      color: white;
+      color: #fff;
     }
-    .red { background: #e74c3c; }
-    .yellow { background: #f1c40f; color: black; }
-    .green { background: #2ecc71; }
-
-    /* --- Bearbeitungs-Overlay mit Texteditor --- */
+    .btn-falsch   { background-color: #e74c3c; }
+    .btn-muehsam  { background-color: #f39c12; color: black; }
+    .btn-gut      { background-color: #2ecc71; }
+    .btn-einfach  { background-color: #1abc9c; }
+    .btn-edit     { background-color: #8e44ad; }
+    
+    /* Bearbeitungs-Overlay */
     .edit-overlay {
       display: none;
       position: fixed;
@@ -119,9 +122,19 @@
       max-width: 400px;
       background: #fff;
       padding: 15px;
-      box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
       border-radius: 8px;
       z-index: 1000;
+    }
+    .edit-overlay .text-editor {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 5px;
+    }
+    .edit-overlay .text-editor button {
+      padding: 5px;
+      font-size: 0.9rem;
+      cursor: pointer;
     }
     .edit-overlay textarea {
       width: 100%;
@@ -130,16 +143,6 @@
       border: 1px solid #ccc;
       border-radius: 4px;
       height: 100px;
-    }
-    .text-editor {
-      display: flex;
-      gap: 5px;
-      margin-bottom: 5px;
-    }
-    .text-editor button {
-      padding: 5px;
-      font-size: 0.9rem;
-      cursor: pointer;
     }
     .edit-overlay .buttons {
       display: flex;
@@ -151,11 +154,22 @@
       border: none;
       border-radius: 4px;
       cursor: pointer;
-      color: white;
+      color: #fff;
     }
     .save { background-color: #28a745; }
     .close { background-color: #dc3545; }
-
+    
+    /* Canvas für Zeichnen */
+    #drawCanvas {
+      width: 90%;
+      height: 60px;
+      border: 1px solid #ccc;
+      margin-top: 5px;
+    }
+    /* Input für Bild-Upload */
+    #imageUpload {
+      margin-top: 5px;
+    }
   </style>
 </head>
 <body>
@@ -166,82 +180,172 @@
 
   <div class="card-container">
     <div class="card" id="card" onclick="flipCard()">
+      <!-- Vorderseite -->
       <div class="card-face card-front">
         <div id="frontQuestion">Frage wird geladen...</div>
       </div>
+      <!-- Rückseite -->
       <div class="card-face card-back">
         <div id="backAnswer">Antwort wird geladen...</div>
+        <input type="file" id="imageUpload" accept="image/*" onchange="handleImageUpload(event)">
+        <canvas id="drawCanvas"></canvas>
       </div>
     </div>
-
-    <!-- Buttons rechts neben der Karte -->
+    <!-- Side-Buttons: Bild hochladen & Bearbeiten (rechts neben der Karte) -->
     <div class="side-buttons">
-      <button onclick="showEditForm()">✏️ Bearbeiten</button>
-      <button onclick="addImage()">📷 Bild hinzufügen</button>
+      <button onclick="openEditOverlay()">Bearbeiten</button>
+      <button onclick="promptImageUpload()">Bild hinzufügen</button>
     </div>
   </div>
 
-  <!-- Bunte Buttons unter der Karte -->
-  <div class="bottom-buttons">
-    <button class="red">❌</button>
-    <button class="yellow">⚠️</button>
-    <button class="green">✅</button>
+  <!-- Bottom-Buttons: erscheinen nur wenn Karte umgedreht ist -->
+  <div class="bottom-buttons" id="bottomButtons">
+    <button class="btn-falsch" onclick="rateCard('Falsch')">Falsch</button>
+    <button class="btn-muehsam" onclick="rateCard('Mühsam')">Mühsam</button>
+    <button class="btn-gut" onclick="rateCard('Gut')">Gut</button>
+    <button class="btn-einfach" onclick="rateCard('Einfach')">Einfach</button>
+    <button class="btn-edit" onclick="openEditOverlay()">Editieren</button>
   </div>
 
-  <!-- Bearbeitungs-Overlay -->
+  <!-- Bearbeitungs-Overlay (Texteditor mit Formatierungsoptionen) -->
   <div class="edit-overlay" id="editOverlay">
     <h3>Karte bearbeiten</h3>
     <div class="text-editor">
-      <button onclick="formatText('bold')"><b>B</b></button>
-      <button onclick="formatText('italic')"><i>I</i></button>
-      <button onclick="formatText('h1')">H1</button>
+      <button onclick="applyFormat('bold')"><b>B</b></button>
+      <button onclick="applyFormat('italic')"><i>I</i></button>
+      <button onclick="applyFormat('underline')"><u>U</u></button>
+      <button onclick="applyFormat('fontSize')">Größe</button>
     </div>
-    <textarea id="editText"></textarea>
+    <textarea id="editText" placeholder="Antwort bearbeiten..."></textarea>
     <div class="buttons">
       <button class="save" onclick="saveEdit()">Speichern</button>
-      <button class="close" onclick="hideEditForm()">Abbrechen</button>
+      <button class="close" onclick="closeEditOverlay()">Abbrechen</button>
     </div>
   </div>
 
   <script>
+    // Beispiel-Karten (du kannst diese später dynamisch laden)
     let cards = [
-      { question: "Wann besteht ein Anspruch des Verkäufers V gegen den Abkäufer A auf Rückübereignung des Pkw?", answer: "Wenn die Voraussetzungen des § 812 BGB erfüllt sind." }
+      {
+        question: "Wann besteht ein Anspruch des Verkäufers V gegen den Abkäufer A auf Rückübereignung des Pkw?",
+        answer: "Wenn die Voraussetzungen des § 812 BGB erfüllt sind.\n\nWeitere Infos:\n- Punkt 1\n- Punkt 2"
+      }
     ];
     let currentIndex = 0;
-
     document.addEventListener("DOMContentLoaded", () => {
       loadCard(currentIndex);
+      setupCanvas();
+      updateBottomButtons();
+      document.getElementById("totalCards").textContent = cards.length;
     });
-
     function loadCard(index) {
       document.getElementById("frontQuestion").textContent = cards[index].question;
+      // Verwende innerHTML, um HTML-Formatierungen (wie <br> für Absätze) zu erhalten
       document.getElementById("backAnswer").innerHTML = cards[index].answer.replace(/\n/g, "<br>");
       document.getElementById("currentCardIndex").textContent = index + 1;
     }
-
     function flipCard() {
-      document.getElementById("card").classList.toggle("flip");
+      const cardEl = document.getElementById("card");
+      cardEl.classList.toggle("flip");
+      updateBottomButtons();
     }
-
-    function showEditForm() {
+    // Bottom-Buttons anzeigen, wenn Karte umgedreht
+    function updateBottomButtons() {
+      const cardEl = document.getElementById("card");
+      const bottomButtons = document.getElementById("bottomButtons");
+      if(cardEl.classList.contains("flip")) {
+        bottomButtons.style.display = "flex";
+      } else {
+        bottomButtons.style.display = "none";
+      }
+    }
+    // Bewertungsfunktion
+    function rateCard(rating) {
+      alert(`Bewertung: ${rating}`);
+      // Hier kannst du Logik einfügen, z.B. Karte bei "Einfach" löschen
+    }
+    // Bearbeitungs-Overlay öffnen
+    function openEditOverlay() {
       document.getElementById("editText").value = cards[currentIndex].answer;
       document.getElementById("editOverlay").style.display = "block";
     }
-
-    function hideEditForm() {
+    function closeEditOverlay() {
       document.getElementById("editOverlay").style.display = "none";
     }
-
     function saveEdit() {
-      cards[currentIndex].answer = document.getElementById("editText").value;
+      let newText = document.getElementById("editText").value;
+      cards[currentIndex].answer = newText;
       loadCard(currentIndex);
-      hideEditForm();
+      closeEditOverlay();
     }
-
-    function formatText(type) {
-      document.getElementById("editText").style.fontWeight = type === "bold" ? "bold" : "normal";
+    // Formatierung im Editor
+    function applyFormat(format) {
+      const textarea = document.getElementById("editText");
+      let start = textarea.selectionStart;
+      let end = textarea.selectionEnd;
+      let selected = textarea.value.substring(start, end);
+      let before = "", after = "";
+      switch(format) {
+        case "bold":
+          before = "<b>";
+          after = "</b>";
+          break;
+        case "italic":
+          before = "<i>";
+          after = "</i>";
+          break;
+        case "underline":
+          before = "<u>";
+          after = "</u>";
+          break;
+        case "fontSize":
+          let size = prompt("Schriftgröße (z.B. 18px):", "18px");
+          before = `<span style="font-size:${size};">`;
+          after = "</span>";
+          break;
+      }
+      textarea.value = textarea.value.substring(0, start) + before + selected + after + textarea.value.substring(end);
+    }
+    // Dummy-Funktion: Über den Seiten-Button "Bild hinzufügen" wird der Bild-Upload ausgelöst
+    function promptImageUpload() {
+      document.getElementById("imageUpload").click();
+    }
+    // Bild-Upload-Funktion
+    function handleImageUpload(event) {
+      const file = event.target.files[0];
+      if(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          let img = document.createElement("img");
+          img.src = e.target.result;
+          img.style.maxWidth = "100%";
+          // Füge Bild in die Antwort ein
+          document.getElementById("backAnswer").innerHTML += "<br>" + img.outerHTML;
+        }
+        reader.readAsDataURL(file);
+      }
+    }
+    // Zeichnen auf Canvas
+    function setupCanvas() {
+      const canvas = document.getElementById("drawCanvas");
+      const ctx = canvas.getContext("2d");
+      canvas.width = canvas.clientWidth;
+      canvas.height = 60;
+      let drawing = false;
+      canvas.addEventListener("mousedown", () => { drawing = true; ctx.beginPath(); });
+      canvas.addEventListener("mouseup", () => { drawing = false; });
+      canvas.addEventListener("mousemove", function(e) {
+        if(!drawing) return;
+        let rect = canvas.getBoundingClientRect();
+        let x = e.clientX - rect.left;
+        let y = e.clientY - rect.top;
+        ctx.lineWidth = 2;
+        ctx.lineCap = "round";
+        ctx.strokeStyle = "#000";
+        ctx.lineTo(x, y);
+        ctx.stroke();
+      });
     }
   </script>
-
 </body>
 </html>
