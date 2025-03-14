@@ -36,7 +36,9 @@
 
     /* --- Flip-Karten-Container --- */
     .card-container {
-      perspective: 1000px; /* Wichtig für den 3D-Flip-Effekt */
+      /* Wichtig für 3D-Flip: perspective */
+      perspective: 1000px;
+      -webkit-perspective: 1000px;
       width: 320px;
       height: 220px;
       margin-bottom: 15px;
@@ -45,20 +47,25 @@
       width: 100%;
       height: 100%;
       position: relative;
+      /* 3D-Einstellungen */
       transform-style: preserve-3d;
+      -webkit-transform-style: preserve-3d;
       transition: transform 0.6s;
+      -webkit-transition: -webkit-transform 0.6s;
       cursor: pointer;
     }
     .card.flip {
       transform: rotateY(180deg);
+      -webkit-transform: rotateY(180deg);
     }
 
-    /* --- Vorder- und Rückseite der Karte --- */
+    /* --- Vorder- und Rückseite --- */
     .card-face {
       position: absolute;
       width: 100%;
       height: 100%;
       backface-visibility: hidden; 
+      -webkit-backface-visibility: hidden;
       border-radius: 8px;
       box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
       display: flex;
@@ -74,6 +81,7 @@
     .card-back {
       background-color: #f9f9f9;
       transform: rotateY(180deg);
+      -webkit-transform: rotateY(180deg);
     }
 
     /* --- Frage & Antwort-Text --- */
@@ -109,10 +117,10 @@
     .btn:hover {
       opacity: 0.9;
     }
-    .btn-falsch    { background-color: #dc3545; }  /* Rot */
-    .btn-muehsam   { background-color: #ffc107; color: #333; } /* Gelb */
-    .btn-gut       { background-color: #28a745; }  /* Grün */
-    .btn-einfach   { background-color: #17a2b8; }  /* Türkis */
+    .btn-falsch    { background-color: #dc3545; }
+    .btn-muehsam   { background-color: #ffc107; color: #333; }
+    .btn-gut       { background-color: #28a745; }
+    .btn-einfach   { background-color: #17a2b8; }
 
     /* --- Footer-Info --- */
     .info-footer {
@@ -143,7 +151,7 @@
       <div class="card-face card-back">
         <div id="backAnswer">Antwort wird geladen...</div>
         <div class="rating-buttons">
-          <!-- event.stopPropagation() verhindert erneutes Flippen bei Klick auf Buttons -->
+          <!-- event.stopPropagation() verhindert erneutes Flippen beim Klick auf Buttons -->
           <button class="btn btn-falsch"  onclick="rateCard('Falsch'); event.stopPropagation();">Falsch</button>
           <button class="btn btn-muehsam" onclick="rateCard('Mühsam'); event.stopPropagation();">Mühsam</button>
           <button class="btn btn-gut"     onclick="rateCard('Gut'); event.stopPropagation();">Gut</button>
@@ -210,15 +218,13 @@
 
     // Karte flippen (Vorder-/Rückseite)
     function flipCard() {
-      // Falls keine Karten mehr da sind, nichts flippen
-      if (cards.length === 0) return;
+      if (cards.length === 0) return; // Keine Karten => kein Flip
       cardEl.classList.toggle('flip');
     }
 
     // Karte bewerten
     function rateCard(rating) {
       infoFooterEl.textContent = `Du hast die Karte als "${rating}" bewertet.`;
-
       // Nur bei "Einfach" Karte entfernen, sonst ans Ende verschieben
       if (rating === 'Einfach') {
         cards.splice(currentIndex, 1);
@@ -227,18 +233,15 @@
         cards.splice(currentIndex, 1);
         cards.push(currentCard);
       }
-
-      // Wenn alle Karten entfernt wurden
+      // Falls alle Karten weg sind
       if (cards.length === 0) {
         loadCard(-1);
         return;
       }
-
-      // Index anpassen (z. B. wenn wir am Ende des Arrays sind)
+      // Index anpassen
       if (currentIndex >= cards.length) {
         currentIndex = 0;
       }
-
       // Nächste Karte laden
       loadCard(currentIndex);
     }
