@@ -7,28 +7,32 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Interaktive Karteikarten</h1>
-    
-    <div class="card-container">
-        <div id="card" class="card" onclick="flipCard()">
-            <div class="front">
-                <p id="front-text">Frage: Was ist die Hauptstadt von Deutschland?</p>
-            </div>
-            <div class="back">
-                <p id="back-text">Antwort: Berlin</p>
-                <input type="file" id="uploadImage" accept="image/*" onchange="addImage(event)">
-                <canvas id="drawCanvas"></canvas>
+    <div class="container">
+        <h2> <span class="highlight">Heute: <span id="progress">1/3</span> </span></h2>
+        <p class="knowledge-status">Wissensstand: <span>Pro-Funktion</span></p>
+
+        <div class="card" id="card">
+            <div class="card-inner">
+                <div class="card-front">
+                    <p id="question">Wann besteht ein Anspruch des Verkäufers V gegen den Abkäufer A auf Rückübereignung des Pkw nach § 812 I 1 2?</p>
+                    <button class="flip-btn" onclick="flipCard()">Antwort anzeigen</button>
+                </div>
+                <div class="card-back">
+                    <p id="answer">Voraussetzungen: <b>Eigentum und Besitz</b> an A übergegangen, <i>Nichtleistungskondiktion</i>, etc.</p>
+                    <input type="file" id="imageUpload" accept="image/*" onchange="addImage(event)">
+                    <canvas id="drawCanvas"></canvas>
+                    <div class="buttons">
+                        <button class="btn red">Falsch</button>
+                        <button class="btn yellow">Mühsam</button>
+                        <button class="btn green">Gut</button>
+                        <button class="btn blue">Einfach</button>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-    
-    <div class="buttons">
-        <button onclick="editCard()">📝 Bearbeiten</button>
-        <button onclick="addBold()">𝐁</button>
-        <button onclick="addItalic()">𝘐</button>
-        <button onclick="addColor()">🎨</button>
-        <button onclick="saveCard()">💾 Speichern</button>
-        <button onclick="nextCard()">➡️ Nächste Karte</button>
+
+        <textarea id="editText" placeholder="Antwort bearbeiten..."></textarea>
+        <button onclick="saveEdit()">Speichern</button>
     </div>
 
     <script src="script.js"></script>
