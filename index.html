@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Retain-Style Karteikarten</title>
   <style>
-    /* --- Grund-Layout --- */
+    /* Globales Styling */
     * {
       margin: 0;
       padding: 0;
@@ -24,15 +24,14 @@
       margin-bottom: 20px;
     }
     header h2 {
-      color: #555;
+      color: #972D54;
       margin-bottom: 5px;
     }
     header .subinfo {
       color: #888;
       font-size: 0.9rem;
     }
-
-    /* --- Karteikarten-Stil --- */
+    /* Karteikarten-Container */
     .card-container {
       width: 100%;
       max-width: 400px;
@@ -50,7 +49,7 @@
       line-height: 1.4;
     }
     .card-answer {
-      display: none; /* initially hidden */
+      display: none; /* Antwort wird zunächst versteckt */
       font-size: 1rem;
       background: #f9f9f9;
       border-left: 4px solid #ccc;
@@ -60,8 +59,7 @@
       color: #444;
       line-height: 1.4;
     }
-
-    /* --- Buttons --- */
+    /* Button-Styling */
     .btn {
       display: inline-block;
       padding: 10px 16px;
@@ -75,19 +73,12 @@
     .btn:hover {
       opacity: 0.9;
     }
-    /* Farbschema wie bei Retain.ai: */
-    .btn-falsch { background-color: #dc3545; }  /* rot */
-    .btn-muehsam { background-color: #ffc107; color: #333; } /* gelb, dunkler Text */
-    .btn-gut { background-color: #28a745; }    /* grün */
-    .btn-einfach { background-color: #17a2b8; } /* türkis */
-
-    /* --- "Antwort prüfen" Button --- */
-    .btn-check {
-      background-color: #972D54; /* deine Wunschfarbe */
-      margin-top: 10px;
-    }
-
-    /* --- Fortschritt + Info --- */
+    .btn-falsch { background-color: #dc3545; }       /* Rot */
+    .btn-muehsam { background-color: #ffc107; color: #333; } /* Gelb */
+    .btn-gut { background-color: #28a745; }           /* Grün */
+    .btn-einfach { background-color: #17a2b8; }       /* Türkis */
+    .btn-check { background-color: #972D54; margin-top: 10px; }
+    /* Fortschrittsanzeige */
     .info-footer {
       margin-top: 20px;
       color: #666;
@@ -96,7 +87,6 @@
   </style>
 </head>
 <body>
-
   <!-- Kopfzeile / Fortschritt -->
   <header>
     <h2>Heute: <span id="currentCardIndex">0</span>/<span id="totalCards">0</span></h2>
@@ -126,11 +116,11 @@
   <div class="info-footer" id="infoFooter"></div>
 
   <script>
-    // Beispiel-Karten
+    // Beispiel-Karteikarten
     let cards = [
       {
         question: "Wann besteht ein Anspruch des Verkäufers V gegen den Abkäufer A auf Rückübereignung des Pkw nach § 812 I 1 2?",
-        answer: "Voraussetzungen: Eigentum und Besitz an A übergegangen, Nichtleistungs-kondiktion, etc."
+        answer: "Voraussetzungen: Eigentum und Besitz an A übergegangen, Nichtleistungskondiktion, etc."
       },
       {
         question: "Ein Anspruch des Verkäufers V gegen den Abkäufer A auf Rückübereignung des Pkw nach § 812 I 1 2 (Nichtleistungskondiktion) besteht, wenn ...",
@@ -145,6 +135,7 @@
     let currentIndex = 0;
     const totalCards = cards.length;
 
+    // DOM-Elemente
     const questionEl = document.getElementById('cardQuestion');
     const answerEl = document.getElementById('cardAnswer');
     const currentCardIndexEl = document.getElementById('currentCardIndex');
@@ -152,70 +143,56 @@
     const checkAnswerBtn = document.getElementById('checkAnswerBtn');
     const infoFooter = document.getElementById('infoFooter');
 
-    // Seite initialisieren
+    // Initialisierung der Seite
     function init() {
       totalCardsEl.textContent = totalCards;
       loadCard(currentIndex);
     }
 
-    // Karte laden
+    // Lade die aktuelle Karte
     function loadCard(index) {
       if (cards.length === 0) {
-        // Wenn keine Karten mehr vorhanden sind
         questionEl.textContent = "Alle Karten abgeschlossen!";
         answerEl.style.display = "none";
         checkAnswerBtn.style.display = "none";
         infoFooter.textContent = "Du hast alle Karten bearbeitet. Glückwunsch!";
         return;
       }
-      // Neue Karte anzeigen
       questionEl.textContent = cards[index].question;
       answerEl.textContent = cards[index].answer;
-      answerEl.style.display = "none";  // Antwort wieder verstecken
+      answerEl.style.display = "none";  // Antwort wieder verbergen
       checkAnswerBtn.style.display = "inline-block";
       currentCardIndexEl.textContent = index + 1;
       infoFooter.textContent = "";
     }
 
-    // Antwort anzeigen
+    // Beim Klick auf "Antwort prüfen" wird die Antwort angezeigt
     checkAnswerBtn.addEventListener('click', () => {
       answerEl.style.display = "block";
       checkAnswerBtn.style.display = "none";
     });
 
-    // Karte bewerten
+    // Bewertungsfunktion: Nur bei "Einfach" wird die Karte entfernt, sonst ans Ende verschoben
     function rateCard(rating) {
-      // Zeige Info im Footer
       infoFooter.textContent = `Du hast die Karte als "${rating}" bewertet.`;
-
-      // Karte entfernen, wenn man das möchte
-      // (z.B. bei "Einfach" oder "Gut" -> Karte rausnehmen)
-      // Du kannst die Logik anpassen, wann Karten verschwinden sollen.
-      if (rating === 'Einfach' || rating === 'Gut') {
+      if (rating === 'Einfach') {
         cards.splice(currentIndex, 1);
       } else {
-        // Optional: Bei 'Falsch' oder 'Mühsam' Karte am Ende wieder einfügen
-        // => Spaced Repetition-Ansatz
-        // Wir verschieben die Karte ans Ende:
         let currentCard = cards[currentIndex];
         cards.splice(currentIndex, 1);
         cards.push(currentCard);
       }
-
-      // Wenn keine Karten mehr da sind
       if (cards.length === 0) {
         loadCard(-1);
         return;
       }
-
-      // currentIndex anpassen
       if (currentIndex >= cards.length) {
         currentIndex = 0;
       }
       loadCard(currentIndex);
     }
 
-    // Init
+    // Initialisierung starten
     init();
   </script>
 </body>
