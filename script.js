@@ -1,60 +1,43 @@
-let cards = [
-    { question: "Was ist die Hauptstadt von Deutschland?", answer: "Berlin" },
-    { question: "Was ist 5 + 3?", answer: "8" },
-    { question: "Wer schrieb 'Faust'?", answer: "Goethe" }
-];
-
-let currentIndex = 0;
-let flipped = false;
-
 function flipCard() {
-    let card = document.getElementById("card");
-    card.classList.toggle("flipped");
+    document.getElementById("card").classList.toggle("flipped");
 }
 
-function nextCard() {
-    currentIndex = (currentIndex + 1) % cards.length;
-    document.getElementById("front-text").innerHTML = "Frage: " + cards[currentIndex].question;
-    document.getElementById("back-text").innerHTML = "Antwort: " + cards[currentIndex].answer;
-}
-
-function editCard() {
-    let text = prompt("Bearbeite die Antwort:", document.getElementById("back-text").innerHTML);
-    if (text !== null) {
-        document.getElementById("back-text").innerHTML = text;
-    }
-}
-
-function addBold() {
-    let textElement = document.getElementById("back-text");
-    textElement.innerHTML = "<b>" + textElement.innerHTML + "</b>";
-}
-
-function addItalic() {
-    let textElement = document.getElementById("back-text");
-    textElement.innerHTML = "<i>" + textElement.innerHTML + "</i>";
-}
-
-function addColor() {
-    let color = prompt("Gib eine Farbe ein (z.B. 'red', 'blue' oder Hex-Code):", "#972D54");
-    document.getElementById("back-text").style.color = color;
-}
-
-function saveCard() {
-    alert("Karteikarte gespeichert!");
+function saveEdit() {
+    let newText = document.getElementById("editText").value;
+    document.getElementById("answer").innerHTML = newText;
 }
 
 function addImage(event) {
-    let file = event.target.files[0];
-    if (file) {
-        let reader = new FileReader();
-        reader.onload = function(e) {
-            let img = document.createElement("img");
-            img.src = e.target.result;
-            img.style.maxWidth = "100px";
-            img.style.maxHeight = "100px";
-            document.getElementById("back-text").appendChild(img);
-        };
-        reader.readAsDataURL(file);
-    }
+    let reader = new FileReader();
+    reader.onload = function(){
+        let img = document.createElement("img");
+        img.src = reader.result;
+        img.style.maxWidth = "100%";
+        document.getElementById("answer").appendChild(img);
+    };
+    reader.readAsDataURL(event.target.files[0]);
+}
+
+// Zeichnen aktivieren
+let canvas = document.getElementById("drawCanvas");
+let ctx = canvas.getContext("2d");
+canvas.width = 300;
+canvas.height = 200;
+canvas.style.border = "1px solid black";
+canvas.style.marginTop = "10px";
+
+let drawing = false;
+canvas.addEventListener("mousedown", () => drawing = true);
+canvas.addEventListener("mouseup", () => drawing = false);
+canvas.addEventListener("mousemove", draw);
+
+function draw(event) {
+    if (!drawing) return;
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "black";
+    ctx.lineTo(event.offsetX, event.offsetY);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(event.offsetX, event.offsetY);
 }
