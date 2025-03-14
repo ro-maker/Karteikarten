@@ -1,325 +1,38 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Retain-Style Flip-Karteikarten</title>
-  <style>
-    /* --- Globales Styling --- */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
-    body {
-      background-color: #fefefe;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
-    }
-    header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    header h2 {
-      color: #972D54;
-      margin-bottom: 5px;
-    }
-    header .subinfo {
-      color: #888;
-      font-size: 0.9rem;
-    }
-    /* --- Flip-Karten-Container --- */
-    .card-container {
-      perspective: 1000px;
-      -webkit-perspective: 1000px;
-      width: 320px;
-      height: 240px; /* leicht erhöhte Höhe */
-      margin-bottom: 15px;
-    }
-    .card {
-      width: 100%;
-      height: 100%;
-      position: relative;
-      transform-style: preserve-3d;
-      -webkit-transform-style: preserve-3d;
-      transition: transform 0.6s;
-      -webkit-transition: -webkit-transform 0.6s;
-      cursor: pointer;
-      border-radius: 8px;
-    }
-    .card.flip {
-      transform: rotateY(180deg);
-      -webkit-transform: rotateY(180deg);
-    }
-    .card-face {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-      border-radius: 8px;
-      box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 16px;
-      box-sizing: border-box;
-    }
-    .card-front {
-      background-color: #fff;
-    }
-    .card-back {
-      background-color: #f9f9f9;
-      transform: rotateY(180deg);
-      -webkit-transform: rotateY(180deg);
-    }
-    /* --- Textinhalte --- */
-    #frontQuestion {
-      font-size: 1.1rem;
-      color: #333;
-      line-height: 1.4;
-      text-align: center;
-      padding: 0 10px;
-    }
-    #backAnswer {
-      font-size: 1rem;
-      color: #444;
-      line-height: 1.4;
-      text-align: center;
-      margin-bottom: 15px;
-      padding: 0 10px;
-    }
-    /* --- Bewertungs- und Edit-Buttons (außerhalb der Karte) --- */
-    .control-buttons {
-      display: flex;
-      flex-wrap: nowrap;
-      justify-content: space-evenly;
-      width: 100%;
-      max-width: 320px;
-      margin-top: 10px;
-    }
-    .btn {
-      flex: 1;
-      margin: 5px;
-      padding: 10px 6px;
-      border: none;
-      border-radius: 4px;
-      font-size: 0.85rem;
-      cursor: pointer;
-      color: #fff;
-      text-align: center;
-    }
-    .btn:hover {
-      opacity: 0.9;
-    }
-    .btn-falsch    { background-color: #dc3545; }
-    .btn-muehsam   { background-color: #ffc107; color: #333; }
-    .btn-gut       { background-color: #28a745; }
-    .btn-einfach   { background-color: #17a2b8; }
-    .btn-edit      { background-color: #972D54; }
-    
-    /* --- Bearbeitungsformular --- */
-    .edit-form {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      width: 100%;
-      max-width: 320px;
-      margin-top: 10px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      background: #fff;
-      padding: 10px;
-      box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
-    }
-    .edit-form input, .edit-form textarea {
-      width: 90%;
-      padding: 8px;
-      margin: 5px 0;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    .edit-form button {
-      margin: 5px;
-      padding: 8px 12px;
-      border: none;
-      border-radius: 4px;
-      background-color: #28a745;
-      color: #fff;
-      cursor: pointer;
-    }
-    .edit-form button.cancel {
-      background-color: #dc3545;
-    }
-    
-    /* --- Footer-Info --- */
-    .info-footer {
-      margin-top: 20px;
-      color: #666;
-      font-size: 0.95rem;
-      text-align: center;
-      min-height: 20px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktive Karteikarten</title>
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <!-- Kopfzeile / Fortschritt -->
-  <header>
-    <h2>Heute: <span id="currentCardIndex">0</span>/<span id="totalCards">0</span></h2>
-    <div class="subinfo">Wissensstand: Pro-Funktion</div>
-  </header>
-
-  <!-- Flip-Karten-Container -->
-  <div class="card-container">
-    <div class="card" id="card" onclick="flipCard()">
-      <!-- Vorderseite -->
-      <div class="card-face card-front">
-        <div id="frontQuestion">Frage wird geladen...</div>
-      </div>
-      <!-- Rückseite -->
-      <div class="card-face card-back">
-        <div id="backAnswer">Antwort wird geladen...</div>
-      </div>
+    <h1>Karteikarten lernen</h1>
+    
+    <div class="card-container">
+        <div id="card" class="card" onclick="flipCard()">
+            <div class="card-front">
+                <div id="editor-front" class="editor"></div>
+            </div>
+            <div class="card-back">
+                <div id="editor-back" class="editor"></div>
+                <canvas id="drawingCanvas"></canvas>
+                <input type="file" id="imageUpload" accept="image/*">
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- Steuerungsbuttons (Bewertung + Edit) -->
-  <div class="control-buttons">
-    <button class="btn btn-falsch" onclick="rateCard('Falsch'); event.stopPropagation();">Falsch</button>
-    <button class="btn btn-muehsam" onclick="rateCard('Mühsam'); event.stopPropagation();">Mühsam</button>
-    <button class="btn btn-gut" onclick="rateCard('Gut'); event.stopPropagation();">Gut</button>
-    <button class="btn btn-einfach" onclick="rateCard('Einfach'); event.stopPropagation();">Einfach</button>
-    <button class="btn btn-edit" onclick="showEditForm(); event.stopPropagation();">Editieren</button>
-  </div>
-
-  <!-- Bearbeitungsformular -->
-  <div class="edit-form" id="editForm">
-    <h3>Karte bearbeiten</h3>
-    <input type="text" id="editQuestion" placeholder="Frage" />
-    <textarea id="editAnswer" rows="3" placeholder="Antwort"></textarea>
-    <div class="control-buttons" style="justify-content: center;">
-      <button onclick="saveEdit()">Speichern</button>
-      <button class="cancel" onclick="hideEditForm()">Abbrechen</button>
+    <div id="buttons" class="buttons hidden">
+        <button class="btn falsch">Falsch</button>
+        <button class="btn mühsam">Mühsam</button>
+        <button class="btn gut">Gut</button>
+        <button class="btn einfach" onclick="markAsEasy()">Einfach</button>
     </div>
-  </div>
 
-  <!-- Footer-Info -->
-  <div class="info-footer" id="infoFooter"></div>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script src="script.js"></script>
 
-  <script>
-    // Beispiel-Karteikarten
-    let cards = [
-      {
-        question: "Wann besteht ein Anspruch des Verkäufers V gegen den Abkäufer A auf Rückübereignung des Pkw nach § 812 I 1 2?",
-        answer: "Voraussetzungen: Eigentum und Besitz an A übergegangen, Nichtleistungskondiktion, etc."
-      },
-      {
-        question: "Ein Anspruch des Verkäufers V gegen den Abkäufer A auf Rückübereignung des Pkw nach § 812 I 1 2 (Nichtleistungskondiktion) besteht, wenn ...",
-        answer: "1. A hat Eigentum und Besitz am Pkw erlangt. 2. In sonstiger Weise ... usw."
-      },
-      {
-        question: "Wer schrieb 'Faust'?",
-        answer: "Johann Wolfgang von Goethe."
-      }
-    ];
-    
-    let currentIndex = 0;
-    const totalCards = cards.length;
-    
-    // DOM-Elemente
-    const cardEl = document.getElementById('card');
-    const frontQuestionEl = document.getElementById('frontQuestion');
-    const backAnswerEl = document.getElementById('backAnswer');
-    const currentCardIndexEl = document.getElementById('currentCardIndex');
-    const totalCardsEl = document.getElementById('totalCards');
-    const infoFooterEl = document.getElementById('infoFooter');
-    const editFormEl = document.getElementById('editForm');
-    const editQuestionEl = document.getElementById('editQuestion');
-    const editAnswerEl = document.getElementById('editAnswer');
-    
-    // Initialisierung der Seite
-    document.addEventListener('DOMContentLoaded', init);
-    
-    function init() {
-      totalCardsEl.textContent = totalCards;
-      loadCard(currentIndex);
-    }
-    
-    // Lade aktuelle Karte
-    function loadCard(index) {
-      if (cards.length === 0) {
-        frontQuestionEl.textContent = "Alle Karten abgeschlossen!";
-        backAnswerEl.textContent = "Keine Karten mehr vorhanden.";
-        infoFooterEl.textContent = "Glückwunsch, du hast alle Karten durchgearbeitet!";
-        return;
-      }
-      frontQuestionEl.textContent = cards[index].question;
-      backAnswerEl.textContent = cards[index].answer;
-      currentCardIndexEl.textContent = index + 1;
-      infoFooterEl.textContent = "";
-      // Karte auf Vorderseite zurücksetzen
-      cardEl.classList.remove('flip');
-    }
-    
-    // Karte flippen
-    function flipCard() {
-      if (cards.length === 0) return;
-      cardEl.classList.toggle('flip');
-    }
-    
-    // Bewertungsfunktion: Nur bei "Einfach" wird die Karte entfernt, sonst wird sie ans Ende verschoben
-    function rateCard(rating) {
-      infoFooterEl.textContent = `Du hast die Karte als "${rating}" bewertet.`;
-      if (rating === 'Einfach') {
-        cards.splice(currentIndex, 1);
-      } else {
-        let currentCard = cards[currentIndex];
-        cards.splice(currentIndex, 1);
-        cards.push(currentCard);
-      }
-      if (cards.length === 0) {
-        loadCard(-1);
-        return;
-      }
-      if (currentIndex >= cards.length) {
-        currentIndex = 0;
-      }
-      loadCard(currentIndex);
-    }
-    
-    // Bearbeitungsformular anzeigen
-    function showEditForm() {
-      if (cards.length === 0) return;
-      // Setze die Eingabefelder mit aktuellen Inhalten
-      editQuestionEl.value = cards[currentIndex].question;
-      editAnswerEl.value = cards[currentIndex].answer;
-      editFormEl.style.display = 'flex';
-      // Verhindere, dass die Karte beim Editieren flipt
-      cardEl.classList.remove('flip');
-    }
-    
-    // Bearbeitungsformular ausblenden
-    function hideEditForm() {
-      editFormEl.style.display = 'none';
-    }
-    
-    // Änderungen speichern und Karte aktualisieren
-    function saveEdit() {
-      const newQuestion = editQuestionEl.value.trim();
-      const newAnswer = editAnswerEl.value.trim();
-      if (newQuestion && newAnswer) {
-        cards[currentIndex].question = newQuestion;
-        cards[currentIndex].answer = newAnswer;
-        loadCard(currentIndex);
-        infoFooterEl.textContent = "Karte aktualisiert.";
-      }
-      hideEditForm();
-    }
-  </script>
 </body>
 </html>
