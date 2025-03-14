@@ -5,39 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Karteikarten</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.ckeditor.com/4.20.0/full/ckeditor.js"></script> <!-- Rich-Text-Editor -->
 </head>
 <body>
-
     <h1>Interaktive Karteikarten</h1>
-    <p id="progress">Heute: <span id="counter">1</span>/<span id="total">3</span></p>
-
-    <div class="card-container" onclick="flipCard()">
-        <div class="card" id="card">
-            <div class="front" id="front">
-                <div id="question">Frage: Was ist die Hauptstadt von Deutschland?</div>
+    
+    <div class="card-container">
+        <div id="card" class="card" onclick="flipCard()">
+            <div class="front">
+                <p id="front-text">Frage: Was ist die Hauptstadt von Deutschland?</p>
             </div>
-            <div class="back" id="back">
-                <div id="answer">Antwort: Berlin</div>
-                <input type="file" id="imageUpload" accept="image/*">
+            <div class="back">
+                <p id="back-text">Antwort: Berlin</p>
+                <input type="file" id="uploadImage" accept="image/*" onchange="addImage(event)">
                 <canvas id="drawCanvas"></canvas>
-                <button onclick="startDrawing()">Zeichnen</button>
-                <button onclick="stopDrawing()">Speichern</button>
             </div>
         </div>
     </div>
-
-    <div id="buttons" class="hidden">
-        <button class="wrong" onclick="rateCard('wrong')">Falsch</button>
-        <button class="hard" onclick="rateCard('hard')">Mühsam</button>
-        <button class="good" onclick="rateCard('good')">Gut</button>
-        <button class="easy" onclick="rateCard('easy')">Einfach</button>
+    
+    <div class="buttons">
+        <button onclick="editCard()">📝 Bearbeiten</button>
+        <button onclick="addBold()">𝐁</button>
+        <button onclick="addItalic()">𝘐</button>
+        <button onclick="addColor()">🎨</button>
+        <button onclick="saveCard()">💾 Speichern</button>
+        <button onclick="nextCard()">➡️ Nächste Karte</button>
     </div>
 
-    <button onclick="editCard()">Bearbeiten</button>
-    <button onclick="saveCard()" id="saveButton" class="hidden">Speichern</button>
-
     <script src="script.js"></script>
-
 </body>
 </html>
