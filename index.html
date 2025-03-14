@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <title>Flip-Karteikarten mit neuen Funktionen</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Retain-Style Karteikarten</title>
   <style>
-    /* --- Globales Styling --- */
     * {
       margin: 0;
       padding: 0;
@@ -15,8 +14,9 @@
     body {
       background-color: #fefefe;
       display: flex;
-      flex-direction: column;
+      justify-content: center;
       align-items: center;
+      flex-direction: column;
       padding: 20px;
     }
     header {
@@ -24,52 +24,40 @@
       margin-bottom: 20px;
     }
     header h2 {
-      color: #972D54;  /* Pink */
-      margin-bottom: 5px;
+      color: #972D54;
     }
-    header .subinfo {
-      color: #888;
-      font-size: 0.9rem;
-    }
-
-    /* --- Flip-Karten-Container --- */
+    
+    /* --- Flip-Karte --- */
     .card-container {
       perspective: 1000px;
-      -webkit-perspective: 1000px;
       width: 320px;
       height: 240px;
-      margin-bottom: 15px;
+      position: relative;
     }
     .card {
       width: 100%;
       height: 100%;
       position: relative;
       transform-style: preserve-3d;
-      -webkit-transform-style: preserve-3d;
       transition: transform 0.6s;
-      -webkit-transition: -webkit-transform 0.6s;
       cursor: pointer;
       border-radius: 8px;
     }
     .card.flip {
       transform: rotateY(180deg);
-      -webkit-transform: rotateY(180deg);
     }
     .card-face {
       position: absolute;
       width: 100%;
       height: 100%;
       backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
       border-radius: 8px;
       box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
       display: flex;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
       padding: 16px;
-      box-sizing: border-box;
-      overflow: hidden;
+      text-align: center;
     }
     .card-front {
       background-color: #fff;
@@ -77,337 +65,146 @@
     .card-back {
       background-color: #f9f9f9;
       transform: rotateY(180deg);
-      -webkit-transform: rotateY(180deg);
     }
-
-    /* --- Textinhalte --- */
-    #frontQuestion {
-      font-size: 1.1rem;
-      color: #333;
-      line-height: 1.4;
-      text-align: center;
-      padding: 0 10px;
-    }
-    #backAnswer {
-      font-size: 1rem;
-      color: #444;
-      line-height: 1.4;
-      text-align: center;
-      margin-bottom: 10px;
-      padding: 0 10px;
-      overflow-y: auto; /* falls der Text länger wird */
-      max-height: 70px; /* damit Canvas und Buttons noch Platz haben */
-    }
-
-    /* --- Bewertungs- und Edit-Buttons (unterhalb der Karte) --- */
-    .control-buttons {
+    
+    /* --- Buttons rechts neben der Karte --- */
+    .side-buttons {
+      position: absolute;
+      top: 0;
+      right: -90px;
       display: flex;
-      flex-wrap: nowrap;
-      justify-content: space-evenly;
-      width: 100%;
-      max-width: 320px;
-      margin-top: 10px;
+      flex-direction: column;
+      gap: 10px;
     }
-    .btn {
-      flex: 1;
-      margin: 5px;
-      padding: 10px 6px;
+    .side-buttons button {
+      padding: 8px 12px;
       border: none;
       border-radius: 4px;
-      font-size: 0.85rem;
-      cursor: pointer;
+      background-color: #972D54;
       color: #fff;
-      text-align: center;
+      cursor: pointer;
+      font-size: 0.85rem;
     }
-    .btn:hover {
+    .side-buttons button:hover {
       opacity: 0.9;
     }
-    .btn-falsch    { background-color: #dc3545; }
-    .btn-muehsam   { background-color: #ffc107; color: #333; }
-    .btn-gut       { background-color: #28a745; }
-    .btn-einfach   { background-color: #17a2b8; }
-    .btn-edit      { background-color: #972D54; }
-
-    /* --- Bearbeitungsformular --- */
-    .edit-form {
+    
+    /* --- Overlay für Bearbeitung --- */
+    .edit-overlay {
       display: none;
-      flex-direction: column;
-      align-items: center;
-      width: 100%;
-      max-width: 320px;
-      margin-top: 10px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      background: #fff;
-      padding: 10px;
-      box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
-    }
-    .edit-form textarea {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       width: 90%;
-      height: 80px;
+      max-width: 400px;
+      background: #fff;
+      padding: 15px;
+      box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+      border-radius: 8px;
+      z-index: 1000;
+    }
+    .edit-overlay input, .edit-overlay textarea {
+      width: 100%;
       padding: 8px;
       margin: 5px 0;
       border: 1px solid #ccc;
       border-radius: 4px;
     }
-    .edit-form .tools {
-      margin: 5px 0;
+    .edit-overlay .buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
     }
-    .edit-form button {
-      margin: 5px;
+    .edit-overlay button {
       padding: 8px 12px;
       border: none;
       border-radius: 4px;
-      background-color: #28a745;
-      color: #fff;
       cursor: pointer;
+      color: white;
     }
-    .edit-form button.cancel {
+    .edit-overlay .save {
+      background-color: #28a745;
+    }
+    .edit-overlay .close {
       background-color: #dc3545;
     }
-
-    /* --- Footer-Info --- */
-    .info-footer {
-      margin-top: 20px;
-      color: #666;
-      font-size: 0.95rem;
-      text-align: center;
-      min-height: 20px;
-    }
-
-    /* --- Canvas & Image Upload auf der Rückseite --- */
-    #drawCanvas {
-      width: 90%;
-      height: 60px;
-      border: 1px solid #ccc;
-      margin-top: 5px;
-    }
-    #imageUpload {
-      margin-top: 5px;
-    }
+    
   </style>
 </head>
 <body>
 
-  <!-- Kopfzeile / Fortschritt -->
   <header>
     <h2>Heute: <span id="currentCardIndex">0</span>/<span id="totalCards">0</span></h2>
-    <div class="subinfo">Wissensstand: Pro-Funktion</div>
   </header>
 
-  <!-- Flip-Karten-Container -->
   <div class="card-container">
     <div class="card" id="card" onclick="flipCard()">
-      <!-- Vorderseite -->
       <div class="card-face card-front">
         <div id="frontQuestion">Frage wird geladen...</div>
       </div>
-      <!-- Rückseite -->
       <div class="card-face card-back">
         <div id="backAnswer">Antwort wird geladen...</div>
-
-        <!-- Datei-Upload (Bild) & Zeichen-Canvas -->
-        <input type="file" id="imageUpload" accept="image/*" onchange="addImage(event)">
-        <canvas id="drawCanvas"></canvas>
       </div>
     </div>
+
+    <!-- Buttons rechts neben der Karte -->
+    <div class="side-buttons">
+      <button onclick="showEditForm()">✏️ Bearbeiten</button>
+      <button onclick="addImage()">📷 Bild hinzufügen</button>
+    </div>
   </div>
 
-  <!-- Steuerungsbuttons (Bewertung + Edit) -->
-  <div class="control-buttons">
-    <button class="btn btn-falsch"  onclick="rateCard('Falsch'); event.stopPropagation();">Falsch</button>
-    <button class="btn btn-muehsam" onclick="rateCard('Mühsam'); event.stopPropagation();">Mühsam</button>
-    <button class="btn btn-gut"     onclick="rateCard('Gut'); event.stopPropagation();">Gut</button>
-    <button class="btn btn-einfach"onclick="rateCard('Einfach'); event.stopPropagation();">Einfach</button>
-    <button class="btn btn-edit"   onclick="showEditForm(); event.stopPropagation();">Editieren</button>
-  </div>
-
-  <!-- Bearbeitungsformular (inkl. Tools für Formatierung) -->
-  <div class="edit-form" id="editForm">
+  <!-- Bearbeitungs-Overlay -->
+  <div class="edit-overlay" id="editOverlay">
     <h3>Karte bearbeiten</h3>
-    <textarea id="editAnswer"></textarea>
-
-    <div class="tools">
-      <!-- Einfache Formatierungs-Buttons -->
-      <button type="button" onclick="wrapSelection('<b>','</b>')"><b>B</b></button>
-      <button type="button" onclick="wrapSelection('<i>','</i>')"><i>I</i></button>
-      <button type="button" onclick="changeColor()">Farbe</button>
-      <button type="button" onclick="addLineBreak()">Absatz</button>
-    </div>
-
-    <div class="control-buttons" style="justify-content: center;">
-      <button onclick="saveEdit()">Speichern</button>
-      <button class="cancel" onclick="hideEditForm()">Abbrechen</button>
+    <input type="text" id="editQuestion" placeholder="Frage">
+    <textarea id="editAnswer" rows="3" placeholder="Antwort"></textarea>
+    <div class="buttons">
+      <button class="save" onclick="saveEdit()">Speichern</button>
+      <button class="close" onclick="hideEditForm()">Abbrechen</button>
     </div>
   </div>
-
-  <!-- Footer-Info -->
-  <div class="info-footer" id="infoFooter"></div>
 
   <script>
-    // Beispiel-Karteikarten
     let cards = [
-      {
-        question: "Wann besteht ein Anspruch des Verkäufers V gegen den Abkäufer A auf Rückübereignung des Pkw nach § 812 I 1 2?",
-        answer: "Voraussetzungen: Eigentum und Besitz an A übergegangen,<br><b>Nichtleistungskondiktion</b>, etc."
-      },
-      {
-        question: "Ein Anspruch des Verkäufers V gegen den Abkäufer A auf Rückübereignung des Pkw nach § 812 I 1 2 (Nichtleistungskondiktion) besteht, wenn ...",
-        answer: "1. A hat Eigentum und Besitz am Pkw erlangt.<br>2. In sonstiger Weise ... usw."
-      },
-      {
-        question: "Wer schrieb 'Faust'?",
-        answer: "Johann Wolfgang von Goethe."
-      }
+      { question: "Wann besteht ein Anspruch des Verkäufers V gegen den Abkäufer A auf Rückübereignung des Pkw?", answer: "Wenn die Voraussetzungen des § 812 BGB erfüllt sind." }
     ];
-
     let currentIndex = 0;
-    const totalCards = cards.length;
 
-    // DOM-Elemente
-    const cardEl            = document.getElementById('card');
-    const frontQuestionEl   = document.getElementById('frontQuestion');
-    const backAnswerEl      = document.getElementById('backAnswer');
-    const currentCardIndexEl= document.getElementById('currentCardIndex');
-    const totalCardsEl      = document.getElementById('totalCards');
-    const infoFooterEl      = document.getElementById('infoFooter');
-    const editFormEl        = document.getElementById('editForm');
-    const editAnswerEl      = document.getElementById('editAnswer');
-    const drawCanvas        = document.getElementById('drawCanvas');
-    let ctx                 = drawCanvas.getContext('2d');
-    let drawing             = false;
-
-    document.addEventListener('DOMContentLoaded', init);
-
-    function init() {
-      totalCardsEl.textContent = totalCards;
+    document.addEventListener("DOMContentLoaded", () => {
       loadCard(currentIndex);
-      setupCanvas();
-    }
+    });
 
-    // Karte laden
     function loadCard(index) {
-      if (cards.length === 0) {
-        frontQuestionEl.textContent = "Alle Karten abgeschlossen!";
-        backAnswerEl.innerHTML      = "Keine Karten mehr vorhanden.";
-        infoFooterEl.textContent    = "Glückwunsch, du hast alle Karten durchgearbeitet!";
-        return;
-      }
-      frontQuestionEl.textContent = cards[index].question;
-      backAnswerEl.innerHTML      = cards[index].answer;
-      currentCardIndexEl.textContent = index + 1;
-      infoFooterEl.textContent    = "";
-      cardEl.classList.remove('flip');
+      document.getElementById("frontQuestion").textContent = cards[index].question;
+      document.getElementById("backAnswer").textContent = cards[index].answer;
+      document.getElementById("currentCardIndex").textContent = index + 1;
     }
 
-    // Flip-Funktion
     function flipCard() {
-      if (cards.length === 0) return;
-      cardEl.classList.toggle('flip');
+      document.getElementById("card").classList.toggle("flip");
     }
 
-    // Bewertungsfunktion
-    function rateCard(rating) {
-      infoFooterEl.textContent = `Du hast die Karte als "${rating}" bewertet.`;
-      if (rating === 'Einfach') {
-        // Karte entfernen
-        cards.splice(currentIndex, 1);
-      } else {
-        // Karte ans Ende verschieben
-        let currentCard = cards[currentIndex];
-        cards.splice(currentIndex, 1);
-        cards.push(currentCard);
-      }
-      if (cards.length === 0) {
-        loadCard(-1);
-        return;
-      }
-      if (currentIndex >= cards.length) {
-        currentIndex = 0;
-      }
-      loadCard(currentIndex);
-    }
-
-    // Bearbeitungsformular anzeigen
     function showEditForm() {
-      if (cards.length === 0) return;
-      editAnswerEl.value = cards[currentIndex].answer; // HTML als Text
-      editFormEl.style.display = 'flex';
-      cardEl.classList.remove('flip');
-    }
-    function hideEditForm() {
-      editFormEl.style.display = 'none';
+      document.getElementById("editQuestion").value = cards[currentIndex].question;
+      document.getElementById("editAnswer").value = cards[currentIndex].answer;
+      document.getElementById("editOverlay").style.display = "block";
     }
 
-    // Änderungen speichern
+    function hideEditForm() {
+      document.getElementById("editOverlay").style.display = "none";
+    }
+
     function saveEdit() {
-      let newAnswer = editAnswerEl.value;
-      // Setze den bearbeiteten Text als HTML in die Karte
-      cards[currentIndex].answer = newAnswer;
-      backAnswerEl.innerHTML     = newAnswer;
-      infoFooterEl.textContent   = "Karte aktualisiert.";
+      cards[currentIndex].question = document.getElementById("editQuestion").value.trim();
+      cards[currentIndex].answer = document.getElementById("editAnswer").value.trim();
+      loadCard(currentIndex);
       hideEditForm();
     }
 
-    // Absätze & Textformatierung
-    function wrapSelection(before, after) {
-      let start = editAnswerEl.selectionStart;
-      let end   = editAnswerEl.selectionEnd;
-      let text  = editAnswerEl.value;
-      let selected = text.substring(start, end);
-      let newText  = text.substring(0, start) + before + selected + after + text.substring(end);
-      editAnswerEl.value = newText;
-    }
-    function addLineBreak() {
-      let start = editAnswerEl.selectionStart;
-      let text  = editAnswerEl.value;
-      // Füge <br> an der Cursor-Position ein
-      let newText = text.substring(0, start) + "<br>" + text.substring(start);
-      editAnswerEl.value = newText;
-    }
-    function changeColor() {
-      let color = prompt("Farbe eingeben (z.B. 'red' oder '#123456'):", "red");
-      if (!color) return;
-      wrapSelection(`<span style="color:${color}">`, "</span>");
-    }
-
-    // Bilder einfügen
-    function addImage(event) {
-      let file = event.target.files[0];
-      if (!file) return;
-      let reader = new FileReader();
-      reader.onload = function(e) {
-        // Füge <img> in die Antwort ein
-        let img = document.createElement('img');
-        img.src = e.target.result;
-        img.style.maxWidth = "80%";
-        backAnswerEl.appendChild(img);
-      };
-      reader.readAsDataURL(file);
-    }
-
-    // Zeichnen auf Canvas
-    function setupCanvas() {
-      drawCanvas.width  = drawCanvas.clientWidth;
-      drawCanvas.height = 60; // fixierte Höhe
-      ctx.lineCap = "round";
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = "#000";
-
-      drawCanvas.addEventListener('mousedown', () => {
-        drawing = true;
-        ctx.beginPath();
-      });
-      drawCanvas.addEventListener('mouseup', () => drawing = false);
-      drawCanvas.addEventListener('mousemove', drawOnCanvas);
-    }
-    function drawOnCanvas(e) {
-      if (!drawing) return;
-      let rect = drawCanvas.getBoundingClientRect();
-      let x = e.clientX - rect.left;
-      let y = e.clientY - rect.top;
-      ctx.lineTo(x, y);
-      ctx.stroke();
+    function addImage() {
+      alert("Hier könnte eine Funktion zum Hochladen von Bildern eingebaut werden.");
     }
   </script>
 </body>
