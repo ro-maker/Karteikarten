@@ -14,9 +14,8 @@
     body {
       background-color: #fefefe;
       display: flex;
-      justify-content: center;
-      align-items: center;
       flex-direction: column;
+      align-items: center;
       padding: 20px;
     }
     header {
@@ -26,7 +25,7 @@
     header h2 {
       color: #972D54;
     }
-    
+
     /* --- Flip-Karte --- */
     .card-container {
       perspective: 1000px;
@@ -58,6 +57,7 @@
       align-items: center;
       padding: 16px;
       text-align: center;
+      white-space: pre-line; /* Absätze beibehalten */
     }
     .card-front {
       background-color: #fff;
@@ -66,15 +66,16 @@
       background-color: #f9f9f9;
       transform: rotateY(180deg);
     }
-    
+
     /* --- Buttons rechts neben der Karte --- */
     .side-buttons {
       position: absolute;
-      top: 0;
-      right: -90px;
+      top: 50%;
+      right: -110px;
       display: flex;
       flex-direction: column;
       gap: 10px;
+      transform: translateY(-50%);
     }
     .side-buttons button {
       padding: 8px 12px;
@@ -88,8 +89,26 @@
     .side-buttons button:hover {
       opacity: 0.9;
     }
-    
-    /* --- Overlay für Bearbeitung --- */
+
+    /* --- Bunte Buttons unter der Karte --- */
+    .bottom-buttons {
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+    }
+    .bottom-buttons button {
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+      color: white;
+    }
+    .red { background: #e74c3c; }
+    .yellow { background: #f1c40f; color: black; }
+    .green { background: #2ecc71; }
+
+    /* --- Bearbeitungs-Overlay mit Texteditor --- */
     .edit-overlay {
       display: none;
       position: fixed;
@@ -104,12 +123,23 @@
       border-radius: 8px;
       z-index: 1000;
     }
-    .edit-overlay input, .edit-overlay textarea {
+    .edit-overlay textarea {
       width: 100%;
       padding: 8px;
       margin: 5px 0;
       border: 1px solid #ccc;
       border-radius: 4px;
+      height: 100px;
+    }
+    .text-editor {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 5px;
+    }
+    .text-editor button {
+      padding: 5px;
+      font-size: 0.9rem;
+      cursor: pointer;
     }
     .edit-overlay .buttons {
       display: flex;
@@ -123,13 +153,9 @@
       cursor: pointer;
       color: white;
     }
-    .edit-overlay .save {
-      background-color: #28a745;
-    }
-    .edit-overlay .close {
-      background-color: #dc3545;
-    }
-    
+    .save { background-color: #28a745; }
+    .close { background-color: #dc3545; }
+
   </style>
 </head>
 <body>
@@ -155,11 +181,22 @@
     </div>
   </div>
 
+  <!-- Bunte Buttons unter der Karte -->
+  <div class="bottom-buttons">
+    <button class="red">❌</button>
+    <button class="yellow">⚠️</button>
+    <button class="green">✅</button>
+  </div>
+
   <!-- Bearbeitungs-Overlay -->
   <div class="edit-overlay" id="editOverlay">
     <h3>Karte bearbeiten</h3>
-    <input type="text" id="editQuestion" placeholder="Frage">
-    <textarea id="editAnswer" rows="3" placeholder="Antwort"></textarea>
+    <div class="text-editor">
+      <button onclick="formatText('bold')"><b>B</b></button>
+      <button onclick="formatText('italic')"><i>I</i></button>
+      <button onclick="formatText('h1')">H1</button>
+    </div>
+    <textarea id="editText"></textarea>
     <div class="buttons">
       <button class="save" onclick="saveEdit()">Speichern</button>
       <button class="close" onclick="hideEditForm()">Abbrechen</button>
@@ -178,7 +215,7 @@
 
     function loadCard(index) {
       document.getElementById("frontQuestion").textContent = cards[index].question;
-      document.getElementById("backAnswer").textContent = cards[index].answer;
+      document.getElementById("backAnswer").innerHTML = cards[index].answer.replace(/\n/g, "<br>");
       document.getElementById("currentCardIndex").textContent = index + 1;
     }
 
@@ -187,8 +224,7 @@
     }
 
     function showEditForm() {
-      document.getElementById("editQuestion").value = cards[currentIndex].question;
-      document.getElementById("editAnswer").value = cards[currentIndex].answer;
+      document.getElementById("editText").value = cards[currentIndex].answer;
       document.getElementById("editOverlay").style.display = "block";
     }
 
@@ -197,15 +233,15 @@
     }
 
     function saveEdit() {
-      cards[currentIndex].question = document.getElementById("editQuestion").value.trim();
-      cards[currentIndex].answer = document.getElementById("editAnswer").value.trim();
+      cards[currentIndex].answer = document.getElementById("editText").value;
       loadCard(currentIndex);
       hideEditForm();
     }
 
-    function addImage() {
-      alert("Hier könnte eine Funktion zum Hochladen von Bildern eingebaut werden.");
+    function formatText(type) {
+      document.getElementById("editText").style.fontWeight = type === "bold" ? "bold" : "normal";
     }
   </script>
+
 </body>
 </html>
