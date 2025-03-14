@@ -1,66 +1,82 @@
 body {
     font-family: Arial, sans-serif;
     text-align: center;
-    background-color: #FF98BC;
+    background-color: #FFFAFA;
 }
 
-h1 {
+.container {
+    width: 50%;
+    margin: auto;
+}
+
+h2 {
     color: #972D54;
 }
 
-.card-container {
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;
+.knowledge-status {
+    color: gray;
 }
 
 .card {
-    width: 300px;
-    height: 200px;
-    border: 2px solid #972D54;
-    border-radius: 10px;
-    background-color: white;
-    position: relative;
+    width: 100%;
+    max-width: 400px;
+    height: 250px;
+    perspective: 1000px;
+    margin: auto;
+}
+
+.card-inner {
+    width: 100%;
+    height: 100%;
     transform-style: preserve-3d;
     transition: transform 0.6s;
 }
 
-.card .front, .card .back {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    padding: 10px;
-}
-
-.card .back {
-    background-color: #FF98BC;
-    color: #972D54;
+.card.flipped .card-inner {
     transform: rotateY(180deg);
 }
 
-.card.flipped {
+.card-front, .card-back {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.card-back {
     transform: rotateY(180deg);
 }
 
 .buttons {
-    margin-top: 20px;
+    margin-top: 10px;
 }
 
-button {
+.btn {
+    padding: 10px 15px;
     margin: 5px;
-    padding: 10px;
     border: none;
-    background-color: #972D54;
     color: white;
-    border-radius: 5px;
+    font-weight: bold;
     cursor: pointer;
+    border-radius: 5px;
 }
 
-button:hover {
-    background-color: #FF98BC;
+.red { background-color: #D32F2F; }
+.yellow { background-color: #FBC02D; }
+.green { background-color: #388E3C; }
+.blue { background-color: #0288D1; }
+
+textarea {
+    width: 80%;
+    height: 100px;
+    margin-top: 10px;
+    display: block;
 }
