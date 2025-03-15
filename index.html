@@ -7,8 +7,7 @@
   <style>
     /* ---------- Globales Styling ---------- */
     * {
-      margin: 0;
-      padding: 0;
+      margin: 0; padding: 0;
       box-sizing: border-box;
       font-family: Arial, sans-serif;
     }
@@ -24,17 +23,15 @@
       margin-bottom: 20px;
     }
     header h2 { color: #972D54; }
-    
-    /* ---------- Wrapper für Karte & Side-Buttons ---------- */
+
+    /* ---------- Wrapper & Flexible Karte ---------- */
     .card-wrapper {
       position: relative;
-      display: inline-block; /* passt sich Inhalt an */
+      display: inline-block;  /* passt sich Inhalt an */
       min-width: 320px;
       width: auto;
       margin-bottom: 20px;
     }
-    
-    /* ---------- Flexible Karte ---------- */
     .card {
       width: 100%;
       min-height: 240px;
@@ -45,28 +42,27 @@
       border-radius: 8px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       background-color: #fff;
-      overflow: hidden;
+      overflow: auto;
     }
     .card.flip {
       transform: rotateY(180deg);
     }
     .card-face {
       position: absolute;
-      top: 0;
-      left: 0;
+      top: 0; left: 0;
       width: 100%;
       min-height: 240px;
       padding: 16px;
       border-radius: 8px;
       backface-visibility: hidden;
-      white-space: pre-line;
+      white-space: pre-line; /* Zeilenumbrüche beibehalten */
     }
     .card-front { background-color: #fff; }
     .card-back {
       background-color: #f9f9f9;
       transform: rotateY(180deg);
     }
-    /* Standardtext linksbündig (kann im Editor geändert werden) */
+    /* Standardtext: linksbündig (im Editor änderbar) */
     #frontQuestion, #backAnswer {
       text-align: left;
     }
@@ -75,7 +71,7 @@
     .side-buttons {
       position: absolute;
       top: 10px;
-      right: -150px;
+      right: -160px;
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -94,7 +90,7 @@
     }
     .side-buttons button:hover { opacity: 0.9; }
     
-    /* ---------- Bottom-Buttons (erscheinen unter der Karte) ---------- */
+    /* ---------- Bottom-Buttons (unter der Karte) ---------- */
     .bottom-buttons {
       width: 100%;
       max-width: 600px;
@@ -116,9 +112,9 @@
     .btn-muehsam  { background-color: #f39c12; color: #000; }
     .btn-gut      { background-color: #2ecc71; }
     .btn-einfach  { background-color: #1abc9c; }
-    /* Den Editieren-Button unten entfernen – er ist schon in den Side-Buttons vorhanden */
+    /* Editieren-Button unten entfällt, da er schon in den Side-Buttons ist */
     
-    /* ---------- Bearbeitungs-Overlay (WYSIWYG-Editor) ---------- */
+    /* ---------- Bearbeitungs-Overlay (WYSIWYG Editor) ---------- */
     .edit-overlay {
       display: none;
       position: fixed;
@@ -145,6 +141,7 @@
       border: 1px solid #ccc;
       background: #f5f5dc;  /* beige */
       border-radius: 4px;
+      color: #800080; /* lila Schrift für die Buttons */
     }
     .toolbar .format-btn:hover { background: #eee; }
     .color-palette, .highlight-palette {
@@ -244,7 +241,7 @@
         <div id="backAnswer">Antwort wird geladen...</div>
       </div>
     </div>
-    <!-- Side-Buttons: stehen komplett rechts neben der Karte -->
+    <!-- Side-Buttons: komplett rechts neben der Karte -->
     <div class="side-buttons">
       <button onclick="openEditOverlay()">✏️ Bearbeiten</button>
       <button onclick="triggerImageUpload()">📷 Bild hinzufügen</button>
@@ -260,7 +257,7 @@
     <button class="btn-einfach" onclick="rateCard('Einfach')">Einfach</button>
   </div>
 
-  <!-- Bearbeitungs-Overlay (WYSIWYG) -->
+  <!-- Bearbeitungs-Overlay (WYSIWYG Editor) -->
   <div class="edit-overlay" id="editOverlay">
     <h3>Karte bearbeiten</h3>
     <div class="toolbar">
@@ -345,7 +342,7 @@
     }
     function rateCard(rating) {
       alert(`Bewertung: ${rating}`);
-      // Hier kann Bewertungslogik ergänzt werden
+      // Bewertungslogik hier ergänzen
     }
     // Bearbeitungs-Overlay (WYSIWYG)
     function openEditOverlay() {
@@ -390,7 +387,7 @@
       if(file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-          let imgHTML = `<br><img src="${e.target.result}" style="max-width:100%;"/><br>`;
+          let imgHTML = `<br><img src="${e.target.result}" style="max-width:100%; cursor:pointer;" onclick="if(confirm('Bild entfernen?')) { this.remove(); }"><br>`;
           cards[currentIndex].answer += imgHTML;
           loadCard(currentIndex);
         }
@@ -443,7 +440,7 @@
     function saveDrawing() {
       const canvas = document.getElementById("drawCanvas");
       const dataURL = canvas.toDataURL("image/png");
-      let imgHTML = `<br><img src="${dataURL}" style="max-width:100%;"/><br>`;
+      let imgHTML = `<br><img src="${dataURL}" style="max-width:100%; cursor:pointer;" onclick="if(confirm('Zeichnung entfernen?')) { this.remove(); }"><br>`;
       cards[currentIndex].answer += imgHTML;
       loadCard(currentIndex);
       closeDrawOverlay();
