@@ -2,10 +2,10 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Flip-Karteikarten mit Editor & Zeichnen</title>
+  <title>Flip-Karteikarten mit WYSIWYG & Dynamischer Höhe</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <style>
-    /* --- Globales Styling --- */
+    /* Globales Styling */
     * {
       margin: 0;
       padding: 0;
@@ -23,14 +23,15 @@
       text-align: center;
       margin-bottom: 20px;
     }
-    header h2 { color: #972D54; }
-
-    /* --- Flip-Karten-Container --- */
+    header h2 { 
+      color: #972D54;
+    }
+    /* Flip-Karten-Container (dynamisch in der Höhe) */
     .card-container {
       position: relative;
       perspective: 1000px;
       width: 320px;
-      min-height: 240px; /* Mindesthöhe; wächst bei mehr Inhalt */
+      min-height: 240px; /* Mindesthöhe, wächst bei mehr Inhalt */
       margin-bottom: 20px;
     }
     .card {
@@ -58,15 +59,17 @@
       align-items: center;
       padding: 16px;
       text-align: center;
-      white-space: pre-line; /* Zeilenumbrüche erhalten */
+      white-space: pre-line; /* Zeilenumbrüche beibehalten */
     }
-    .card-front { background-color: #fff; }
+    .card-front {
+      background-color: #fff;
+    }
     .card-back {
       background-color: #f9f9f9;
       transform: rotateY(180deg);
     }
 
-    /* --- Side-Buttons (rechts neben der Karte) --- */
+    /* Side-Buttons (rechts neben der Karte) */
     .side-buttons {
       position: absolute;
       top: 10px;
@@ -87,13 +90,15 @@
       align-items: center;
       gap: 5px;
     }
-    .side-buttons button:hover { opacity: 0.9; }
+    .side-buttons button:hover { 
+      opacity: 0.9; 
+    }
 
-    /* --- Bottom-Buttons (fünf Buttons) --- */
+    /* Bottom-Buttons (fünf Buttons) */
     .bottom-buttons {
       margin-top: 15px;
       width: 320px;
-      display: none; /* erscheint nur, wenn Karte umgedreht ist */
+      display: none; /* erst sichtbar, wenn Karte umgedreht ist */
       gap: 10px;
       justify-content: space-between;
     }
@@ -112,38 +117,39 @@
     .btn-einfach  { background-color: #1abc9c; }
     .btn-edit     { background-color: #8e44ad; }
 
-    /* --- Bearbeitungs-Overlay (Editor) --- */
+    /* Bearbeitungs-Overlay (WYSIWYG) */
     .edit-overlay {
       display: none;
       position: fixed;
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
       width: 90%;
-      max-width: 400px;
+      max-width: 500px;
       background: #fff;
       padding: 15px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.2);
       border-radius: 8px;
       z-index: 1000;
     }
-    .edit-overlay .text-editor {
+    .edit-overlay .toolbar {
       display: flex;
       gap: 5px;
       margin-bottom: 5px;
     }
-    .edit-overlay .text-editor button {
+    .edit-overlay .toolbar button {
       padding: 5px;
       font-size: 0.9rem;
       cursor: pointer;
     }
-    .edit-overlay textarea {
+    /* WYSIWYG-Bereich (contenteditable) */
+    #editContent {
       width: 100%;
+      min-height: 150px;
       padding: 8px;
-      margin: 5px 0;
       border: 1px solid #ccc;
       border-radius: 4px;
-      height: 100px;
-      white-space: pre-line;
+      margin-bottom: 10px;
+      overflow-y: auto;
     }
     .edit-overlay .buttons {
       display: flex;
@@ -159,14 +165,6 @@
     }
     .save { background-color: #28a745; }
     .close { background-color: #dc3545; }
-
-    /* --- Canvas für Zeichnen --- */
-    #drawCanvas {
-      width: 90%;
-      height: 80px;
-      border: 1px solid #ccc;
-      margin-top: 5px;
-    }
   </style>
 </head>
 <body>
@@ -184,17 +182,16 @@
       <!-- Rückseite -->
       <div class="card-face card-back">
         <div id="backAnswer">Antwort wird geladen...</div>
-        <canvas id="drawCanvas"></canvas>
       </div>
     </div>
-    <!-- Side-Buttons: komplett rechts neben der Karte -->
+    <!-- Side-Buttons -->
     <div class="side-buttons">
       <button onclick="openEditOverlay()">✏️ Bearbeiten</button>
       <button onclick="promptImageUpload()">📷 Bild hinzufügen</button>
     </div>
   </div>
 
-  <!-- Bottom-Buttons: erscheinen nur, wenn Karte umgedreht -->
+  <!-- Bottom-Buttons (erst sichtbar, wenn Karte umgedreht) -->
   <div class="bottom-buttons" id="bottomButtons">
     <button class="btn-falsch" onclick="rateCard('Falsch')">Falsch</button>
     <button class="btn-muehsam" onclick="rateCard('Mühsam')">Mühsam</button>
@@ -203,25 +200,28 @@
     <button class="btn-edit" onclick="openEditOverlay()">Editieren</button>
   </div>
 
-  <!-- Bearbeitungs-Overlay (Editor mit Formatierung, inkl. Highlighter) -->
+  <!-- Bearbeitungs-Overlay (WYSIWYG) -->
   <div class="edit-overlay" id="editOverlay">
     <h3>Karte bearbeiten</h3>
-    <div class="text-editor">
-      <button onclick="applyFormat('bold')"><b>B</b></button>
-      <button onclick="applyFormat('italic')"><i>I</i></button>
-      <button onclick="applyFormat('underline')"><u>U</u></button>
-      <button onclick="applyFormat('fontSize')">Größe</button>
-      <button onclick="applyFormat('color')">Farbe</button>
-      <button onclick="applyFormat('highlight')">Markieren</button>
+    <!-- Toolbar mit Formatierung -->
+    <div class="toolbar">
+      <button onclick="execCmd('bold')"><b>B</b></button>
+      <button onclick="execCmd('italic')"><i>I</i></button>
+      <button onclick="execCmd('underline')"><u>U</u></button>
+      <button onclick="changeFontSize()">Größe</button>
+      <button onclick="changeColor()">Farbe</button>
+      <button onclick="highlightText()">Markieren</button>
     </div>
-    <textarea id="editText" placeholder="Antwort bearbeiten..."></textarea>
+    <!-- WYSIWYG-Bereich (contenteditable) -->
+    <div id="editContent" contenteditable="true" style="background:#fff;"></div>
+    
     <div class="buttons">
       <button class="save" onclick="saveEdit()">Speichern</button>
       <button class="close" onclick="closeEditOverlay()">Abbrechen</button>
     </div>
   </div>
 
-  <!-- Versteckter Datei-Upload (wird über den Side-Button ausgelöst) -->
+  <!-- Versteckter Datei-Upload (Bild) -->
   <input type="file" id="hiddenImageUpload" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
 
   <script>
@@ -229,91 +229,85 @@
     let cards = [
       {
         question: "Wann besteht ein Anspruch des Verkäufers auf Rückübereignung des Pkw?",
-        answer: "Wenn die Voraussetzungen des § 812 BGB erfüllt sind.\n\nWeitere Details:\n- Punkt 1\n- Punkt 2"
+        answer: "Wenn die Voraussetzungen des § 812 BGB erfüllt sind.<br><br>Weitere Details:<br>- Punkt 1<br>- Punkt 2"
       }
     ];
     let currentIndex = 0;
+
     document.addEventListener("DOMContentLoaded", () => {
       loadCard(currentIndex);
-      setupCanvas();
       document.getElementById("totalCards").textContent = cards.length;
     });
+
+    // Karte laden
     function loadCard(index) {
-      document.getElementById("frontQuestion").textContent = cards[index].question;
-      // Ersetze \n durch <br> um Absätze zu erhalten
-      document.getElementById("backAnswer").innerHTML = cards[index].answer.replace(/\n/g, "<br>");
+      document.getElementById("frontQuestion").innerHTML = cards[index].question;
+      document.getElementById("backAnswer").innerHTML   = cards[index].answer;
       document.getElementById("currentCardIndex").textContent = index + 1;
     }
+
+    // Flip-Effekt
     function flipCard() {
-      document.getElementById("card").classList.toggle("flip");
+      const cardEl = document.getElementById("card");
+      cardEl.classList.toggle("flip");
       updateBottomButtons();
     }
+    // Bottom-Buttons nur sichtbar, wenn Karte umgedreht
     function updateBottomButtons() {
       const cardEl = document.getElementById("card");
       const bottom = document.getElementById("bottomButtons");
-      if(cardEl.classList.contains("flip")) {
-        bottom.style.display = "flex";
-      } else {
-        bottom.style.display = "none";
-      }
+      bottom.style.display = cardEl.classList.contains("flip") ? "flex" : "none";
     }
+
+    // Bewertung
     function rateCard(rating) {
       alert(`Bewertung: ${rating}`);
-      // Hier kannst du die Bewertungslogik ergänzen
+      // ggf. Karte entfernen oder ans Ende verschieben
     }
-    // Bearbeitungs-Overlay
+
+    // Overlay öffnen
     function openEditOverlay() {
-      document.getElementById("editText").value = cards[currentIndex].answer;
+      // WYSIWYG-Bereich mit aktuellem HTML füllen
+      document.getElementById("editContent").innerHTML = cards[currentIndex].answer;
       document.getElementById("editOverlay").style.display = "block";
     }
     function closeEditOverlay() {
       document.getElementById("editOverlay").style.display = "none";
     }
+
+    // Speichern: Hole das HTML aus contenteditable und setze es in die Karte
     function saveEdit() {
-      let newText = document.getElementById("editText").value;
-      cards[currentIndex].answer = newText;
+      let newHTML = document.getElementById("editContent").innerHTML;
+      cards[currentIndex].answer = newHTML;
       loadCard(currentIndex);
       closeEditOverlay();
     }
-    // Formatierung: wirkt nur auf den markierten Bereich im Textarea
-    function applyFormat(format) {
-      const textarea = document.getElementById("editText");
-      let start = textarea.selectionStart;
-      let end = textarea.selectionEnd;
-      let selected = textarea.value.substring(start, end);
-      let before = "", after = "";
-      switch(format) {
-        case "bold":
-          before = "<b>";
-          after = "</b>";
-          break;
-        case "italic":
-          before = "<i>";
-          after = "</i>";
-          break;
-        case "underline":
-          before = "<u>";
-          after = "</u>";
-          break;
-        case "fontSize":
-          let size = prompt("Schriftgröße (z.B. 18px):", "18px");
-          before = `<span style="font-size:${size};">`;
-          after = "</span>";
-          break;
-        case "color":
-          let color = prompt("Farbe (z.B. 'red' oder '#123456'):", "#000");
-          before = `<span style="color:${color};">`;
-          after = "</span>";
-          break;
-        case "highlight":
-          let hColor = prompt("Highlight-Farbe (z.B. 'yellow' oder '#ffff00'):", "yellow");
-          before = `<mark style="background-color:${hColor};">`;
-          after = "</mark>";
-          break;
-      }
-      textarea.value = textarea.value.substring(0, start) + before + selected + after + textarea.value.substring(end);
+
+    // WYSIWYG-Befehle (document.execCommand)
+    function execCmd(cmd) {
+      document.execCommand(cmd, false, null);
     }
-    // Datei-Upload: über Side-Button "Bild hinzufügen"
+    function changeFontSize() {
+      let size = prompt("Schriftgröße (z.B. 18px):", "18px");
+      if(!size) return;
+      document.execCommand("fontSize", false, "5"); 
+      // Um fontSize mit px zu erzwingen, manipulieren wir den <font size=..>-Tag per CSS
+      let fonts = document.getElementById("editContent").querySelectorAll("font[size='5']");
+      fonts.forEach(f => f.removeAttribute("size"));
+      fonts.forEach(f => f.style.fontSize = size);
+    }
+    function changeColor() {
+      let color = prompt("Farbe (z.B. 'red' oder '#123456'):", "#000");
+      if(!color) return;
+      document.execCommand("foreColor", false, color);
+    }
+    function highlightText() {
+      let color = prompt("Highlight-Farbe (z.B. 'yellow' oder '#ffff00'):", "yellow");
+      if(!color) return;
+      document.execCommand("hiliteColor", false, color);
+    }
+
+    // Datei-Upload (Bild)
     function promptImageUpload() {
       document.getElementById("hiddenImageUpload").click();
     }
@@ -322,46 +316,15 @@
       if(file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-          let imgHTML = `<br><img src="${e.target.result}" style="max-width:100%;"/><br>`;
-          cards[currentIndex].answer += imgHTML;
-          loadCard(currentIndex);
+          // Bild ins WYSIWYG einfügen
+          let img = `<img src="${e.target.result}" style="max-width:100%;"/><br>`;
+          // Füge es in das bearbeitete HTML ein
+          let editDiv = document.getElementById("editContent");
+          editDiv.focus();
+          document.execCommand("insertHTML", false, img);
         }
         reader.readAsDataURL(file);
       }
-    }
-    // Canvas für Zeichnen
-    function setupCanvas() {
-      const canvas = document.getElementById("drawCanvas");
-      const ctx = canvas.getContext("2d");
-      canvas.width = canvas.clientWidth;
-      canvas.height = 80;
-      let drawing = false;
-      let currentColor = "#000";
-      canvas.addEventListener("mousedown", () => { drawing = true; ctx.beginPath(); });
-      canvas.addEventListener("mouseup", () => { drawing = false; });
-      canvas.addEventListener("mousemove", function(e) {
-        if(!drawing) return;
-        let rect = canvas.getBoundingClientRect();
-        let x = e.clientX - rect.left;
-        let y = e.clientY - rect.top;
-        ctx.lineWidth = 2;
-        ctx.lineCap = "round";
-        ctx.strokeStyle = currentColor;
-        ctx.lineTo(x, y);
-        ctx.stroke();
-      });
-      // Farb-Picker oberhalb des Canvas
-      const colorPicker = document.createElement("div");
-      colorPicker.style.marginTop = "5px";
-      colorPicker.innerHTML = `
-        <button onclick="setDrawingColor('#000')">Schwarz</button>
-        <button onclick="setDrawingColor('#f1c40f')">Gelb</button>
-        <button onclick="setDrawingColor('#e74c3c')">Rot</button>
-        <button onclick="setDrawingColor('#2ecc71')">Grün</button>
-        <button onclick="setDrawingColor('#8e44ad')">Lila</button>
-      `;
-      canvas.parentElement.appendChild(colorPicker);
-      window.setDrawingColor = function(color) { currentColor = color; }
     }
   </script>
 </body>
