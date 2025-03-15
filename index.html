@@ -7,8 +7,7 @@
   <style>
     /* ---------- Globales Styling ---------- */
     * {
-      margin: 0;
-      padding: 0;
+      margin: 0; padding: 0;
       box-sizing: border-box;
       font-family: Arial, sans-serif;
     }
@@ -24,17 +23,15 @@
       margin-bottom: 20px;
     }
     header h2 { color: #972D54; }
-    
-    /* ---------- Karteikarten-Container ---------- */
+
+    /* ---------- Wrapper & Flexible Karte ---------- */
     .card-wrapper {
       position: relative;
-      display: inline-block;
+      display: inline-block;  /* passt sich Inhalt an */
       min-width: 320px;
       width: auto;
       margin-bottom: 20px;
     }
-    
-    /* ---------- Flip-Karte ---------- */
     .card {
       width: 100%;
       min-height: 240px;
@@ -45,34 +42,36 @@
       border-radius: 8px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       background-color: #fff;
-      overflow: hidden;
+      overflow: auto;
     }
     .card.flip {
       transform: rotateY(180deg);
     }
     .card-face {
       position: absolute;
-      top: 0;
-      left: 0;
+      top: 0; left: 0;
       width: 100%;
       min-height: 240px;
       padding: 16px;
       border-radius: 8px;
       backface-visibility: hidden;
-      white-space: pre-line;
-      text-align: left;
+      white-space: pre-line; /* Zeilenumbrüche beibehalten */
     }
     .card-front { background-color: #fff; }
     .card-back {
       background-color: #f9f9f9;
       transform: rotateY(180deg);
     }
-
+    /* Standardtext: linksbündig (im Editor änderbar) */
+    #frontQuestion, #backAnswer {
+      text-align: left;
+    }
+    
     /* ---------- Side-Buttons (rechts neben der Karte) ---------- */
     .side-buttons {
       position: absolute;
       top: 10px;
-      right: -150px;
+      right: -160px;
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -90,12 +89,12 @@
       gap: 5px;
     }
     .side-buttons button:hover { opacity: 0.9; }
-
-    /* ---------- Bottom-Buttons (erscheinen unter der Karte) ---------- */
+    
+    /* ---------- Bottom-Buttons (unter der Karte) ---------- */
     .bottom-buttons {
       width: 100%;
       max-width: 600px;
-      display: none;
+      display: none; /* erst sichtbar, wenn Karte umgedreht */
       gap: 10px;
       justify-content: space-between;
       margin-top: 10px;
@@ -113,7 +112,115 @@
     .btn-muehsam  { background-color: #f39c12; color: #000; }
     .btn-gut      { background-color: #2ecc71; }
     .btn-einfach  { background-color: #1abc9c; }
-
+    /* Editieren-Button unten entfällt, da er schon in den Side-Buttons ist */
+    
+    /* ---------- Bearbeitungs-Overlay (WYSIWYG Editor) ---------- */
+    .edit-overlay {
+      display: none;
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 600px;
+      background: #fff;
+      padding: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      border-radius: 8px;
+      z-index: 1000;
+    }
+    .edit-overlay h3 { margin-bottom: 10px; }
+    .toolbar {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .toolbar .format-btn {
+      padding: 5px 8px;
+      cursor: pointer;
+      border: 1px solid #ccc;
+      background: #f5f5dc;  /* beige */
+      border-radius: 4px;
+      color: #800080; /* lila Schrift für die Buttons */
+    }
+    .toolbar .format-btn:hover { background: #eee; }
+    .color-palette, .highlight-palette {
+      display: flex;
+      gap: 5px;
+      margin-top: 5px;
+    }
+    .color-palette button, .highlight-palette button {
+      width: 25px;
+      height: 25px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #editContent {
+      min-height: 150px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 8px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+      background: #fff;
+    }
+    .edit-overlay .buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+    .edit-overlay button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      color: #fff;
+    }
+    .save { background-color: #28a745; }
+    .close { background-color: #dc3545; }
+    
+    /* ---------- Zeichnen-Overlay ---------- */
+    .draw-overlay {
+      display: none;
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 600px;
+      background: #fff;
+      padding: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      border-radius: 8px;
+      z-index: 2000;
+    }
+    .draw-overlay h3 { margin-bottom: 10px; }
+    #drawCanvas {
+      width: 100%;
+      height: 300px;
+      border: 1px solid #ccc;
+      background: #fff;
+      cursor: crosshair;
+      margin-bottom: 10px;
+    }
+    .color-palette-draw {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+    .color-palette-draw button {
+      width: 30px;
+      height: 30px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+    }
+    .draw-overlay .buttons {
+      display: flex;
+      justify-content: space-between;
+    }
+    .save-draw { background-color: #28a745; }
+    .close-draw { background-color: #dc3545; }
   </style>
 </head>
 <body>
@@ -134,7 +241,7 @@
         <div id="backAnswer">Antwort wird geladen...</div>
       </div>
     </div>
-    <!-- Side-Buttons: stehen komplett rechts neben der Karte -->
+    <!-- Side-Buttons: komplett rechts neben der Karte -->
     <div class="side-buttons">
       <button onclick="openEditOverlay()">✏️ Bearbeiten</button>
       <button onclick="triggerImageUpload()">📷 Bild hinzufügen</button>
@@ -150,7 +257,62 @@
     <button class="btn-einfach" onclick="rateCard('Einfach')">Einfach</button>
   </div>
 
+  <!-- Bearbeitungs-Overlay (WYSIWYG Editor) -->
+  <div class="edit-overlay" id="editOverlay">
+    <h3>Karte bearbeiten</h3>
+    <div class="toolbar">
+      <button class="format-btn" onclick="execCmd('bold')"><b>B</b></button>
+      <button class="format-btn" onclick="execCmd('italic')"><i>I</i></button>
+      <button class="format-btn" onclick="execCmd('underline')"><u>U</u></button>
+      <button class="format-btn" onclick="execCmd('justifyLeft')">Links</button>
+      <button class="format-btn" onclick="execCmd('justifyCenter')">Mitte</button>
+      <button class="format-btn" onclick="execCmd('justifyRight')">Rechts</button>
+      <button class="format-btn" onclick="changeFontSize()">Größe</button>
+    </div>
+    <div class="color-palette">
+      <button style="background:#000;" onclick="execCmdColor('#000')"></button>
+      <button style="background:red;" onclick="execCmdColor('red')"></button>
+      <button style="background:green;" onclick="execCmdColor('green')"></button>
+      <button style="background:blue;" onclick="execCmdColor('blue')"></button>
+      <button style="background:#8e44ad;" onclick="execCmdColor('#8e44ad')"></button>
+    </div>
+    <div class="highlight-palette">
+      <button style="background:yellow;" onclick="execCmdHighlight('yellow')"></button>
+      <button style="background:#f39c12;" onclick="execCmdHighlight('#f39c12')"></button>
+      <button style="background:#9b59b6;" onclick="execCmdHighlight('#9b59b6')"></button>
+      <button style="background:#bdc3c7;" onclick="execCmdHighlight('#bdc3c7')"></button>
+      <button style="background:pink;" onclick="execCmdHighlight('pink')"></button>
+    </div>
+    <div id="editContent" contenteditable="true" style="border:1px solid #ccc; border-radius:4px; padding:8px; margin-top:10px; min-height:150px;"></div>
+    <div class="buttons">
+      <button class="save" onclick="saveEdit()">Speichern</button>
+      <button class="close" onclick="closeEditOverlay()">Abbrechen</button>
+    </div>
+  </div>
+
+  <!-- Zeichnen-Overlay -->
+  <div class="draw-overlay" id="drawOverlay">
+    <h3>Notizen / Zeichnen</h3>
+    <canvas id="drawCanvas"></canvas>
+    <div class="color-palette-draw">
+      <button style="background:#000;" onclick="setDrawingColor('#000')"></button>
+      <button style="background:red;" onclick="setDrawingColor('red')"></button>
+      <button style="background:green;" onclick="setDrawingColor('green')"></button>
+      <button style="background:blue;" onclick="setDrawingColor('blue')"></button>
+      <button style="background:#8e44ad;" onclick="setDrawingColor('#8e44ad')"></button>
+      <button style="background:#fff; border:1px solid #ccc;" onclick="eraseDrawing()">✖</button>
+    </div>
+    <div class="buttons">
+      <button class="save-draw" onclick="saveDrawing()">Übernehmen</button>
+      <button class="close-draw" onclick="closeDrawOverlay()">Abbrechen</button>
+    </div>
+  </div>
+
+  <!-- Versteckter Datei-Upload für Bild -->
+  <input type="file" id="hiddenImageUpload" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
+
   <script>
+    // Beispiel-Karteikarten
     let cards = [
       {
         question: "Wann besteht ein Anspruch des Verkäufers auf Rückübereignung des Pkw?",
@@ -158,49 +320,130 @@
       }
     ];
     let currentIndex = 0;
-
     document.addEventListener("DOMContentLoaded", () => {
       loadCard(currentIndex);
       document.getElementById("totalCards").textContent = cards.length;
+      setupDrawCanvas();
     });
-
     function loadCard(index) {
-      let questionEl = document.getElementById("frontQuestion");
-      let answerEl = document.getElementById("backAnswer");
-
-      // Setze die Frage und Antwort korrekt
-      questionEl.innerHTML = cards[index].question.replace(/\n/g, "<br>");
-      answerEl.innerHTML = cards[index].answer.replace(/\n/g, "<br>");
-
+      document.getElementById("frontQuestion").innerHTML = cards[index].question.replace(/\n/g, "<br>");
+      document.getElementById("backAnswer").innerHTML  = cards[index].answer.replace(/\n/g, "<br>");
       document.getElementById("currentCardIndex").textContent = index + 1;
     }
-
     function flipCard() {
       const cardEl = document.getElementById("card");
       cardEl.classList.toggle("flip");
       updateBottomButtons();
     }
-
     function updateBottomButtons() {
       const cardEl = document.getElementById("card");
       const bottom = document.getElementById("bottomButtons");
       bottom.style.display = cardEl.classList.contains("flip") ? "flex" : "none";
     }
-
     function rateCard(rating) {
       alert(`Bewertung: ${rating}`);
+      // Bewertungslogik hier ergänzen
     }
-
+    // Bearbeitungs-Overlay (WYSIWYG)
     function openEditOverlay() {
-      alert("Editor öffnet sich (noch nicht implementiert)");
+      document.getElementById("editContent").innerHTML = cards[currentIndex].answer;
+      document.getElementById("editOverlay").style.display = "block";
     }
-
+    function closeEditOverlay() {
+      document.getElementById("editOverlay").style.display = "none";
+    }
+    function saveEdit() {
+      let newHTML = document.getElementById("editContent").innerHTML;
+      cards[currentIndex].answer = newHTML;
+      loadCard(currentIndex);
+      closeEditOverlay();
+    }
+    // execCommand-Befehle
+    function execCmd(cmd) {
+      document.execCommand(cmd, false, null);
+    }
+    function changeFontSize() {
+      let size = prompt("Schriftgröße (z.B. 18px):", "18px");
+      if(!size) return;
+      document.execCommand("fontSize", false, "5");
+      let fonts = document.getElementById("editContent").querySelectorAll("font[size='5']");
+      fonts.forEach(f => {
+        f.removeAttribute("size");
+        f.style.fontSize = size;
+      });
+    }
+    function execCmdColor(color) {
+      document.execCommand("foreColor", false, color);
+    }
+    function execCmdHighlight(color) {
+      document.execCommand("hiliteColor", false, color);
+    }
+    // Versteckter Datei-Upload für Bild
     function triggerImageUpload() {
-      alert("Bild hinzufügen Funktion kommt bald!");
+      document.getElementById("hiddenImageUpload").click();
     }
-
+    function handleImageUpload(event) {
+      const file = event.target.files[0];
+      if(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          let imgHTML = `<br><img src="${e.target.result}" style="max-width:100%; cursor:pointer;" onclick="if(confirm('Bild entfernen?')) { this.remove(); }"><br>`;
+          cards[currentIndex].answer += imgHTML;
+          loadCard(currentIndex);
+        }
+        reader.readAsDataURL(file);
+      }
+    }
+    function promptImageUpload() {
+      triggerImageUpload();
+    }
+    // Zeichnen-Overlay
     function openDrawOverlay() {
-      alert("Zeichnen-Funktion folgt!");
+      document.getElementById("drawOverlay").style.display = "block";
+      const canvas = document.getElementById("drawCanvas");
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    function closeDrawOverlay() {
+      document.getElementById("drawOverlay").style.display = "none";
+    }
+    function setupDrawCanvas() {
+      const canvas = document.getElementById("drawCanvas");
+      const ctx = canvas.getContext("2d");
+      let rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+      let drawing = false;
+      canvas.addEventListener("mousedown", () => { drawing = true; ctx.beginPath(); });
+      canvas.addEventListener("mouseup", () => { drawing = false; });
+      canvas.addEventListener("mousemove", function(e) {
+        if(!drawing) return;
+        let r = canvas.getBoundingClientRect();
+        let x = e.clientX - r.left;
+        let y = e.clientY - r.top;
+        ctx.lineWidth = 3;
+        ctx.lineCap = "round";
+        ctx.strokeStyle = currentDrawingColor;
+        ctx.lineTo(x, y);
+        ctx.stroke();
+      });
+    }
+    let currentDrawingColor = "#000";
+    function setDrawingColor(color) {
+      currentDrawingColor = color;
+    }
+    function eraseDrawing() {
+      const canvas = document.getElementById("drawCanvas");
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    function saveDrawing() {
+      const canvas = document.getElementById("drawCanvas");
+      const dataURL = canvas.toDataURL("image/png");
+      let imgHTML = `<br><img src="${dataURL}" style="max-width:100%; cursor:pointer;" onclick="if(confirm('Zeichnung entfernen?')) { this.remove(); }"><br>`;
+      cards[currentIndex].answer += imgHTML;
+      loadCard(currentIndex);
+      closeDrawOverlay();
     }
   </script>
 </body>
