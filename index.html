@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Flip-Karteikarten mit dynamischer Größe & Editor</title>
+  <title>Flip-Karteikarten mit Editor & Zeichnen</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <style>
     /* --- Globales Styling --- */
@@ -25,13 +25,13 @@
     }
     header h2 { color: #972D54; }
 
-    /* --- Flip-Karten-Container (dynamisch in der Höhe) --- */
+    /* --- Flip-Karten-Container --- */
     .card-container {
       position: relative;
       perspective: 1000px;
       width: 320px;
-      min-height: 240px;  /* Mindesthöhe */
-      /* Höhe passt sich automatisch an den Inhalt an */
+      min-height: 240px; /* Mindesthöhe; wächst bei mehr Inhalt */
+      margin-bottom: 20px;
     }
     .card {
       width: 100%;
@@ -58,7 +58,7 @@
       align-items: center;
       padding: 16px;
       text-align: center;
-      white-space: pre-line; /* Zeilenumbrüche bleiben erhalten */
+      white-space: pre-line; /* Zeilenumbrüche erhalten */
     }
     .card-front { background-color: #fff; }
     .card-back {
@@ -89,11 +89,11 @@
     }
     .side-buttons button:hover { opacity: 0.9; }
 
-    /* --- Bottom-Buttons (fünf Buttons, erscheinen erst wenn Karte umgedreht ist) --- */
+    /* --- Bottom-Buttons (fünf Buttons) --- */
     .bottom-buttons {
       margin-top: 15px;
       width: 320px;
-      display: none; /* erst sichtbar, wenn Karte umgedreht ist */
+      display: none; /* erscheint nur, wenn Karte umgedreht ist */
       gap: 10px;
       justify-content: space-between;
     }
@@ -112,7 +112,7 @@
     .btn-einfach  { background-color: #1abc9c; }
     .btn-edit     { background-color: #8e44ad; }
 
-    /* --- Bearbeitungs-Overlay --- */
+    /* --- Bearbeitungs-Overlay (Editor) --- */
     .edit-overlay {
       display: none;
       position: fixed;
@@ -163,7 +163,7 @@
     /* --- Canvas für Zeichnen --- */
     #drawCanvas {
       width: 90%;
-      height: 80px; /* etwas größer für mehr Platz */
+      height: 80px;
       border: 1px solid #ccc;
       margin-top: 5px;
     }
@@ -184,18 +184,17 @@
       <!-- Rückseite -->
       <div class="card-face card-back">
         <div id="backAnswer">Antwort wird geladen...</div>
-        <!-- Kein Datei-Upload-Feld hier, da Bild per Side-Button hinzugefügt wird -->
         <canvas id="drawCanvas"></canvas>
       </div>
     </div>
-    <!-- Side-Buttons: befinden sich nun komplett rechts neben der Karte -->
+    <!-- Side-Buttons: komplett rechts neben der Karte -->
     <div class="side-buttons">
       <button onclick="openEditOverlay()">✏️ Bearbeiten</button>
       <button onclick="promptImageUpload()">📷 Bild hinzufügen</button>
     </div>
   </div>
 
-  <!-- Bottom-Buttons: erscheinen erst, wenn die Karte umgedreht ist -->
+  <!-- Bottom-Buttons: erscheinen nur, wenn Karte umgedreht -->
   <div class="bottom-buttons" id="bottomButtons">
     <button class="btn-falsch" onclick="rateCard('Falsch')">Falsch</button>
     <button class="btn-muehsam" onclick="rateCard('Mühsam')">Mühsam</button>
@@ -204,7 +203,7 @@
     <button class="btn-edit" onclick="openEditOverlay()">Editieren</button>
   </div>
 
-  <!-- Bearbeitungs-Overlay (mit Texteditor und Formatierung) -->
+  <!-- Bearbeitungs-Overlay (Editor mit Formatierung, inkl. Highlighter) -->
   <div class="edit-overlay" id="editOverlay">
     <h3>Karte bearbeiten</h3>
     <div class="text-editor">
@@ -213,6 +212,7 @@
       <button onclick="applyFormat('underline')"><u>U</u></button>
       <button onclick="applyFormat('fontSize')">Größe</button>
       <button onclick="applyFormat('color')">Farbe</button>
+      <button onclick="applyFormat('highlight')">Markieren</button>
     </div>
     <textarea id="editText" placeholder="Antwort bearbeiten..."></textarea>
     <div class="buttons">
@@ -240,6 +240,7 @@
     });
     function loadCard(index) {
       document.getElementById("frontQuestion").textContent = cards[index].question;
+      // Ersetze \n durch <br> um Absätze zu erhalten
       document.getElementById("backAnswer").innerHTML = cards[index].answer.replace(/\n/g, "<br>");
       document.getElementById("currentCardIndex").textContent = index + 1;
     }
@@ -258,7 +259,7 @@
     }
     function rateCard(rating) {
       alert(`Bewertung: ${rating}`);
-      // Hier kannst du die Logik für Bewertungen ergänzen (z.B. Karte entfernen bei "Einfach")
+      // Hier kannst du die Bewertungslogik ergänzen
     }
     // Bearbeitungs-Overlay
     function openEditOverlay() {
@@ -274,7 +275,7 @@
       loadCard(currentIndex);
       closeEditOverlay();
     }
-    // Formatierung: wirkt nur auf den markierten Text im Textarea
+    // Formatierung: wirkt nur auf den markierten Bereich im Textarea
     function applyFormat(format) {
       const textarea = document.getElementById("editText");
       let start = textarea.selectionStart;
@@ -304,10 +305,15 @@
           before = `<span style="color:${color};">`;
           after = "</span>";
           break;
+        case "highlight":
+          let hColor = prompt("Highlight-Farbe (z.B. 'yellow' oder '#ffff00'):", "yellow");
+          before = `<mark style="background-color:${hColor};">`;
+          after = "</mark>";
+          break;
       }
       textarea.value = textarea.value.substring(0, start) + before + selected + after + textarea.value.substring(end);
     }
-    // Datei-Upload: über den Side-Button "Bild hinzufügen"
+    // Datei-Upload: über Side-Button "Bild hinzufügen"
     function promptImageUpload() {
       document.getElementById("hiddenImageUpload").click();
     }
@@ -344,7 +350,7 @@
         ctx.lineTo(x, y);
         ctx.stroke();
       });
-      // Erstelle einen einfachen Farb-Picker oberhalb des Canvas
+      // Farb-Picker oberhalb des Canvas
       const colorPicker = document.createElement("div");
       colorPicker.style.marginTop = "5px";
       colorPicker.innerHTML = `
