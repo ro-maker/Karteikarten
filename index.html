@@ -2,10 +2,10 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Flexible Flip-Karteikarten mit Editor & Zeichnen</title>
+  <title>Flexible Flip-Karteikarten mit Editor, Bild & Zeichnen</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <style>
-    /* Globales Styling */
+    /* ---------- Globales Styling ---------- */
     * {
       margin: 0;
       padding: 0;
@@ -23,18 +23,16 @@
       text-align: center;
       margin-bottom: 20px;
     }
-    header h2 {
-      color: #972D54;
-    }
-
-    /* Wrapper für Karte + Side-Buttons */
+    header h2 { color: #972D54; }
+    
+    /* ---------- Wrapper & Flexible Karte ---------- */
     .card-wrapper {
-      display: inline-block;
       position: relative;
+      display: inline-block;
       min-width: 320px;
+      width: auto;  /* passt sich dem Inhalt an */
       margin-bottom: 20px;
     }
-    /* Flexibler Karten-Container: keine feste Höhe/Breite, wächst mit Inhalt */
     .card {
       width: 100%;
       min-height: 240px;
@@ -45,20 +43,21 @@
       border-radius: 8px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       background-color: #fff;
+      overflow: auto;
     }
     .card.flip {
       transform: rotateY(180deg);
     }
     .card-face {
-      width: 100%;
-      min-height: 240px;
       position: absolute;
       top: 0;
       left: 0;
+      width: 100%;
+      min-height: 240px;
       padding: 16px;
-      backface-visibility: hidden;
       border-radius: 8px;
-      white-space: pre-line; /* Zeilenumbrüche bleiben erhalten */
+      backface-visibility: hidden;
+      white-space: pre-line; /* Erhält Zeilenumbrüche */
     }
     .card-front {
       background-color: #fff;
@@ -67,16 +66,16 @@
       background-color: #f9f9f9;
       transform: rotateY(180deg);
     }
-    /* Inhalte (Frage & Antwort) linksbündig */
+    /* Die Inhalte (Frage/Antwort) sollen linksbündig sein – der Nutzer kann aber später im Editor auch die Ausrichtung ändern */
     #frontQuestion, #backAnswer {
       text-align: left;
     }
-
-    /* Side-Buttons (rechts neben der Karte) */
+    
+    /* ---------- Side-Buttons (rechts neben der Karte) ---------- */
     .side-buttons {
       position: absolute;
       top: 10px;
-      right: -150px;
+      right: -160px; /* Abstand, passt sich an */
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -93,13 +92,15 @@
       align-items: center;
       gap: 5px;
     }
-    .side-buttons button:hover { opacity: 0.9; }
-
-    /* Bottom-Buttons (fünf Buttons) – immer unter der Karte, passen sich an */
+    .side-buttons button:hover {
+      opacity: 0.9;
+    }
+    
+    /* ---------- Bottom-Buttons (erscheinen, wenn Karte umgedreht ist) ---------- */
     .bottom-buttons {
       width: 100%;
       max-width: 600px;
-      display: none; /* erst sichtbar, wenn Karte umgedreht */
+      display: none; /* erst sichtbar, wenn Karte flippt */
       gap: 10px;
       justify-content: space-between;
       margin-top: 10px;
@@ -117,9 +118,9 @@
     .btn-muehsam  { background-color: #f39c12; color: #000; }
     .btn-gut      { background-color: #2ecc71; }
     .btn-einfach  { background-color: #1abc9c; }
-    .btn-edit     { background-color: #8e44ad; }
-
-    /* Bearbeitungs-Overlay (WYSIWYG) */
+    /* Den lila "Editieren"-Button unten entfernen (da es schon oben rechts existiert) */
+    
+    /* ---------- Bearbeitungs-Overlay (WYSIWYG-Editor) ---------- */
     .edit-overlay {
       display: none;
       position: fixed;
@@ -154,11 +155,13 @@
       margin-top: 5px;
     }
     .color-palette button, .highlight-palette button {
-      width: 25px; height: 25px;
+      width: 25px;
+      height: 25px;
       border: none;
       border-radius: 4px;
       cursor: pointer;
     }
+    /* WYSIWYG-Bereich (contenteditable) */
     #editContent {
       min-height: 150px;
       border: 1px solid #ccc;
@@ -182,8 +185,8 @@
     }
     .save { background-color: #28a745; }
     .close { background-color: #dc3545; }
-
-    /* Zeichnen-Overlay */
+    
+    /* ---------- Zeichnen-Overlay ---------- */
     .draw-overlay {
       display: none;
       position: fixed;
@@ -212,7 +215,8 @@
       margin-top: 10px;
     }
     .color-palette-draw button {
-      width: 30px; height: 30px;
+      width: 30px;
+      height: 30px;
       border-radius: 4px;
       border: none;
       cursor: pointer;
@@ -240,21 +244,20 @@
         <div id="backAnswer">Antwort wird geladen...</div>
       </div>
     </div>
-    <!-- Side-Buttons (stehen komplett rechts neben der Karte) -->
+    <!-- Side-Buttons: stehen vollständig rechts neben der Karte -->
     <div class="side-buttons">
       <button onclick="openEditOverlay()">✏️ Bearbeiten</button>
+      <button onclick="promptImageUpload()">📷 Bild hinzufügen</button>
       <button onclick="openDrawOverlay()">✍️ Zeichnen</button>
-      <button onclick="triggerImageUpload()">📷 Bild hinzufügen</button>
     </div>
   </div>
 
-  <!-- Bottom-Buttons (erscheinen nur, wenn die Karte umgedreht ist) -->
+  <!-- Bottom-Buttons: erscheinen nur, wenn die Karte umgedreht ist -->
   <div class="bottom-buttons" id="bottomButtons">
     <button class="btn-falsch" onclick="rateCard('Falsch')">Falsch</button>
     <button class="btn-muehsam" onclick="rateCard('Mühsam')">Mühsam</button>
     <button class="btn-gut" onclick="rateCard('Gut')">Gut</button>
     <button class="btn-einfach" onclick="rateCard('Einfach')">Einfach</button>
-    <button class="btn-edit" onclick="openEditOverlay()">Editieren</button>
   </div>
 
   <!-- Bearbeitungs-Overlay (WYSIWYG) -->
@@ -292,14 +295,15 @@
 
   <!-- Zeichnen-Overlay -->
   <div class="draw-overlay" id="drawOverlay">
-    <h3>Zeichnen / Notizen</h3>
+    <h3>Notizen / Zeichnen</h3>
     <canvas id="drawCanvas"></canvas>
-    <div class="draw-overlay .color-palette-draw">
+    <div class="color-palette-draw">
       <button style="background:#000;" onclick="setDrawingColor('#000')"></button>
       <button style="background:red;" onclick="setDrawingColor('red')"></button>
       <button style="background:green;" onclick="setDrawingColor('green')"></button>
       <button style="background:blue;" onclick="setDrawingColor('blue')"></button>
       <button style="background:#8e44ad;" onclick="setDrawingColor('#8e44ad')"></button>
+      <button style="background:#fff; border:1px solid #ccc;" onclick="eraseDrawing()">✖</button>
     </div>
     <div class="buttons">
       <button class="save-draw" onclick="saveDrawing()">Übernehmen</button>
@@ -319,36 +323,30 @@
       }
     ];
     let currentIndex = 0;
-
     document.addEventListener("DOMContentLoaded", () => {
       loadCard(currentIndex);
       document.getElementById("totalCards").textContent = cards.length;
       setupDrawCanvas();
     });
-
     function loadCard(index) {
       document.getElementById("frontQuestion").innerHTML = cards[index].question.replace(/\n/g, "<br>");
-      document.getElementById("backAnswer").innerHTML = cards[index].answer.replace(/\n/g, "<br>");
+      document.getElementById("backAnswer").innerHTML  = cards[index].answer.replace(/\n/g, "<br>");
       document.getElementById("currentCardIndex").textContent = index + 1;
     }
-
     function flipCard() {
       const cardEl = document.getElementById("card");
       cardEl.classList.toggle("flip");
       updateBottomButtons();
     }
-
     function updateBottomButtons() {
       const cardEl = document.getElementById("card");
       const bottom = document.getElementById("bottomButtons");
       bottom.style.display = cardEl.classList.contains("flip") ? "flex" : "none";
     }
-
     function rateCard(rating) {
       alert(`Bewertung: ${rating}`);
-      // Bewertungslogik hier ergänzen
+      // Hier kann Bewertungslogik ergänzt werden
     }
-
     // Bearbeitungs-Overlay (WYSIWYG)
     function openEditOverlay() {
       document.getElementById("editContent").innerHTML = cards[currentIndex].answer;
@@ -363,8 +361,7 @@
       loadCard(currentIndex);
       closeEditOverlay();
     }
-
-    // execCommand-Befehle für WYSIWYG
+    // execCommand-Befehle
     function execCmd(cmd) {
       document.execCommand(cmd, false, null);
     }
@@ -384,17 +381,7 @@
     function execCmdHighlight(color) {
       document.execCommand("hiliteColor", false, color);
     }
-
-    // Farb-Palette-Buttons in Overlay rufen hier Prompts nicht auf,
-    // sondern setzen direkt eine vordefinierte Farbe (Beispiel):
-    function execCmdColor(btnColor) {
-      document.execCommand("foreColor", false, btnColor);
-    }
-    function execCmdHighlight(btnColor) {
-      document.execCommand("hiliteColor", false, btnColor);
-    }
-
-    // Versteckter Datei-Upload für Bild hinzufügen
+    // Versteckter Datei-Upload
     function triggerImageUpload() {
       document.getElementById("hiddenImageUpload").click();
     }
@@ -403,21 +390,36 @@
       if(file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-          let imgHTML = `<br><img src="${e.target.result}" style="max-width:100%;"/><br>`;
-          cards[currentIndex].answer += imgHTML;
-          loadCard(currentIndex);
+          // Erstelle ein Bild-Element mit Klick zum Entfernen
+          let img = document.createElement("img");
+          img.src = e.target.result;
+          img.style.maxWidth = "100%";
+          img.style.cursor = "pointer";
+          img.title = "Klick, um zu entfernen";
+          img.onclick = function() {
+            if(confirm("Dieses Bild entfernen?")) {
+              img.remove();
+              // Aktualisiere den Inhalt im Editor, falls nötig
+            }
+          }
+          // Füge das Bild in den Editor ein (bei Bearbeitung) oder direkt in den Antwortbereich, wenn nicht im Edit-Modus
+          let container = document.getElementById("editOverlay").style.display === "block"
+                          ? document.getElementById("editContent")
+                          : document.getElementById("backAnswer");
+          container.appendChild(document.createElement("br"));
+          container.appendChild(img);
+          container.appendChild(document.createElement("br"));
+          // Aktualisiere den Karteninhalt, wenn nicht im Edit-Modus
+          if(document.getElementById("editOverlay").style.display !== "block") {
+            cards[currentIndex].answer = container.innerHTML;
+          }
         }
         reader.readAsDataURL(file);
       }
     }
-    function promptImageUpload() {
-      triggerImageUpload();
-    }
-
     // Zeichnen-Overlay
     function openDrawOverlay() {
       document.getElementById("drawOverlay").style.display = "block";
-      // Canvas leeren
       const canvas = document.getElementById("drawCanvas");
       const ctx = canvas.getContext("2d");
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -454,6 +456,7 @@
       const canvas = document.getElementById("drawCanvas");
       const dataURL = canvas.toDataURL("image/png");
       let imgHTML = `<br><img src="${dataURL}" style="max-width:100%;"/><br>`;
+      // Füge die Zeichnung in den Antwortinhalt ein
       cards[currentIndex].answer += imgHTML;
       loadCard(currentIndex);
       closeDrawOverlay();
