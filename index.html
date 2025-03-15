@@ -25,7 +25,7 @@
     }
     header h2 { color: #972D54; }
     
-    /* ---------- Wrapper für Karte & Side-Buttons ---------- */
+    /* ---------- Karteikarten-Container ---------- */
     .card-wrapper {
       position: relative;
       display: inline-block;
@@ -34,7 +34,7 @@
       margin-bottom: 20px;
     }
     
-    /* ---------- Flexible Karte ---------- */
+    /* ---------- Flip-Karte ---------- */
     .card {
       width: 100%;
       min-height: 240px;
@@ -60,15 +60,12 @@
       border-radius: 8px;
       backface-visibility: hidden;
       white-space: pre-line;
+      text-align: left;
     }
     .card-front { background-color: #fff; }
     .card-back {
       background-color: #f9f9f9;
       transform: rotateY(180deg);
-    }
-    /* Text richtig ausrichten */
-    #frontQuestion, #backAnswer {
-      text-align: left;
     }
 
     /* ---------- Side-Buttons (rechts neben der Karte) ---------- */
@@ -168,8 +165,13 @@
     });
 
     function loadCard(index) {
-      document.getElementById("frontQuestion").innerHTML = cards[index].question.replace(/\n/g, "<br>");
-      document.getElementById("backAnswer").innerHTML = cards[index].answer.replace(/\n/g, "<br>");
+      let questionEl = document.getElementById("frontQuestion");
+      let answerEl = document.getElementById("backAnswer");
+
+      // Setze die Frage und Antwort korrekt
+      questionEl.innerHTML = cards[index].question.replace(/\n/g, "<br>");
+      answerEl.innerHTML = cards[index].answer.replace(/\n/g, "<br>");
+
       document.getElementById("currentCardIndex").textContent = index + 1;
     }
 
