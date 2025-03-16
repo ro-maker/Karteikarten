@@ -7,204 +7,152 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
-        }
-
-        .container {
             display: flex;
             flex-direction: column;
             align-items: center;
+            background-color: #f5f5f5;
         }
 
-        .headline {
-            font-size: 24px;
-            font-weight: bold;
-            color: #8A1D40;
-            margin-bottom: 20px;
+        .card-container {
+            perspective: 1000px;
+            margin: 20px;
         }
 
         .card {
-            position: relative;
-            width: auto;
-            min-width: 300px;
-            max-width: 600px;
+            width: 300px;
             height: auto;
             min-height: 150px;
-            max-height: 400px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
-            padding: 20px;
-            overflow: auto;
-            resize: both;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.5s;
         }
 
-        .button-group {
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card .side {
+            position: absolute;
+            width: 100%;
+            min-height: 150px;
+            padding: 20px;
+            box-sizing: border-box;
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .card .back {
+            transform: rotateY(180deg);
+        }
+
+        .button-container {
+            margin-top: 20px;
             display: flex;
             gap: 10px;
-            margin-top: 15px;
         }
 
-        .button {
-            padding: 10px 15px;
+        button {
+            padding: 10px 20px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
+        }
+
+        .flip-button {
+            background-color: #6200ea;
             color: white;
         }
 
-        .btn-edit { background: #8A1D40; }
-        .btn-image { background: #555; }
-        .btn-draw { background: #D81B60; }
-        .btn-color { background: #E65100; }
-        .btn-wrong { background: #D32F2F; }
-        .btn-hard { background: #F57C00; }
-        .btn-good { background: #388E3C; }
-        .btn-easy { background: #0097A7; }
-        
-        .btn-add {
-            position: absolute;
-            left: -50px;
-            background: #4CAF50;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            font-size: 24px;
+        .add-button {
+            background-color: #03dac6;
             color: white;
-            line-height: 40px;
         }
 
-        canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            border-radius: 10px;
+        .delete-button {
+            background-color: #d32f2f;
+            color: white;
+        }
+
+        .edit-button {
+            background-color: #ff9800;
+            color: white;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="headline">Heute: <span id="progress">1/1</span></div>
-        
-        <div class="card-container" style="position: relative;">
-            <button class="btn-add" onclick="addCard()">+</button>
-            <div class="card" contenteditable="true" id="card">
-                <canvas id="canvas"></canvas>
-                <p>Wann besteht ein Anspruch des Verkäufers auf Rückübereignung des Pkw?</p>
-            </div>
-        </div>
 
-        <div class="button-group">
-            <button class="button btn-edit" onclick="editCard()">✏ Bearbeiten</button>
-            <button class="button btn-image" onclick="addImage()">📷 Bild hinzufügen</button>
-            <button class="button btn-draw" onclick="startDrawing()">✍ Zeichnen</button>
-            <button class="button btn-color" onclick="changeColor()">🎨 Farbe</button>
-        </div>
+    <div id="cardContainer"></div>
+    <button class="add-button" onclick="addCard()">+ Karteikarte hinzufügen</button>
 
-        <div class="button-group">
-            <button class="button btn-wrong">Falsch</button>
-            <button class="button btn-hard">Mühsam</button>
-            <button class="button btn-good">Gut</button>
-            <button class="button btn-easy">Einfach</button>
-        </div>
-    </div>
-
-    <input type="file" id="fileInput" style="display: none;" onchange="handleImage(event)">
-    
     <script>
-        let isDrawing = false;
-        let ctx;
-        let imgElement;
+        let cardData = JSON.parse(localStorage.getItem("cards")) || [];
 
-        function editCard() {
-            let card = document.getElementById("card");
-            card.contentEditable = true;
-            card.focus();
+        function saveCards() {
+            localStorage.setItem("cards", JSON.stringify(cardData));
         }
 
-        function addImage() {
-            document.getElementById("fileInput").click();
+        function renderCards() {
+            const container = document.getElementById("cardContainer");
+            container.innerHTML = "";
+            cardData.forEach((card, index) => {
+                const cardDiv = document.createElement("div");
+                cardDiv.classList.add("card-container");
+                cardDiv.innerHTML = `
+                    <div class="card" onclick="flipCard(this)">
+                        <div class="side front">${card.question}</div>
+                        <div class="side back">${card.answer}</div>
+                    </div>
+                    <div class="button-container">
+                        <button class="edit-button" onclick="editCard(${index})">Bearbeiten</button>
+                        <button class="delete-button" onclick="deleteCard(${index})">Löschen</button>
+                    </div>
+                `;
+                container.appendChild(cardDiv);
+            });
         }
 
-        function handleImage(event) {
-            let file = event.target.files[0];
-            if (file) {
-                let reader = new FileReader();
-                reader.onload = function(e) {
-                    if (imgElement) {
-                        imgElement.remove();
-                    }
-                    imgElement = document.createElement("img");
-                    imgElement.src = e.target.result;
-                    imgElement.style.maxWidth = "100%";
-                    imgElement.style.position = "absolute";
-                    imgElement.style.left = "10px";
-                    imgElement.style.top = "10px";
-                    imgElement.style.cursor = "move";
-                    imgElement.setAttribute("draggable", "true");
-                    imgElement.ondragstart = dragStart;
-                    document.querySelector(".card").appendChild(imgElement);
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function dragStart(event) {
-            event.dataTransfer.setData("text/plain", null);
-            let img = event.target;
-            document.onmousemove = function(e) {
-                img.style.left = e.pageX - img.width / 2 + "px";
-                img.style.top = e.pageY - img.height / 2 + "px";
-            };
-            document.onmouseup = function() {
-                document.onmousemove = null;
-                document.onmouseup = null;
-            };
-        }
-
-        function startDrawing() {
-            let canvas = document.getElementById("canvas");
-            let card = document.querySelector(".card");
-
-            canvas.width = card.clientWidth;
-            canvas.height = card.clientHeight;
-            canvas.style.position = "absolute";
-            canvas.style.top = "0";
-            canvas.style.left = "0";
-
-            ctx = canvas.getContext("2d");
-            ctx.strokeStyle = "black";
-            ctx.lineWidth = 2;
-
-            canvas.onmousedown = function(e) {
-                isDrawing = true;
-                ctx.beginPath();
-                ctx.moveTo(e.offsetX, e.offsetY);
-            };
-
-            canvas.onmousemove = function(e) {
-                if (isDrawing) {
-                    ctx.lineTo(e.offsetX, e.offsetY);
-                    ctx.stroke();
-                }
-            };
-
-            canvas.onmouseup = function() {
-                isDrawing = false;
-            };
-        }
-
-        function changeColor() {
-            let color = prompt("Wähle eine Farbe (z.B. rot, blau, grün):", "schwarz");
-            if (color) {
-                ctx.strokeStyle = color;
-            }
+        function flipCard(cardElement) {
+            cardElement.classList.toggle("flipped");
         }
 
         function addCard() {
-            alert("Neue Karteikarte hinzufügen! (Diese Funktion kann mit LocalStorage erweitert werden)");
+            const question = prompt("Gib die Frage ein:");
+            const answer = prompt("Gib die Antwort ein:");
+            if (question && answer) {
+                cardData.push({ question, answer });
+                saveCards();
+                renderCards();
+            }
         }
+
+        function editCard(index) {
+            const newQuestion = prompt("Neue Frage eingeben:", cardData[index].question);
+            const newAnswer = prompt("Neue Antwort eingeben:", cardData[index].answer);
+            if (newQuestion && newAnswer) {
+                cardData[index] = { question: newQuestion, answer: newAnswer };
+                saveCards();
+                renderCards();
+            }
+        }
+
+        function deleteCard(index) {
+            if (confirm("Willst du diese Karteikarte wirklich löschen?")) {
+                cardData.splice(index, 1);
+                saveCards();
+                renderCards();
+            }
+        }
+
+        renderCards();
     </script>
+
 </body>
 </html>
