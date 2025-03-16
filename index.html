@@ -3,154 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Karteikarten</title>
+    <title>Karteikarten App</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
         }
+        
         .container {
-            display: flex;
-            gap: 20px;
-        }
-        .sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .card-container {
             position: relative;
+            text-align: center;
+        }
+
+        .karteikarte {
             width: 400px;
-            min-height: 250px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        #flashcard {
-            background: white;
-            width: 100%;
-            min-height: 100%;
+            min-height: 200px;
+            max-width: 600px;
+            max-height: 800px;
+            background-color: white;
             border: 2px solid black;
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s ease-in-out;
+            overflow: hidden;
+            resize: both;
+        }
+
+        .buttons {
+            margin-top: 10px;
+        }
+
+        .color-buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .color-buttons button {
+            width: 30px;
+            height: 30px;
+            margin: 5px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .problem-button {
+            background-color: red;
+            color: white;
+            font-weight: bold;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .sidebar {
+            position: absolute;
+            left: -50px;
+            top: 50%;
+            transform: translateY(-50%);
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            transition: all 0.3s ease;
-            resize: both;
-            overflow: hidden;
         }
-        #drawCanvas {
+
+        .sidebar button {
+            width: 30px;
+            height: 30px;
+            margin: 3px;
+            border: none;
+            cursor: pointer;
+            background-color: lightgray;
+        }
+
+        canvas {
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
-        .toolbar {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        button {
-            padding: 10px;
-            border: none;
-            background: #ccc;
-            cursor: pointer;
+            border-radius: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="sidebar">
-            <div id="cardNumbers"></div>
-        </div>
-        <div class="card-container">
-            <div id="flashcard">
-                <div id="question">Frage eingeben...</div>
-                <div id="answer">Antwort hier...</div>
-            </div>
-            <canvas id="drawCanvas"></canvas>
-        </div>
-        <div class="toolbar">
-            <button onclick="toggleDrawMode()">🖊️ Zeichnen</button>
-            <button onclick="clearDrawing()">❌ Radieren</button>
-            <button onclick="changeColor()">🎨 Farbe</button>
-            <button onclick="toggleProblem()">🅿️ Problem</button>
-            <button onclick="addImage()">📷 Bild</button>
-            <select id="strokeSize" onchange="changeStrokeSize()">
-                <option value="2">Dünn</option>
-                <option value="5">Mittel</option>
-                <option value="10">Dick</option>
-            </select>
-        </div>
+
+<div class="container">
+    <div class="karteikarte" id="karteikarte">
+        <canvas id="zeichenbereich"></canvas>
+        <p id="frage">Frage</p>
+        <p id="antwort" style="display: none;">Antwort</p>
     </div>
-    <script>
-        let drawMode = false;
-        let ctx = document.getElementById('drawCanvas').getContext('2d');
-        let drawing = false;
-        let strokeSize = 2;
 
-        function toggleDrawMode() {
-            drawMode = !drawMode;
-            document.getElementById('drawCanvas').style.pointerEvents = drawMode ? 'auto' : 'none';
+    <div class="buttons">
+        <button onclick="toggleAntwort()">Antwort zeigen</button>
+        <button class="problem-button" onclick="markAsProblem()">P</button>
+    </div>
+
+    <div class="color-buttons">
+        <button style="background-color: red;" onclick="changeColor('red')"></button>
+        <button style="background-color: blue;" onclick="changeColor('blue')"></button>
+        <button style="background-color: green;" onclick="changeColor('green')"></button>
+        <button style="background-color: yellow;" onclick="changeColor('yellow')"></button>
+        <button style="background-color: white; border: 1px solid black;" onclick="changeColor('white')"></button>
+        <button style="background-color: gray;" onclick="changeColor('gray')"></button>
+    </div>
+
+    <div class="sidebar">
+        <button onclick="prevCard()">◀</button>
+        <button onclick="nextCard()">▶</button>
+    </div>
+</div>
+
+<script>
+    let showAnswer = false;
+
+    function toggleAntwort() {
+        let frage = document.getElementById("frage");
+        let antwort = document.getElementById("antwort");
+
+        if (showAnswer) {
+            frage.style.display = "block";
+            antwort.style.display = "none";
+        } else {
+            frage.style.display = "none";
+            antwort.style.display = "block";
         }
+        showAnswer = !showAnswer;
+    }
 
-        function changeStrokeSize() {
-            strokeSize = document.getElementById('strokeSize').value;
-        }
+    function changeColor(color) {
+        let card = document.getElementById("karteikarte");
+        card.style.backgroundColor = color;
+    }
 
-        document.getElementById('drawCanvas').addEventListener('mousedown', function (e) {
-            if (!drawMode) return;
-            drawing = true;
-            ctx.beginPath();
-            ctx.lineWidth = strokeSize;
-            ctx.moveTo(e.offsetX, e.offsetY);
-        });
+    function markAsProblem() {
+        let card = document.getElementById("karteikarte");
+        card.style.borderTop = "5px solid red";
+    }
 
-        document.getElementById('drawCanvas').addEventListener('mousemove', function (e) {
-            if (!drawing) return;
-            ctx.lineTo(e.offsetX, e.offsetY);
-            ctx.stroke();
-        });
+    function prevCard() {
+        alert("Vorherige Karte");
+    }
 
-        document.addEventListener('mouseup', function () {
-            drawing = false;
-        });
+    function nextCard() {
+        alert("Nächste Karte");
+    }
 
-        function clearDrawing() {
-            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-        }
+    let canvas = document.getElementById("zeichenbereich");
+    let ctx = canvas.getContext("2d");
+    let drawing = false;
+    let erasing = false;
+    let lineWidth = 2;
 
-        function changeColor() {
-            let colors = ['white', 'gray', 'red', 'blue', 'yellow', 'green'];
-            let newColor = prompt("Wähle eine Farbe: weiß, grau, rot, blau, gelb, grün");
-            if (colors.includes(newColor)) {
-                document.getElementById('flashcard').style.background = newColor;
-            } else {
-                alert("Farbe nicht verfügbar.");
-            }
-        }
+    canvas.width = 400;
+    canvas.height = 200;
 
-        function toggleProblem() {
-            document.getElementById('flashcard').style.borderTop = "5px solid red";
-        }
+    function startDrawing(event) {
+        drawing = true;
+        ctx.beginPath();
+        ctx.moveTo(event.offsetX, event.offsetY);
+    }
 
-        function addImage() {
-            let imgURL = prompt("Gib die Bild-URL ein:");
-            if (imgURL) {
-                let img = new Image();
-                img.src = imgURL;
-                img.style.width = "100%";
-                img.style.height = "auto";
-                document.getElementById('flashcard').appendChild(img);
-            }
-        }
-    </script>
+    function draw(event) {
+        if (!drawing) return;
+        ctx.lineTo(event.offsetX, event.offsetY);
+        ctx.strokeStyle = erasing ? "white" : "black";
+        ctx.lineWidth = lineWidth;
+        ctx.stroke();
+    }
+
+    function stopDrawing() {
+        drawing = false;
+    }
+
+    function toggleErase() {
+        erasing = !erasing;
+    }
+
+    function changeLineWidth(size) {
+        lineWidth = size;
+    }
+
+    canvas.addEventListener("mousedown", startDrawing);
+    canvas.addEventListener("mousemove", draw);
+    canvas.addEventListener("mouseup", stopDrawing);
+</script>
+
 </body>
 </html>
