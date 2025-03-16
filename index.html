@@ -9,192 +9,202 @@
             font-family: Arial, sans-serif;
             text-align: center;
         }
-        #karte {
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .headline {
+            font-size: 24px;
+            font-weight: bold;
+            color: #8A1D40;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            position: relative;
             width: auto;
             min-width: 300px;
             max-width: 600px;
+            height: auto;
             min-height: 150px;
-            padding: 20px;
-            border-radius: 10px;
+            max-height: 400px;
             background: white;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            position: relative;
-            display: inline-block;
-            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            overflow: auto;
+            resize: both;
         }
-        .btn {
-            padding: 10px;
-            margin: 5px;
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .button {
+            padding: 10px 15px;
             border: none;
-            cursor: pointer;
             border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
             color: white;
         }
-        .btn-bearbeiten { background: #900C3F; }
-        .btn-bild { background: #5C2D91; }
-        .btn-zeichnen { background: #E74C3C; }
-        .btn-farbe { background: #F39C12; }
-        .btn-plus { background: green; font-size: 24px; border-radius: 50%; width: 50px; height: 50px; }
-        .bewertung { background: gray; }
+
+        .btn-edit { background: #8A1D40; }
+        .btn-image { background: #555; }
+        .btn-draw { background: #D81B60; }
+        .btn-color { background: #E65100; }
+        .btn-wrong { background: #D32F2F; }
+        .btn-hard { background: #F57C00; }
+        .btn-good { background: #388E3C; }
+        .btn-easy { background: #0097A7; }
+        
+        .btn-add {
+            position: absolute;
+            left: -50px;
+            background: #4CAF50;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 24px;
+            color: white;
+            line-height: 40px;
+        }
+
         canvas {
             position: absolute;
             top: 0;
             left: 0;
-        }
-        img {
-            max-width: 100%;
-            position: absolute;
-            cursor: grab;
+            border-radius: 10px;
         }
     </style>
 </head>
 <body>
+    <div class="container">
+        <div class="headline">Heute: <span id="progress">1/1</span></div>
+        
+        <div class="card-container" style="position: relative;">
+            <button class="btn-add" onclick="addCard()">+</button>
+            <div class="card" contenteditable="true" id="card">
+                <canvas id="canvas"></canvas>
+                <p>Wann besteht ein Anspruch des Verkäufers auf Rückübereignung des Pkw?</p>
+            </div>
+        </div>
 
-    <h1>Heute: <span id="anzahl">0/0</span></h1>
+        <div class="button-group">
+            <button class="button btn-edit" onclick="editCard()">✏ Bearbeiten</button>
+            <button class="button btn-image" onclick="addImage()">📷 Bild hinzufügen</button>
+            <button class="button btn-draw" onclick="startDrawing()">✍ Zeichnen</button>
+            <button class="button btn-color" onclick="changeColor()">🎨 Farbe</button>
+        </div>
 
-    <button class="btn btn-plus" onclick="neueKarte()">+</button>
-
-    <div id="karte" contenteditable="true" oninput="speichern()">
-        <canvas id="zeichenFlaeche"></canvas>
+        <div class="button-group">
+            <button class="button btn-wrong">Falsch</button>
+            <button class="button btn-hard">Mühsam</button>
+            <button class="button btn-good">Gut</button>
+            <button class="button btn-easy">Einfach</button>
+        </div>
     </div>
 
-    <br>
-
-    <button class="btn btn-bearbeiten" onclick="bearbeiten()">✏️ Bearbeiten</button>
-    <button class="btn btn-bild" onclick="bildHinzufuegen()">📷 Bild hinzufügen</button>
-    <button class="btn btn-zeichnen" onclick="zeichnen()">✍️ Zeichnen</button>
-    <button class="btn btn-farbe" onclick="farbeWaehlen()">🎨 Farbe</button>
-
-    <br><br>
-
-    <button class="btn bewertung" onclick="bewerten('falsch')">Falsch</button>
-    <button class="btn bewertung" onclick="bewerten('mühsam')">Mühsam</button>
-    <button class="btn bewertung" onclick="bewerten('gut')">Gut</button>
-    <button class="btn bewertung" onclick="bewerten('einfach')">Einfach</button>
-
-    <input type="color" id="farbPicker" style="display:none;" onchange="farbeSetzen(this.value)">
-
+    <input type="file" id="fileInput" style="display: none;" onchange="handleImage(event)">
+    
     <script>
-        let karten = JSON.parse(localStorage.getItem('karten')) || [];
-        let aktuelleKarte = 0;
-        let zeichnenAktiv = false;
-        let zeichnung = document.getElementById("zeichenFlaeche");
-        let ctx = zeichnung.getContext("2d");
+        let isDrawing = false;
+        let ctx;
+        let imgElement;
 
-        function speichern() {
-            karten[aktuelleKarte] = document.getElementById("karte").innerHTML;
-            localStorage.setItem('karten', JSON.stringify(karten));
+        function editCard() {
+            let card = document.getElementById("card");
+            card.contentEditable = true;
+            card.focus();
         }
 
-        function bearbeiten() {
-            let karte = document.getElementById("karte");
-            karte.contentEditable = true;
-            karte.focus();
+        function addImage() {
+            document.getElementById("fileInput").click();
         }
 
-        function bildHinzufuegen() {
-            let input = document.createElement("input");
-            input.type = "file";
-            input.accept = "image/*";
-            input.onchange = function (e) {
+        function handleImage(event) {
+            let file = event.target.files[0];
+            if (file) {
                 let reader = new FileReader();
-                reader.onload = function (event) {
-                    let img = document.createElement("img");
-                    img.src = event.target.result;
-                    img.style.width = "100px";
-                    img.style.height = "auto";
-                    img.draggable = true;
-                    img.ondragstart = function (event) {
-                        event.dataTransfer.setData("text/plain", null);
-                        img.style.position = "absolute";
-                    };
-                    img.onmousedown = function (event) {
-                        let shiftX = event.clientX - img.getBoundingClientRect().left;
-                        let shiftY = event.clientY - img.getBoundingClientRect().top;
-
-                        function moveAt(pageX, pageY) {
-                            img.style.left = pageX - shiftX + 'px';
-                            img.style.top = pageY - shiftY + 'px';
-                        }
-
-                        function onMouseMove(event) {
-                            moveAt(event.pageX, event.pageY);
-                        }
-
-                        document.addEventListener('mousemove', onMouseMove);
-
-                        img.onmouseup = function () {
-                            document.removeEventListener('mousemove', onMouseMove);
-                            img.onmouseup = null;
-                        };
-                    };
-                    img.ondblclick = function () {
-                        img.remove();
-                    };
-                    document.getElementById("karte").appendChild(img);
-                    speichern();
+                reader.onload = function(e) {
+                    if (imgElement) {
+                        imgElement.remove();
+                    }
+                    imgElement = document.createElement("img");
+                    imgElement.src = e.target.result;
+                    imgElement.style.maxWidth = "100%";
+                    imgElement.style.position = "absolute";
+                    imgElement.style.left = "10px";
+                    imgElement.style.top = "10px";
+                    imgElement.style.cursor = "move";
+                    imgElement.setAttribute("draggable", "true");
+                    imgElement.ondragstart = dragStart;
+                    document.querySelector(".card").appendChild(imgElement);
                 };
-                reader.readAsDataURL(e.target.files[0]);
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function dragStart(event) {
+            event.dataTransfer.setData("text/plain", null);
+            let img = event.target;
+            document.onmousemove = function(e) {
+                img.style.left = e.pageX - img.width / 2 + "px";
+                img.style.top = e.pageY - img.height / 2 + "px";
             };
-            input.click();
+            document.onmouseup = function() {
+                document.onmousemove = null;
+                document.onmouseup = null;
+            };
         }
 
-        function zeichnen() {
-            zeichnenAktiv = !zeichnenAktiv;
-            if (zeichnenAktiv) {
-                zeichnung.width = document.getElementById("karte").offsetWidth;
-                zeichnung.height = document.getElementById("karte").offsetHeight;
-                zeichnung.style.display = "block";
+        function startDrawing() {
+            let canvas = document.getElementById("canvas");
+            let card = document.querySelector(".card");
 
-                zeichnung.onmousedown = function (event) {
-                    ctx.beginPath();
-                    ctx.moveTo(event.offsetX, event.offsetY);
+            canvas.width = card.clientWidth;
+            canvas.height = card.clientHeight;
+            canvas.style.position = "absolute";
+            canvas.style.top = "0";
+            canvas.style.left = "0";
 
-                    zeichnung.onmousemove = function (event) {
-                        ctx.lineTo(event.offsetX, event.offsetY);
-                        ctx.stroke();
-                    };
-                };
+            ctx = canvas.getContext("2d");
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = 2;
 
-                zeichnung.onmouseup = function () {
-                    zeichnung.onmousemove = null;
-                };
-            } else {
-                zeichnung.style.display = "none";
+            canvas.onmousedown = function(e) {
+                isDrawing = true;
+                ctx.beginPath();
+                ctx.moveTo(e.offsetX, e.offsetY);
+            };
+
+            canvas.onmousemove = function(e) {
+                if (isDrawing) {
+                    ctx.lineTo(e.offsetX, e.offsetY);
+                    ctx.stroke();
+                }
+            };
+
+            canvas.onmouseup = function() {
+                isDrawing = false;
+            };
+        }
+
+        function changeColor() {
+            let color = prompt("Wähle eine Farbe (z.B. rot, blau, grün):", "schwarz");
+            if (color) {
+                ctx.strokeStyle = color;
             }
         }
 
-        function farbeWaehlen() {
-            document.getElementById("farbPicker").click();
+        function addCard() {
+            alert("Neue Karteikarte hinzufügen! (Diese Funktion kann mit LocalStorage erweitert werden)");
         }
-
-        function farbeSetzen(farbe) {
-            ctx.strokeStyle = farbe;
-        }
-
-        function neueKarte() {
-            karten.push("");
-            aktuelleKarte = karten.length - 1;
-            document.getElementById("karte").innerHTML = "";
-            speichern();
-            updateAnzahl();
-        }
-
-        function bewerten(level) {
-            alert("Bewertung: " + level);
-        }
-
-        function updateAnzahl() {
-            document.getElementById("anzahl").innerText = (aktuelleKarte + 1) + "/" + karten.length;
-        }
-
-        window.onload = function () {
-            if (karten.length > 0) {
-                document.getElementById("karte").innerHTML = karten[0];
-            }
-            updateAnzahl();
-        };
     </script>
-
 </body>
 </html>
