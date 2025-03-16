@@ -7,7 +7,8 @@
   <style>
     /* Globales Styling */
     * {
-      margin: 0; padding: 0;
+      margin: 0;
+      padding: 0;
       box-sizing: border-box;
       font-family: Arial, sans-serif;
     }
@@ -22,9 +23,11 @@
       text-align: center;
       margin-bottom: 20px;
     }
-    header h2 { color: #972D54; }
-    
-    /* Main Container */
+    header h2 {
+      color: #972D54;
+    }
+
+    /* Main Container: Plus-Button links, Kartenbereich in der Mitte, Side-Buttons rechts */
     .main-container {
       display: flex;
       align-items: flex-start;
@@ -41,52 +44,86 @@
       cursor: pointer;
       align-self: center;
     }
-    
-    /* Karteikarte */
+
+    /* Wrapper für Karteikarte mit dezenten horizontalen Hilfslinien */
     .card-wrapper {
       position: relative;
+      display: inline-block;
+      /* Minimale Breite lassen wir, damit es nicht zu klein wird */
       min-width: 400px;
       margin-bottom: 20px;
+
+      /* Hilfslinien-Hintergrund */
       background-image: repeating-linear-gradient(
-          to bottom,
-          transparent, transparent 19px,
-          rgba(0,0,0,0.1) 19px, rgba(0,0,0,0.1) 20px
+        to bottom,
+        transparent,
+        transparent 19px,
+        rgba(0,0,0,0.1) 19px,
+        rgba(0,0,0,0.1) 20px
       );
     }
+
+    /* Flexible Karte mit innerem Container für den Flip-Effekt */
     .card {
-      width: 100%;
+      /* Wichtig: Dynamisch, damit viel Text hineinpasst */
+      width: auto;
+      min-width: 400px;
       min-height: 300px;
+      max-width: 800px;    /* Maximalbreite, damit es nicht unendlich breit wird */
+      max-height: 1000px;  /* Maximalhöhe, damit es nicht zu groß wird */
       position: relative;
       border-radius: 8px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       background-color: #fff;
-      overflow: auto;
+      overflow: auto; /* Scrollbalken, falls sehr viel Text */
     }
+
     .card-inner {
+      position: relative;
       width: 100%;
       height: 100%;
       transition: transform 0.6s;
       transform-style: preserve-3d;
     }
-    .card.flip .card-inner { transform: rotateY(180deg); }
+    .card.flip .card-inner {
+      transform: rotateY(180deg);
+    }
+
     .card-face {
       position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
       min-height: 300px;
       padding: 20px;
       border-radius: 8px;
       backface-visibility: hidden;
-      white-space: pre-line;
-      text-align: left;
+      white-space: pre-wrap;  /* Zeilenumbrüche erhalten */
+      word-wrap: break-word;   /* Lange Wörter umbrechen */
       font-size: 1.2rem;
     }
-    .card-front { background-color: #fff; }
+    .card-front {
+      background-color: #fff;
+    }
     .card-back {
       background-color: #f9f9f9;
       transform: rotateY(180deg);
+      /* Hilfslinien-Hintergrund auf Rückseite */
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent,
+        transparent 19px,
+        rgba(0,0,0,0.1) 19px,
+        rgba(0,0,0,0.1) 20px
+      );
     }
-    
-    /* Side-Buttons */
+
+    /* Inhalte */
+    #frontQuestion, #backAnswer {
+      text-align: left;
+    }
+
+    /* Side-Buttons (rechts neben der Karte) */
     .side-buttons {
       position: absolute;
       top: 10px;
@@ -96,117 +133,607 @@
       gap: 10px;
     }
     .side-buttons button {
-      padding: 8px;
+      padding: 8px 12px;
       border: none;
       border-radius: 4px;
       background-color: #972D54;
       color: #fff;
       cursor: pointer;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
     }
-    
-    /* Bottom-Buttons */
+    .side-buttons button:hover {
+      opacity: 0.9;
+    }
+
+    /* Bottom-Buttons (unter der Karte) */
     .bottom-buttons {
-      display: none;
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      gap: 10px;
       justify-content: space-between;
       margin-top: 10px;
     }
-    
-    /* Overlays */
+    .bottom-buttons button {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+      color: #fff;
+    }
+    .btn-falsch {
+      background-color: #e74c3c;
+    }
+    .btn-muehsam {
+      background-color: #f39c12;
+      color: #000;
+    }
+    .btn-gut {
+      background-color: #2ecc71;
+    }
+    .btn-einfach {
+      background-color: #1abc9c;
+    }
+    .btn-edit {
+      background-color: #8e44ad;
+    }
+
+    /* Overlays (standardmäßig ausgeblendet, erscheinen bei Klick) */
     .overlay {
       display: none;
       position: fixed;
-      top: 50%; left: 50%;
+      top: 50%;
+      left: 50%;
       transform: translate(-50%, -50%);
       background: #fff;
       padding: 15px;
       border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
       z-index: 1000;
       max-width: 600px;
       width: 90%;
     }
-    .overlay.active { display: block; }
-    
-    /* Zeichnen */
+    .overlay.active {
+      display: block;
+    }
+    .overlay h3 {
+      margin-bottom: 10px;
+    }
+    .overlay input[type="text"],
+    .overlay textarea {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .overlay button {
+      padding: 10px;
+      background-color: #972D54;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+      margin-right: 5px;
+    }
+
+    /* Bearbeitungs-Overlay (WYSIWYG Editor) */
+    .edit-overlay {
+    }
+    .toolbar {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .toolbar .format-btn {
+      padding: 5px 8px;
+      cursor: pointer;
+      border: 1px solid #ccc;
+      background: #f5f5dc; /* beige */
+      border-radius: 4px;
+      color: #800080;      /* lila */
+    }
+    .toolbar .format-btn:hover {
+      background: #eee;
+    }
+    .color-palette,
+    .highlight-palette {
+      display: flex;
+      gap: 5px;
+      margin-top: 5px;
+    }
+    .color-palette button,
+    .highlight-palette button {
+      width: 25px;
+      height: 25px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #editContent {
+      min-height: 150px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 8px;
+      overflow-y: auto;
+      margin-top: 10px;
+      background: #fff;
+    }
+    .edit-overlay .buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+    .edit-overlay-button {
+      padding: 8px 12px;
+      border: none;
+      border-radius:4px;
+      cursor: pointer;
+      color: #fff;
+    }
+    .save {
+      background-color: #28a745;
+    }
+    .close {
+      background-color: #dc3545;
+    }
+
+    /* Zeichnen-Overlay (direkt über der Karte) */
     .draw-overlay {
       display: none;
       position: fixed;
-      top: 50%; left: 50%;
+      top: 50%;
+      left: 50%;
       transform: translate(-50%, -50%);
       width: 90%;
       max-width: 600px;
       background: #fff;
       padding: 15px;
       border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
       z-index: 2000;
+    }
+    .draw-overlay h3 {
+      margin-bottom: 10px;
     }
     #drawCanvas {
       width: 100%;
       height: 300px;
       border: 1px solid #ccc;
+      background: #fff;
+      cursor: crosshair;
+      margin-bottom: 10px;
+    }
+    .draw-overlay .draw-controls button {
+      margin-right: 5px;
+    }
+    .draw-overlay .buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+    .color-palette-draw button {
+      width: 30px;
+      height: 30px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      margin-right: 5px;
     }
   </style>
 </head>
 <body>
+<header>
+  <h2>Heute: <span id="currentCardIndex">0</span>/<span id="totalCards">0</span></h2>
+</header>
 
-  <header>
-    <h2>Heute: <span id="currentCardIndex">0</span>/<span id="totalCards">0</span></h2>
-  </header>
+<div class="main-container">
+  <!-- Plus-Button zum Hinzufügen neuer Karten (links) -->
+  <button class="add-card-button" onclick="addCard()">+</button>
 
-  <div class="main-container">
-    <button class="add-card-button" onclick="addCard()">+</button>
-    
-    <div class="card-wrapper" id="cardWrapper">
-      <div class="card" id="card" onclick="flipCard()">
-        <div class="card-inner">
-          <div class="card-face card-front">
-            <div id="frontQuestion">Frage wird geladen...</div>
-          </div>
-          <div class="card-face card-back">
-            <div id="backAnswer">Antwort wird geladen...</div>
+  <!-- Wrapper für Karte -->
+  <div class="card-wrapper" id="cardWrapper">
+    <div class="card" id="card" onclick="flipCard()">
+      <!-- Innerer Container für den Flip-Effekt -->
+      <div class="card-inner">
+        <!-- Vorderseite (Frage) -->
+        <div class="card-face card-front">
+          <div id="frontQuestion">Frage wird geladen...</div>
+        </div>
+        <!-- Rückseite (Antwort) -->
+        <div class="card-face card-back">
+          <div id="backAnswer">Antwort wird geladen...</div>
+
+          <!-- Zeichnen-Overlay direkt in der Karte -->
+          <div class="draw-overlay" id="drawOverlay">
+            <canvas id="drawCanvas"></canvas>
+            <div class="draw-controls">
+              <button onclick="setDrawingColor('#000')">Schwarz</button>
+              <button onclick="setDrawingColor('red')">Rot</button>
+              <button onclick="setDrawingColor('green')">Grün</button>
+              <button onclick="setDrawingColor('blue')">Blau</button>
+              <button onclick="eraseDrawing()">Radieren</button>
+              <button onclick="saveDrawing()">Übernehmen</button>
+            </div>
           </div>
         </div>
       </div>
-      
-      <div class="side-buttons">
-        <button onclick="openEditOverlay()">✏️ Bearbeiten</button>
-        <button onclick="openOverlay('imageOverlay')">📷 Bild</button>
-        <button onclick="toggleDrawOverlay()">✍️ Zeichnen</button>
-        <button onclick="openOverlay('colorOverlay')">🎨 Farbe</button>
-      </div>
+    </div>
+
+    <!-- Side-Buttons (rechts neben der Karte) -->
+    <div class="side-buttons">
+      <button onclick="openEditOverlay()">✏️ Bearbeiten</button>
+      <button onclick="openOverlay('imageOverlay')">📷 Bild hinzufügen</button>
+      <button onclick="toggleDrawOverlay()">✍️ Zeichnen</button>
+      <button onclick="openOverlay('colorOverlay')">🎨 Farbe</button>
     </div>
   </div>
+</div>
 
-  <script>
-    let cards = [{ question: "Was ist JavaScript?", answer: "Eine Programmiersprache für Webentwicklung." }];
-    let currentIndex = 0;
+<!-- Bottom-Buttons (unter der Karte, erscheinen, wenn die Karte umgedreht ist) -->
+<div class="bottom-buttons" id="bottomButtons" style="display:none;">
+  <button class="btn-falsch" onclick="rateCard('Falsch')">Falsch</button>
+  <button class="btn-muehsam" onclick="rateCard('Mühsam')">Mühsam</button>
+  <button class="btn-gut" onclick="rateCard('Gut')">Gut</button>
+  <button class="btn-einfach" onclick="rateCard('Einfach')">Einfach</button>
+  <button class="btn-edit" onclick="openEditOverlay()">Bearbeiten</button>
+</div>
 
-    function flipCard() {
-      document.getElementById("card").classList.toggle("flip");
+<!-- Bearbeitungs-Overlay (WYSIWYG-Editor) -->
+<div id="editOverlay" class="overlay">
+  <h3>Karte bearbeiten</h3>
+  <div class="toolbar">
+    <button class="format-btn" onclick="execCmd('bold')"><b>B</b></button>
+    <button class="format-btn" onclick="execCmd('italic')"><i>I</i></button>
+    <button class="format-btn" onclick="execCmd('underline')"><u>U</u></button>
+    <button class="format-btn" onclick="execCmd('justifyLeft')">Links</button>
+    <button class="format-btn" onclick="execCmd('justifyCenter')">Mitte</button>
+    <button class="format-btn" onclick="execCmd('justifyRight')">Rechts</button>
+    <button class="format-btn" onclick="changeFontSize()">Größe</button>
+  </div>
+  <div class="color-palette">
+    <button style="background:#000;" onclick="execCmdColor('#000')"></button>
+    <button style="background:red;" onclick="execCmdColor('red')"></button>
+    <button style="background:green;" onclick="execCmdColor('green')"></button>
+    <button style="background:blue;" onclick="execCmdColor('blue')"></button>
+    <button style="background:#8e44ad;" onclick="execCmdColor('#8e44ad')"></button>
+  </div>
+  <div class="highlight-palette">
+    <button style="background:yellow;" onclick="execCmdHighlight('yellow')"></button>
+    <button style="background:#f39c12;" onclick="execCmdHighlight('#f39c12')"></button>
+    <button style="background:#9b59b6;" onclick="execCmdHighlight('#9b59b6')"></button>
+    <button style="background:#bdc3c7;" onclick="execCmdHighlight('#bdc3c7')"></button>
+    <button style="background:pink;" onclick="execCmdHighlight('pink')"></button>
+  </div>
+  <div id="editContent" contenteditable="true"
+       style="border:1px solid #ccc; border-radius:4px; padding:8px; margin-top:10px; min-height:150px;">
+  </div>
+  <div class="buttons">
+    <button class="save" onclick="saveEdit()">Speichern</button>
+    <button class="close" onclick="closeEditOverlay()">Abbrechen</button>
+  </div>
+</div>
+
+<!-- Bild-Overlay -->
+<div id="imageOverlay" class="overlay">
+  <h3>Bild hinzufügen</h3>
+  <input type="file" id="fileInput" accept="image/*">
+  <button onclick="uploadImage()">Hochladen</button>
+  <button onclick="closeOverlay('imageOverlay')">Abbrechen</button>
+</div>
+
+<!-- Farb-Overlay (Pastellfarben für Karteikarte) -->
+<div id="colorOverlay" class="overlay">
+  <h3>Karteikartenfarbe ändern</h3>
+  <div class="color-palette">
+    <button style="background:#ffdddd;" onclick="setCardColor('#ffdddd')"></button>
+    <button style="background:#fff4dd;" onclick="setCardColor('#fff4dd')"></button>
+    <button style="background:#ddffdd;" onclick="setCardColor('#ddffdd')"></button>
+    <button style="background:#ddeeff;" onclick="setCardColor('#ddeeff')"></button>
+    <button style="background:#ffddee;" onclick="setCardColor('#ffddee')"></button>
+  </div>
+  <button onclick="closeOverlay('colorOverlay')">Schließen</button>
+</div>
+
+<!-- Zeichnen-Overlay (separat, wird per toggleDrawOverlay angezeigt) -->
+<!-- (Wir haben oben schon ein drawOverlay, daher entweder doppelt oder auskommentieren) -->
+
+<!-- Versteckter Datei-Upload für Bild -->
+<input type="file" id="hiddenImageUpload" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
+
+<script>
+  // ---------------------------
+  // Beispiel-Karteikarten
+  // ---------------------------
+  let cards = [
+    {
+      question: "Was ist JavaScript?",
+      answer: "JavaScript ist eine Programmiersprache für Webentwicklung.\n\nWeitere Details:\n- Dynamische Inhalte\n- Interaktive Webseiten"
     }
+  ];
+  let currentIndex = 0;
 
-    function openEditOverlay() {
-      let newAnswer = prompt("Neue Antwort eingeben:", cards[currentIndex].answer);
-      if (newAnswer !== null) {
-        cards[currentIndex].answer = newAnswer;
-        document.getElementById("backAnswer").innerHTML = newAnswer.replace(/\n/g, "<br>");
+  // Beim Laden der Seite
+  document.addEventListener("DOMContentLoaded", () => {
+    // 1. Aus localStorage laden (falls vorhanden)
+    loadCardsFromLocalStorage();
+    // 2. Erste Karte anzeigen
+    if(cards.length > 0) {
+      loadCard(currentIndex);
+    }
+    // Zeichen-Canvas vorbereiten
+    setupDrawCanvas();
+    updateCardCounter();
+  });
+
+  // -----------------------------------------------------------
+  // Karte laden (Frage + Antwort ins DOM schreiben)
+  // -----------------------------------------------------------
+  function loadCard(index) {
+    if(!cards[index]) return;
+    document.getElementById("frontQuestion").innerHTML = cards[index].question.replace(/\n/g, "<br>");
+    document.getElementById("backAnswer").innerHTML   = cards[index].answer.replace(/\n/g, "<br>");
+    updateCardCounter();
+  }
+
+  function updateCardCounter() {
+    document.getElementById("currentCardIndex").textContent = (currentIndex+1).toString();
+    document.getElementById("totalCards").textContent       = cards.length.toString();
+  }
+
+  // -----------------------------------------------------------
+  // Flip-Effekt
+  // -----------------------------------------------------------
+  function flipCard() {
+    document.getElementById("card").classList.toggle("flip");
+    updateBottomButtons();
+  }
+
+  function updateBottomButtons() {
+    const cardEl = document.getElementById("card");
+    const bottom = document.getElementById("bottomButtons");
+    // Buttons nur anzeigen, wenn die Karte umgedreht ist
+    bottom.style.display = cardEl.classList.contains("flip") ? "flex" : "none";
+  }
+
+  // -----------------------------------------------------------
+  // Karte bewerten (Buttons unten)
+  // -----------------------------------------------------------
+  function rateCard(rating) {
+    // Ganz einfache Logik:
+    // - "Falsch" => nichts weiter, könnte z.B. Häufigkeit erhöhen
+    // - "Mühsam" => könnte mittlere Häufigkeit bedeuten
+    // - "Gut"    => könnte geringe Häufigkeit bedeuten
+    // - "Einfach" => Karte rauswerfen
+    if(rating === "Einfach") {
+      // Karte entfernen
+      cards.splice(currentIndex, 1);
+      if(cards.length === 0) {
+        alert("Keine Karten mehr! Du hast alle als 'Einfach' entfernt.");
+        saveCardsToLocalStorage();
+        return;
       }
-    }
-
-    function addCard() {
-      let question = prompt("Neue Frage:");
-      let answer = prompt("Neue Antwort:");
-      if (question && answer) {
-        cards.push({ question, answer });
+      // Falls wir die letzte Karte gelöscht haben, Index anpassen
+      if(currentIndex >= cards.length) {
         currentIndex = cards.length - 1;
-        document.getElementById("frontQuestion").innerHTML = question;
-        document.getElementById("backAnswer").innerHTML = answer;
+      }
+    } else {
+      // Hier könntest du z.B. eine Wiederhol-Logik einbauen.
+      // Für die Demo gehen wir einfach zur nächsten Karte.
+      currentIndex++;
+      if(currentIndex >= cards.length) {
+        currentIndex = 0;
       }
     }
 
-    function toggleDrawOverlay() {
-      alert("Zeichnen-Funktion hier einfügen!");
-    }
-  </script>
+    // Flip zurück, damit die neue Karte auf der Vorderseite ist
+    document.getElementById("card").classList.remove("flip");
+    updateBottomButtons();
+    loadCard(currentIndex);
+    saveCardsToLocalStorage();
+  }
 
+  // -----------------------------------------------------------
+  // Overlays öffnen & schließen
+  // -----------------------------------------------------------
+  function openOverlay(id) {
+    document.getElementById(id).classList.add("active");
+  }
+  function closeOverlay(id) {
+    document.getElementById(id).classList.remove("active");
+  }
+
+  // -----------------------------------------------------------
+  // Bearbeitungs-Overlay (WYSIWYG Editor)
+  // -----------------------------------------------------------
+  function openEditOverlay() {
+    openOverlay("editOverlay");
+    // Den aktuellen Antwort-Text ins Editor-Feld laden
+    document.getElementById("editContent").innerHTML = cards[currentIndex].answer;
+  }
+  function closeEditOverlay() {
+    closeOverlay("editOverlay");
+  }
+  function saveEdit() {
+    let newHTML = document.getElementById("editContent").innerHTML;
+    cards[currentIndex].answer = newHTML;
+    loadCard(currentIndex);
+    closeEditOverlay();
+    saveCardsToLocalStorage();
+  }
+
+  // execCommand-Befehle für WYSIWYG
+  function execCmd(cmd) {
+    document.execCommand(cmd, false, null);
+  }
+  function changeFontSize() {
+    let size = prompt("Schriftgröße (z.B. 18px):", "18px");
+    if(!size) return;
+    // Workaround, um execCommand mit fontSize zu nutzen
+    document.execCommand("fontSize", false, "5");
+    let fonts = document.getElementById("editContent").querySelectorAll("font[size='5']");
+    fonts.forEach(f => {
+      f.removeAttribute("size");
+      f.style.fontSize = size;
+    });
+  }
+  function execCmdColor(btnColor) {
+    document.execCommand("foreColor", false, btnColor);
+  }
+  function execCmdHighlight(btnColor) {
+    document.execCommand("hiliteColor", false, btnColor);
+  }
+
+  // -----------------------------------------------------------
+  // Bild-Overlay: Hochladen
+  // -----------------------------------------------------------
+  function uploadImage() {
+    triggerImageUpload();
+  }
+  function triggerImageUpload() {
+    document.getElementById("hiddenImageUpload").click();
+  }
+  function handleImageUpload(event) {
+    const file = event.target.files[0];
+    if(file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        let imgHTML = `<br><img src="${e.target.result}"
+                           style="max-width:100%; cursor:pointer;"
+                           ondblclick="resizeImage(this)"
+                           onclick="if(confirm('Bild entfernen?')) { this.remove(); }"><br>`;
+        cards[currentIndex].answer += imgHTML;
+        loadCard(currentIndex);
+        saveCardsToLocalStorage();
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+  function resizeImage(img) {
+    let newWidth = prompt("Neue Breite in Prozent (z.B. 50%):", "50%");
+    if(newWidth) {
+      img.style.maxWidth = newWidth;
+    }
+  }
+
+  // -----------------------------------------------------------
+  // Farb-Overlay: Kartenfarbe ändern
+  // -----------------------------------------------------------
+  function setCardColor(color) {
+    // Hintergrundfarbe des Wrappers ändern
+    document.getElementById("cardWrapper").style.backgroundColor = color;
+    closeOverlay('colorOverlay');
+  }
+
+  // -----------------------------------------------------------
+  // Zeichnen-Overlay
+  // -----------------------------------------------------------
+  function toggleDrawOverlay() {
+    const overlay = document.getElementById("drawOverlay");
+    if(overlay.classList.contains("active")) {
+      closeDrawOverlay();
+    } else {
+      openDrawOverlay();
+    }
+  }
+  function openDrawOverlay() {
+    openOverlay("drawOverlay");
+    const canvas = document.getElementById("drawCanvas");
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    setupDrawCanvas();
+  }
+  function closeDrawOverlay() {
+    closeOverlay("drawOverlay");
+  }
+
+  let currentDrawingColor = "#000";
+  function setupDrawCanvas() {
+    const canvas = document.getElementById("drawCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // Größe an Container anpassen
+    let rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+
+    let drawing = false;
+    canvas.addEventListener("mousedown", () => {
+      drawing = true;
+      ctx.beginPath();
+    });
+    canvas.addEventListener("mouseup", () => {
+      drawing = false;
+    });
+    canvas.addEventListener("mousemove", function(e) {
+      if(!drawing) return;
+      let r = canvas.getBoundingClientRect();
+      let x = e.clientX - r.left;
+      let y = e.clientY - r.top;
+      ctx.lineWidth = 3;
+      ctx.lineCap = "round";
+      ctx.strokeStyle = currentDrawingColor;
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    });
+  }
+  function setDrawingColor(color) {
+    currentDrawingColor = color;
+  }
+  function eraseDrawing() {
+    const canvas = document.getElementById("drawCanvas");
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  function saveDrawing() {
+    const canvas = document.getElementById("drawCanvas");
+    const dataURL = canvas.toDataURL("image/png");
+    let imgHTML = `<br><img src="${dataURL}"
+                       style="max-width:100%; cursor:pointer;"
+                       ondblclick="resizeImage(this)"
+                       onclick="if(confirm('Zeichnung entfernen?')) { this.remove(); }"><br>`;
+    cards[currentIndex].answer += imgHTML;
+    loadCard(currentIndex);
+    closeDrawOverlay();
+    saveCardsToLocalStorage();
+  }
+
+  // -----------------------------------------------------------
+  // Neue Karte hinzufügen (Plus-Button)
+  // -----------------------------------------------------------
+  function addCard() {
+    let newQuestion = prompt("Neue Frage:");
+    let newAnswer   = prompt("Neue Antwort:");
+    if(newQuestion && newAnswer) {
+      // Neue Karte hinter der aktuellen einfügen
+      cards.splice(currentIndex+1, 0, {
+        question: newQuestion,
+        answer: newAnswer
+      });
+      currentIndex++;
+      loadCard(currentIndex);
+      saveCardsToLocalStorage();
+    }
+  }
+
+  // -----------------------------------------------------------
+  // Lokale Speicherung mit localStorage
+  // -----------------------------------------------------------
+  function saveCardsToLocalStorage() {
+    localStorage.setItem("myJuraCards", JSON.stringify(cards));
+  }
+  function loadCardsFromLocalStorage() {
+    let data = localStorage.getItem("myJuraCards");
+    if(data) {
+      cards = JSON.parse(data);
+    }
+  }
+</script>
 </body>
 </html>
