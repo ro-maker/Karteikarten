@@ -4,8 +4,10 @@
   <meta charset="UTF-8">
   <title>Jura-Karteikarten</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <!-- Font Awesome für Icons -->
+  
+  <!-- Font Awesome für Icons (neu) -->
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  
   <style>
     /* Globales Styling */
     * {
@@ -89,7 +91,7 @@
     /* Die Karte selbst – dynamisch in Breite und Höhe */
     .card {
       position: relative;
-      min-width: 650px; /* leicht breiter gemacht */
+      min-width: 600px;
       width: auto;
       max-width: 90vw; /* Maximale Breite entspricht ca. einer Seite */
       min-height: 300px;
@@ -101,16 +103,6 @@
       overflow: auto; /* Falls Inhalt größer als die Karte wird, scrollt der Inhalt */
       cursor: pointer;
       transition: border-top 0.3s;
-    }
-    /* Neues Overlay für Muster (Linien / Punkte) */
-    #patternOverlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      display: none;
     }
     /* Innere Karte: passt sich in der Höhe dynamisch an */
     .card-inner {
@@ -176,6 +168,7 @@
       color: #fff;
       cursor: pointer;
       font-size: 0.85rem;
+      /* Neu: Icons + Text */
       display: flex;
       align-items: center;
       gap: 5px;
@@ -323,8 +316,6 @@
               <div id="backAnswer">Antwort wird geladen...</div>
             </div>
           </div>
-          <!-- Muster-Overlay (für Linien / Punkte) -->
-          <div id="patternOverlay"></div>
           <!-- Zeichnen-Overlay (transparent, damit Text sichtbar bleibt) -->
           <div class="draw-overlay" id="drawOverlay" onclick="event.stopPropagation();">
             <div class="draw-toolbar">
@@ -342,12 +333,12 @@
         </div>
         <!-- Side-Buttons: erscheinen neben der Karte -->
         <div class="side-buttons-container">
+          <!-- Neu: Icons in den Buttons -->
           <button onclick="openEditOverlay();"><i class="fas fa-edit"></i> Bearbeiten</button>
           <button onclick="openOverlay('imageOverlay');"><i class="fas fa-image"></i> Bild</button>
           <button onclick="toggleDrawOverlay();"><i class="fas fa-pencil-alt"></i> Zeichnen</button>
           <button onclick="openOverlay('colorOverlay');"><i class="fas fa-palette"></i> Farbe</button>
           <button onclick="toggleProblem();"><i class="fas fa-exclamation-triangle"></i> P</button>
-          <button onclick="togglePattern();"><i class="fas fa-th"></i> Muster</button>
         </div>
       </div>
       <!-- Untere Bewertungsbuttons -->
@@ -427,8 +418,6 @@
       }
     ];
     let currentIndex = 0;
-    // Für Muster-Funktion: 0 = kein Muster, 1 = Linien, 2 = Punkte (ohne Linien)
-    let patternState = 0;
 
     document.addEventListener("DOMContentLoaded", () => {
       loadCardsFromLocalStorage();
@@ -438,6 +427,7 @@
       updateCardCounter();
       updateCardSize();
     });
+
     function loadCard(index) {
       if(!cards[index]) return;
       currentIndex = index;
@@ -454,18 +444,24 @@
       renderCardList();
       updateCardSize();
     }
+
     function updateCardCounter() {
       document.getElementById("currentCardIndex").textContent = currentIndex + 1;
       document.getElementById("totalCards").textContent = cards.length;
     }
+
     function flipCard() {
       document.getElementById("card").classList.toggle("flip");
       updateBottomButtons();
+      // Nach dem Flip die Größe neu anpassen
       setTimeout(updateCardSize, 300);
     }
+
     function updateBottomButtons() {
-      document.getElementById("bottomButtons").style.display = "flex";
+      const bottom = document.getElementById("bottomButtons");
+      bottom.style.display = "flex";
     }
+
     function rateCard(rating) {
       if(rating === "Einfach") {
         cards.splice(currentIndex, 1);
@@ -481,25 +477,42 @@
       loadCard(currentIndex);
       saveCardsToLocalStorage();
     }
+
     function openOverlay(id) {
       document.getElementById(id).classList.add("active");
     }
     function closeOverlay(id) {
       document.getElementById(id).classList.remove("active");
     }
+
+    // Neu: front/back bearbeiten
     function openEditOverlay() {
       openOverlay("editOverlay");
-      document.getElementById("editContent").innerHTML = cards[currentIndex].answer;
+      // Prüfen, ob die Karte geflippt ist:
+      const isFlipped = document.getElementById("card").classList.contains("flip");
+      if(isFlipped) {
+        // Bearbeite die Rückseite (answer)
+        document.getElementById("editContent").innerHTML = cards[currentIndex].answer;
+      } else {
+        // Bearbeite die Vorderseite (question)
+        document.getElementById("editContent").innerHTML = cards[currentIndex].question;
+      }
     }
     function closeEditOverlay() {
       closeOverlay("editOverlay");
     }
     function saveEdit() {
-      cards[currentIndex].answer = document.getElementById("editContent").innerHTML;
+      const isFlipped = document.getElementById("card").classList.contains("flip");
+      if(isFlipped) {
+        cards[currentIndex].answer = document.getElementById("editContent").innerHTML;
+      } else {
+        cards[currentIndex].question = document.getElementById("editContent").innerHTML;
+      }
       loadCard(currentIndex);
       closeEditOverlay();
       saveCardsToLocalStorage();
     }
+
     function execCmd(cmd) {
       document.execCommand(cmd, false, null);
     }
@@ -519,6 +532,7 @@
     function execCmdHighlight(btnColor) {
       document.execCommand("hiliteColor", false, btnColor);
     }
+
     function uploadImage() {
       document.getElementById("hiddenImageUpload").click();
     }
@@ -538,20 +552,24 @@
       let newWidth = prompt("Neue Breite in Prozent (z.B. 50%):", "50%");
       if(newWidth) img.style.maxWidth = newWidth;
     }
+
     function setCardColor(color) {
       cards[currentIndex].color = color;
       loadCard(currentIndex);
       saveCardsToLocalStorage();
       closeOverlay("colorOverlay");
     }
+
     function toggleProblem() {
       cards[currentIndex].problem = !cards[currentIndex].problem;
       loadCard(currentIndex);
       saveCardsToLocalStorage();
     }
+
     let isDrawing = false;
     let currentDrawingColor = "#000";
     let currentLineWidth = 3;
+
     function setupCanvasDrawing() {
       const canvas = document.getElementById("drawCanvas");
       const ctx = canvas.getContext("2d");
@@ -581,6 +599,7 @@
         e.preventDefault();
       });
     }
+
     function getCanvasPos(canvas, e) {
       let rect = canvas.getBoundingClientRect();
       return {
@@ -588,17 +607,21 @@
         y: e.clientY - rect.top
       };
     }
+
     function setDrawingColor(color) {
       currentDrawingColor = color;
     }
+
     function changeLineWidth(val) {
       currentLineWidth = parseInt(val, 10);
     }
+
     function eraseDrawing() {
       const canvas = document.getElementById("drawCanvas");
       const ctx = canvas.getContext("2d");
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
+
     function toggleDrawOverlay() {
       const overlay = document.getElementById("drawOverlay");
       if(overlay.classList.contains("active")) {
@@ -612,6 +635,7 @@
         overlay.classList.add("active");
       }
     }
+
     function saveDrawing() {
       const canvas = document.getElementById("drawCanvas");
       const dataURL = canvas.toDataURL("image/png");
@@ -625,6 +649,7 @@
       saveCardsToLocalStorage();
       toggleDrawOverlay();
     }
+
     function addCard() {
       let newQuestion = prompt("Neue Frage:");
       let newAnswer   = prompt("Neue Antwort:");
@@ -640,16 +665,19 @@
         saveCardsToLocalStorage();
       }
     }
+
     function saveCardsToLocalStorage() {
       localStorage.setItem("myJuraCards", JSON.stringify(cards));
       renderCardList();
     }
+
     function loadCardsFromLocalStorage() {
       let data = localStorage.getItem("myJuraCards");
       if(data) {
         cards = JSON.parse(data);
       }
     }
+
     function renderCardList() {
       const listDiv = document.getElementById("cardList");
       listDiv.innerHTML = "";
@@ -661,6 +689,7 @@
         listDiv.appendChild(btn);
       });
     }
+
     // Diese Funktion misst den Inhalt der aktiven Kartenfläche (front oder back)
     // und passt die Höhe der äußeren .card an – bis maximal 90vh.
     function updateCardSize() {
@@ -668,6 +697,7 @@
       const visibleFace = card.classList.contains('flip')
         ? document.getElementById('cardBackFace')
         : document.getElementById('cardFrontFace');
+      // Klon erstellen, um den natürlichen Inhalt zu messen:
       const clone = visibleFace.cloneNode(true);
       clone.style.position = 'static';
       clone.style.visibility = 'hidden';
@@ -676,27 +706,12 @@
       card.appendChild(clone);
       const contentHeight = clone.offsetHeight;
       card.removeChild(clone);
+      // Etwas extra Raum einrechnen, falls nötig (z.B. für Ränder)
       const maxHeight = window.innerHeight * 0.9;
       card.style.height = Math.min(contentHeight, maxHeight) + 'px';
     }
-    window.addEventListener('resize', updateCardSize);
 
-    // Neue Funktion für Muster: 0 = kein Muster, 1 = Linien, 2 = Punkte (ohne Linien)
-    function togglePattern() {
-      const overlay = document.getElementById("patternOverlay");
-      patternState = (patternState + 1) % 3; // 0,1,2
-      if(patternState === 0) {
-        overlay.style.display = "none";
-      } else if(patternState === 1) {
-        overlay.style.display = "block";
-        overlay.style.background = "linear-gradient(to bottom, rgba(0,0,0,0.2) 1px, transparent 1px)";
-        overlay.style.backgroundSize = "100% 20px";
-      } else if(patternState === 2) {
-        overlay.style.display = "block";
-        overlay.style.background = "radial-gradient(circle, rgba(0,0,0,0.2) 1px, transparent 1px)";
-        overlay.style.backgroundSize = "20px 20px";
-      }
-    }
+    window.addEventListener('resize', updateCardSize);
   </script>
 </body>
 </html>
