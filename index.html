@@ -91,20 +91,19 @@
       width: auto;
       max-width: 90vw; /* Maximale Breite entspricht ca. einer Seite */
       min-height: 300px;
-      height: auto;
+      /* height wird per JS gesetzt */
       max-height: 90vh; /* Maximale Höhe entspricht ca. einer Seite */
       border: 2px solid #ccc;
       border-radius: 8px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      overflow: auto; /* Ermöglicht Scrollen, wenn der Inhalt zu groß wird */
+      overflow: auto; /* Falls Inhalt größer als die Karte wird, scrollt der Inhalt */
       cursor: pointer;
       transition: border-top 0.3s;
     }
-    /* Innere Karte: Höhe passt sich dynamisch an */
+    /* Innere Karte: passt sich in der Höhe dynamisch an */
     .card-inner {
       width: 100%;
-      height: auto;
-      min-height: 100%;
+      /* Höhe wird von den absolut positionierten Kartenflächen nicht automatisch ermittelt */
       transition: transform 0.6s;
       transform-style: preserve-3d;
     }
@@ -325,7 +324,7 @@
             <canvas id="drawCanvas"></canvas>
           </div>
         </div>
-        <!-- Side-Buttons: erscheinen nun neben der Karte -->
+        <!-- Side-Buttons: erscheinen neben der Karte -->
         <div class="side-buttons-container">
           <button onclick="openEditOverlay();">Bearbeiten</button>
           <button onclick="openOverlay('imageOverlay');">Bild</button>
@@ -417,6 +416,7 @@
       renderCardList();
       setupCanvasDrawing();
       updateCardCounter();
+      updateCardSize();
     });
     function loadCard(index) {
       if(!cards[index]) return;
@@ -432,6 +432,7 @@
       updateBottomButtons();
       updateCardCounter();
       renderCardList();
+      updateCardSize();
     }
     function updateCardCounter() {
       document.getElementById("currentCardIndex").textContent = currentIndex + 1;
@@ -440,10 +441,12 @@
     function flipCard() {
       document.getElementById("card").classList.toggle("flip");
       updateBottomButtons();
+      // Nach dem Flip die Größe neu anpassen
+      setTimeout(updateCardSize, 300);
     }
     function updateBottomButtons() {
       const bottom = document.getElementById("bottomButtons");
-      bottom.style.display = document.getElementById("card").classList.contains("flip") ? "flex" : "flex";
+      bottom.style.display = "flex";
     }
     function rateCard(rating) {
       if(rating === "Einfach") {
@@ -640,6 +643,28 @@
         listDiv.appendChild(btn);
       });
     }
+    // Diese Funktion misst den Inhalt der aktiven Kartenfläche (front oder back)
+    // und passt die Höhe der äußeren .card an – bis maximal 90vh.
+    function updateCardSize() {
+      const card = document.getElementById('card');
+      const visibleFace = card.classList.contains('flip')
+        ? document.getElementById('cardBackFace')
+        : document.getElementById('cardFrontFace');
+      // Klon erstellen, um den natürlichen Inhalt zu messen:
+      const clone = visibleFace.cloneNode(true);
+      clone.style.position = 'static';
+      clone.style.visibility = 'hidden';
+      clone.style.height = 'auto';
+      clone.style.padding = getComputedStyle(visibleFace).padding;
+      card.appendChild(clone);
+      const contentHeight = clone.offsetHeight;
+      card.removeChild(clone);
+      // Etwas extra Raum einrechnen, falls nötig (z.B. für Ränder)
+      const newHeight = contentHeight;
+      const maxHeight = window.innerHeight * 0.9;
+      card.style.height = Math.min(newHeight, maxHeight) + 'px';
+    }
+    window.addEventListener('resize', updateCardSize);
   </script>
 </body>
 </html>
