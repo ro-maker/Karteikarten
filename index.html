@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <title>Jura-Karteikarten</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <!-- Font Awesome für Icons -->
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
   <style>
     /* Globales Styling */
     * {
@@ -87,7 +89,7 @@
     /* Die Karte selbst – dynamisch in Breite und Höhe */
     .card {
       position: relative;
-      min-width: 600px;
+      min-width: 650px; /* leicht breiter gemacht */
       width: auto;
       max-width: 90vw; /* Maximale Breite entspricht ca. einer Seite */
       min-height: 300px;
@@ -100,10 +102,19 @@
       cursor: pointer;
       transition: border-top 0.3s;
     }
+    /* Neues Overlay für Muster (Linien/Gitter/Punkte) */
+    #patternOverlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      display: none;
+    }
     /* Innere Karte: passt sich in der Höhe dynamisch an */
     .card-inner {
       width: 100%;
-      /* Höhe wird von den absolut positionierten Kartenflächen nicht automatisch ermittelt */
       transition: transform 0.6s;
       transform-style: preserve-3d;
     }
@@ -165,6 +176,9 @@
       color: #fff;
       cursor: pointer;
       font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
     }
     .side-buttons-container button:hover {
       opacity: 0.9;
@@ -309,6 +323,8 @@
               <div id="backAnswer">Antwort wird geladen...</div>
             </div>
           </div>
+          <!-- Muster-Overlay (für Linien, Gitter, Punkte) -->
+          <div id="patternOverlay"></div>
           <!-- Zeichnen-Overlay (transparent, damit Text sichtbar bleibt) -->
           <div class="draw-overlay" id="drawOverlay" onclick="event.stopPropagation();">
             <div class="draw-toolbar">
@@ -326,11 +342,12 @@
         </div>
         <!-- Side-Buttons: erscheinen neben der Karte -->
         <div class="side-buttons-container">
-          <button onclick="openEditOverlay();">Bearbeiten</button>
-          <button onclick="openOverlay('imageOverlay');">Bild</button>
-          <button onclick="toggleDrawOverlay();">Zeichnen</button>
-          <button onclick="openOverlay('colorOverlay');">Farbe</button>
-          <button onclick="toggleProblem();">P</button>
+          <button onclick="openEditOverlay();"><i class="fas fa-edit"></i> Bearbeiten</button>
+          <button onclick="openOverlay('imageOverlay');"><i class="fas fa-image"></i> Bild</button>
+          <button onclick="toggleDrawOverlay();"><i class="fas fa-pencil-alt"></i> Zeichnen</button>
+          <button onclick="openOverlay('colorOverlay');"><i class="fas fa-palette"></i> Farbe</button>
+          <button onclick="toggleProblem();"><i class="fas fa-exclamation-triangle"></i> P</button>
+          <button onclick="togglePattern();"><i class="fas fa-th"></i> Muster</button>
         </div>
       </div>
       <!-- Untere Bewertungsbuttons -->
@@ -410,6 +427,9 @@
       }
     ];
     let currentIndex = 0;
+    // Für Muster-Funktion
+    let patternState = 0; // 0: kein Muster, 1: Linien, 2: Gitter, 3: Punkte
+
     document.addEventListener("DOMContentLoaded", () => {
       loadCardsFromLocalStorage();
       if(cards.length > 0) loadCard(currentIndex);
@@ -441,12 +461,10 @@
     function flipCard() {
       document.getElementById("card").classList.toggle("flip");
       updateBottomButtons();
-      // Nach dem Flip die Größe neu anpassen
       setTimeout(updateCardSize, 300);
     }
     function updateBottomButtons() {
-      const bottom = document.getElementById("bottomButtons");
-      bottom.style.display = "flex";
+      document.getElementById("bottomButtons").style.display = "flex";
     }
     function rateCard(rating) {
       if(rating === "Einfach") {
@@ -650,7 +668,6 @@
       const visibleFace = card.classList.contains('flip')
         ? document.getElementById('cardBackFace')
         : document.getElementById('cardFrontFace');
-      // Klon erstellen, um den natürlichen Inhalt zu messen:
       const clone = visibleFace.cloneNode(true);
       clone.style.position = 'static';
       clone.style.visibility = 'hidden';
@@ -659,12 +676,31 @@
       card.appendChild(clone);
       const contentHeight = clone.offsetHeight;
       card.removeChild(clone);
-      // Etwas extra Raum einrechnen, falls nötig (z.B. für Ränder)
-      const newHeight = contentHeight;
       const maxHeight = window.innerHeight * 0.9;
-      card.style.height = Math.min(newHeight, maxHeight) + 'px';
+      card.style.height = Math.min(contentHeight, maxHeight) + 'px';
     }
     window.addEventListener('resize', updateCardSize);
+
+    // Neue Funktion für Muster: Linien / Gitter / Punkte
+    function togglePattern() {
+      const overlay = document.getElementById("patternOverlay");
+      patternState = (patternState + 1) % 4;
+      if(patternState === 0) {
+        overlay.style.display = "none";
+      } else if(patternState === 1) {
+        overlay.style.display = "block";
+        overlay.style.background = "linear-gradient(to bottom, rgba(0,0,0,0.2) 1px, transparent 1px)";
+        overlay.style.backgroundSize = "100% 20px";
+      } else if(patternState === 2) {
+        overlay.style.display = "block";
+        overlay.style.background = "linear-gradient(to right, rgba(0,0,0,0.2) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.2) 1px, transparent 1px)";
+        overlay.style.backgroundSize = "20px 20px";
+      } else if(patternState === 3) {
+        overlay.style.display = "block";
+        overlay.style.background = "radial-gradient(circle, rgba(0,0,0,0.2) 1px, transparent 1px)";
+        overlay.style.backgroundSize = "20px 20px";
+      }
+    }
   </script>
 </body>
 </html>
