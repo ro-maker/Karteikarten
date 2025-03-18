@@ -145,13 +145,13 @@
       font-size: 1.2rem;
       line-height: 20px;
       background-color: #f9f9f9;
-      /* Standard: Punkte (können per Muster-Button gewechselt werden) */
+      /* Standard: Subtile Punkte – dezent, damit Texte ordentlich erscheinen */
       background-image: repeating-linear-gradient(
         to bottom,
         transparent,
-        transparent 19px,
-        rgba(0,0,0,0.1) 19px,
-        rgba(0,0,0,0.1) 20px
+        transparent 29px,
+        rgba(0,0,0,0.05) 29px,
+        rgba(0,0,0,0.05) 30px
       );
       transform: rotateY(180deg);
       z-index: 1;
@@ -337,13 +337,12 @@
           <!-- Zeichnen-Overlay -->
           <div class="draw-overlay" id="drawOverlay" onclick="event.stopPropagation();">
             <div class="draw-toolbar">
-              <button onclick="setDrawingColor('#000')"><i class="fas fa-adjust"></i> Schwarz</button>
-              <button onclick="setDrawingColor('red')"><i class="fas fa-adjust"></i> Rot</button>
-              <button onclick="setDrawingColor('green')"><i class="fas fa-adjust"></i> Grün</button>
-              <button onclick="setDrawingColor('blue')"><i class="fas fa-adjust"></i> Blau</button>
+              <button onclick="setDrawingColor('#000')"><i class="fas fa-pen"></i> Schwarz</button>
+              <button onclick="setDrawingColor('red')"><i class="fas fa-pen"></i> Rot</button>
+              <button onclick="setDrawingColor('green')"><i class="fas fa-pen"></i> Grün</button>
+              <button onclick="setDrawingColor('blue')"><i class="fas fa-pen"></i> Blau</button>
               <input type="range" id="lineWidthRange" min="1" max="10" value="3" onchange="changeLineWidth(this.value)">
               <button onclick="eraseDrawing()"><i class="fas fa-eraser"></i> Radieren</button>
-              <!-- Neuer Button: Addieren -->
               <button onclick="addDrawing()"><i class="fas fa-plus"></i> Addieren</button>
               <button onclick="saveDrawing()"><i class="fas fa-save"></i> Speichern</button>
               <button onclick="toggleDrawOverlay()"><i class="fas fa-times"></i> X</button>
@@ -354,12 +353,14 @@
         <!-- Side-Buttons -->
         <div class="side-buttons-container">
           <button onclick="startInlineEdit();"><i class="fas fa-edit"></i> Bearbeiten</button>
-          <button onclick="openOverlay('imageOverlay');"><i class="fas fa-image"></i> Bild importieren</button>
+          <button onclick="openOverlay('imageOverlay');"><i class="fas fa-camera"></i> Bild importieren</button>
           <button onclick="toggleDrawOverlay();"><i class="fas fa-pencil-alt"></i> Zeichnen</button>
           <button onclick="openOverlay('colorOverlay');"><i class="fas fa-palette"></i> Farbe</button>
           <button onclick="toggleProblem();"><i class="fas fa-exclamation-triangle"></i> P</button>
-          <!-- Angepasster Muster-Button: Bei Klick wird das Format gewechselt -->
-          <button id="patternButton" onclick="cyclePattern();"><i class="fas fa-ellipsis-h"></i> Punkte</button>
+          <!-- Angepasster Muster-Button: Klick stoppt das Event-Bubbling -->
+          <button id="patternButton" onclick="event.stopPropagation(); cyclePattern();">
+            <i class="fas fa-ellipsis-h"></i> Punkte
+          </button>
         </div>
       </div>
       <!-- Inline-Edit Toolbar -->
@@ -428,7 +429,7 @@
   <input type="file" id="hiddenImageUpload" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
 
   <script>
-    // Karten-Daten – Standardmäßig mit 'dotted' als Muster (Punkte)
+    // Karten-Daten – Standardmäßig mit "dotted" (Punkte)
     let cards = [
       {
         question: "Was ist JavaScript?",
@@ -469,16 +470,16 @@
       // Muster einstellen
       if(c.pattern === 'lines') {
         document.getElementById("cardBackFace").style.backgroundImage = 
-          'repeating-linear-gradient(0deg, #ccc, #ccc 1px, transparent 1px, transparent 5px)';
+          "repeating-linear-gradient(0deg, transparent, transparent 29px, rgba(0,0,0,0.05) 29px, rgba(0,0,0,0.05) 30px)";
       } else if(c.pattern === 'grid') {
         document.getElementById("cardBackFace").style.backgroundImage = 
-          'linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%), linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%)';
-        document.getElementById("cardBackFace").style.backgroundSize = '20px 20px';
+          "linear-gradient(0deg, transparent 29px, rgba(0,0,0,0.05) 29px, rgba(0,0,0,0.05) 30px), linear-gradient(90deg, transparent 29px, rgba(0,0,0,0.05) 29px, rgba(0,0,0,0.05) 30px)";
+        document.getElementById("cardBackFace").style.backgroundSize = "30px 30px";
       } else if(c.pattern === 'dotted') {
         document.getElementById("cardBackFace").style.backgroundImage = 
-          'repeating-linear-gradient(to bottom, transparent, transparent 19px, rgba(0,0,0,0.1) 19px, rgba(0,0,0,0.1) 20px)';
+          "repeating-radial-gradient(circle, rgba(0,0,0,0.05) 0, rgba(0,0,0,0.05) 1px, transparent 1px, transparent 20px)";
       } else if(c.pattern === 'none') {
-        document.getElementById("cardBackFace").style.backgroundImage = 'none';
+        document.getElementById("cardBackFace").style.backgroundImage = "none";
       }
       
       const cardEl = document.getElementById("card");
@@ -489,7 +490,7 @@
       renderCardList();
       updateCardSize();
       updatePatternButton();
-      // Nach dem Laden: Bilder bearbeitbar machen (Drag & Drop)
+      // Bilder in der Karte bearbeitbar machen (Drag & Drop)
       makeImagesEditable();
     }
     function updateCardCounter() {
@@ -651,8 +652,8 @@
     }
 
     /* --- Muster-Funktionalität --- */
-    // Der Muster-Button (ohne Overlay) wechselt bei jedem Klick zum nächsten Muster:
-    // Reihenfolge: "lines" (Linien) -> "grid" (Gitter) -> "dotted" (Punkte) -> "none" (Kein Muster)
+    // Der Muster-Button wechselt bei jedem Klick in der Reihenfolge:
+    // "lines" (subtile Linien) -> "grid" (kariert) -> "dotted" (Punkte) -> "none" (kein Muster)
     function cyclePattern() {
       let patternOrder = ["lines", "grid", "dotted", "none"];
       let current = cards[currentIndex].pattern;
@@ -662,7 +663,7 @@
       loadCard(currentIndex);
       saveCardsToLocalStorage();
     }
-    // Aktualisiert den Inhalt des Muster-Buttons (Icon & Text) entsprechend dem aktuellen Muster
+    // Aktualisiert den Muster-Button (Icon und Text) gemäß dem aktuellen Zustand
     function updatePatternButton() {
       let btn = document.getElementById("patternButton");
       let pattern = cards[currentIndex].pattern;
@@ -763,7 +764,7 @@
       saveCardsToLocalStorage();
       toggleDrawOverlay();
     }
-    // Neuer Button "Addieren": Speichert die aktuelle Zeichnung, leert den Canvas, lässt das Overlay aber offen
+    // Neuer Button "Addieren": Speichert die aktuelle Zeichnung und leert den Canvas, ohne das Overlay zu schließen
     function addDrawing() {
       const canvas = document.getElementById("drawCanvas");
       const dataURL = canvas.toDataURL("image/png");
