@@ -120,7 +120,7 @@
       left: 0;
       width: 100%;
       min-height: 300px;
-      /* Etwas weniger Padding oben, damit der Text weiter oben beginnt */
+      /* Weniger Padding oben, damit der Text weiter oben beginnt */
       padding: 10px 20px 20px 20px;
       border-radius: 8px;
       backface-visibility: hidden;
@@ -145,7 +145,7 @@
       font-size: 1.2rem;
       line-height: 20px;
       background-color: #f9f9f9;
-      /* Standard: Punkte (kann später per Overlay geändert werden) */
+      /* Standard: Punkte (können per Muster-Button gewechselt werden) */
       background-image: repeating-linear-gradient(
         to bottom,
         transparent,
@@ -303,7 +303,7 @@
     .draw-toolbar input[type="range"] {
       width: 80px;
     }
-    /* Bilder, die im Karteninhalt eingefügt werden – jetzt bearbeitbar */
+    /* Bilder im Karteninhalt bearbeiten */
     .editable-image {
       cursor: move;
     }
@@ -337,16 +337,16 @@
           <!-- Zeichnen-Overlay -->
           <div class="draw-overlay" id="drawOverlay" onclick="event.stopPropagation();">
             <div class="draw-toolbar">
-              <button onclick="setDrawingColor('#000')">Schwarz</button>
-              <button onclick="setDrawingColor('red')">Rot</button>
-              <button onclick="setDrawingColor('green')">Grün</button>
-              <button onclick="setDrawingColor('blue')">Blau</button>
+              <button onclick="setDrawingColor('#000')"><i class="fas fa-adjust"></i> Schwarz</button>
+              <button onclick="setDrawingColor('red')"><i class="fas fa-adjust"></i> Rot</button>
+              <button onclick="setDrawingColor('green')"><i class="fas fa-adjust"></i> Grün</button>
+              <button onclick="setDrawingColor('blue')"><i class="fas fa-adjust"></i> Blau</button>
               <input type="range" id="lineWidthRange" min="1" max="10" value="3" onchange="changeLineWidth(this.value)">
-              <button onclick="eraseDrawing()">Radieren</button>
-              <!-- Neuer Button: Addieren (fügt das Aktuelle hinzu, ohne das Overlay zu schließen) -->
-              <button onclick="addDrawing()">Addieren</button>
-              <button onclick="saveDrawing()">Speichern</button>
-              <button onclick="toggleDrawOverlay()">X</button>
+              <button onclick="eraseDrawing()"><i class="fas fa-eraser"></i> Radieren</button>
+              <!-- Neuer Button: Addieren -->
+              <button onclick="addDrawing()"><i class="fas fa-plus"></i> Addieren</button>
+              <button onclick="saveDrawing()"><i class="fas fa-save"></i> Speichern</button>
+              <button onclick="toggleDrawOverlay()"><i class="fas fa-times"></i> X</button>
             </div>
             <canvas id="drawCanvas"></canvas>
           </div>
@@ -354,15 +354,15 @@
         <!-- Side-Buttons -->
         <div class="side-buttons-container">
           <button onclick="startInlineEdit();"><i class="fas fa-edit"></i> Bearbeiten</button>
-          <button onclick="openOverlay('imageOverlay');"><i class="fas fa-image"></i> Bild</button>
+          <button onclick="openOverlay('imageOverlay');"><i class="fas fa-image"></i> Bild importieren</button>
           <button onclick="toggleDrawOverlay();"><i class="fas fa-pencil-alt"></i> Zeichnen</button>
           <button onclick="openOverlay('colorOverlay');"><i class="fas fa-palette"></i> Farbe</button>
           <button onclick="toggleProblem();"><i class="fas fa-exclamation-triangle"></i> P</button>
-          <!-- Neuer Muster-Button -->
-          <button onclick="openOverlay('patternOverlay');"><i class="fas fa-th-large"></i> Muster</button>
+          <!-- Angepasster Muster-Button: Bei Klick wird das Format gewechselt -->
+          <button id="patternButton" onclick="cyclePattern();"><i class="fas fa-ellipsis-h"></i> Punkte</button>
         </div>
       </div>
-      <!-- Inline-Edit Toolbar (erscheint neben den Side-Buttons) -->
+      <!-- Inline-Edit Toolbar -->
       <div id="inlineEditToolbar" class="inline-edit-toolbar">
         <div class="toolbar">
           <button onclick="execCmd('bold')"><b>B</b></button>
@@ -425,19 +425,10 @@
     <button onclick="closeOverlay('colorOverlay')">Schließen</button>
   </div>
 
-  <!-- Muster-Overlay -->
-  <div id="patternOverlay" class="overlay">
-    <h3>Muster auswählen</h3>
-    <button onclick="setCardPattern('none')">Kein Muster</button>
-    <button onclick="setCardPattern('checkered')">Karierte</button>
-    <button onclick="setCardPattern('dotted')">Punkte</button>
-    <button onclick="closeOverlay('patternOverlay')">Abbrechen</button>
-  </div>
-
   <input type="file" id="hiddenImageUpload" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
 
   <script>
-    // Initialer Karten-Array (mit neuem Property "pattern"; Standard: 'dotted')
+    // Karten-Daten – Standardmäßig mit 'dotted' als Muster (Punkte)
     let cards = [
       {
         question: "Was ist JavaScript?",
@@ -475,16 +466,19 @@
       document.getElementById("cardFrontFace").style.backgroundColor = c.color;
       document.getElementById("cardBackFace").style.backgroundColor  = c.color;
       
-      // Muster (Pattern) einstellen
-      if(c.pattern === 'none') {
-        document.getElementById("cardBackFace").style.backgroundImage = 'none';
-      } else if(c.pattern === 'checkered') {
+      // Muster einstellen
+      if(c.pattern === 'lines') {
+        document.getElementById("cardBackFace").style.backgroundImage = 
+          'repeating-linear-gradient(0deg, #ccc, #ccc 1px, transparent 1px, transparent 5px)';
+      } else if(c.pattern === 'grid') {
         document.getElementById("cardBackFace").style.backgroundImage = 
           'linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%), linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%)';
         document.getElementById("cardBackFace").style.backgroundSize = '20px 20px';
       } else if(c.pattern === 'dotted') {
         document.getElementById("cardBackFace").style.backgroundImage = 
           'repeating-linear-gradient(to bottom, transparent, transparent 19px, rgba(0,0,0,0.1) 19px, rgba(0,0,0,0.1) 20px)';
+      } else if(c.pattern === 'none') {
+        document.getElementById("cardBackFace").style.backgroundImage = 'none';
       }
       
       const cardEl = document.getElementById("card");
@@ -494,7 +488,8 @@
       updateCardCounter();
       renderCardList();
       updateCardSize();
-      // Nach dem Laden: Bilder in der Karte bearbeitbar machen (draggable)
+      updatePatternButton();
+      // Nach dem Laden: Bilder bearbeitbar machen (Drag & Drop)
       makeImagesEditable();
     }
     function updateCardCounter() {
@@ -502,7 +497,6 @@
       document.getElementById("totalCards").textContent = cards.length;
     }
     function maybeFlip(e) {
-      // Nur flippen, wenn nicht im Edit-Modus
       if(!isEditing) {
         flipCard();
       } else {
@@ -534,14 +528,11 @@
         frontEl.contentEditable = "true";
         frontEl.focus();
       }
-      // Toolbar anzeigen (neben den Side-Buttons)
       document.getElementById("inlineEditToolbar").style.display = "block";
     }
     function finishInlineEdit() {
-      const frontEl = document.getElementById("frontQuestion");
-      const backEl  = document.getElementById("backAnswer");
-      frontEl.contentEditable = "false";
-      backEl.contentEditable = "false";
+      document.getElementById("frontQuestion").contentEditable = "false";
+      document.getElementById("backAnswer").contentEditable = "false";
       isEditing = false;
       editingSide = null;
       document.getElementById("inlineEditToolbar").style.display = "none";
@@ -578,8 +569,7 @@
       let size = prompt("Schriftgröße (z.B. 18px):", "18px");
       if(!size) return;
       document.execCommand("fontSize", false, "5");
-      let fonts = document.querySelectorAll("font[size='5']");
-      fonts.forEach(f => {
+      document.querySelectorAll("font[size='5']").forEach(f => {
         f.removeAttribute("size");
         f.style.fontSize = size;
       });
@@ -613,7 +603,7 @@
       saveCardsToLocalStorage();
     }
 
-    /* --- Overlays (Bild, Farbe, Muster) --- */
+    /* --- Overlays (Bild, Farbe) --- */
     function openOverlay(id) {
       document.getElementById(id).classList.add("active");
     }
@@ -628,7 +618,6 @@
       if(file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-          // Bild wird mit der Klasse "editable-image" eingefügt
           cards[currentIndex].answer += `<br><img src="${e.target.result}" class="editable-image" style="max-width:100%; cursor:move;" ondblclick="resizeImage(this)" onclick="if(confirm('Bild entfernen?')) { this.remove(); }"><br>`;
           loadCard(currentIndex);
           saveCardsToLocalStorage();
@@ -636,7 +625,7 @@
         reader.readAsDataURL(file);
       }
     }
-    // Neues resizeImage: Ermöglicht Größenänderung oder Zuschneiden
+    // Erweiterte Bildbearbeitung: Größenänderung oder Zuschneiden
     function resizeImage(img) {
       let action = prompt("Gib 'resize' ein, um die Größe zu ändern oder 'crop' zum Zuschneiden:", "resize");
       if(action === "resize") {
@@ -654,14 +643,53 @@
         }
       }
     }
-    // Muster-Funktion: Setzt das gewählte Muster und speichert es
-    function setCardPattern(pattern) {
-      cards[currentIndex].pattern = pattern;
+    function setCardColor(color) {
+      cards[currentIndex].color = color;
       loadCard(currentIndex);
       saveCardsToLocalStorage();
-      closeOverlay('patternOverlay');
+      closeOverlay('colorOverlay');
     }
-    // Zeichnen
+
+    /* --- Muster-Funktionalität --- */
+    // Der Muster-Button (ohne Overlay) wechselt bei jedem Klick zum nächsten Muster:
+    // Reihenfolge: "lines" (Linien) -> "grid" (Gitter) -> "dotted" (Punkte) -> "none" (Kein Muster)
+    function cyclePattern() {
+      let patternOrder = ["lines", "grid", "dotted", "none"];
+      let current = cards[currentIndex].pattern;
+      let index = patternOrder.indexOf(current);
+      let nextIndex = (index + 1) % patternOrder.length;
+      cards[currentIndex].pattern = patternOrder[nextIndex];
+      loadCard(currentIndex);
+      saveCardsToLocalStorage();
+    }
+    // Aktualisiert den Inhalt des Muster-Buttons (Icon & Text) entsprechend dem aktuellen Muster
+    function updatePatternButton() {
+      let btn = document.getElementById("patternButton");
+      let pattern = cards[currentIndex].pattern;
+      let iconClass = "";
+      let text = "";
+      switch(pattern) {
+        case "lines":
+          iconClass = "fas fa-grip-lines";
+          text = "Linien";
+          break;
+        case "grid":
+          iconClass = "fas fa-th";
+          text = "Gitter";
+          break;
+        case "dotted":
+          iconClass = "fas fa-ellipsis-h";
+          text = "Punkte";
+          break;
+        case "none":
+          iconClass = "fas fa-ban";
+          text = "Kein Muster";
+          break;
+      }
+      btn.innerHTML = `<i class="${iconClass}"></i> ${text}`;
+    }
+
+    /* --- Zeichnen --- */
     function setupCanvasDrawing() {
       const canvas = document.getElementById("drawCanvas");
       const ctx = canvas.getContext("2d");
@@ -722,7 +750,6 @@
         overlay.classList.add("active");
       }
     }
-    // Speichert die Zeichnung und schließt das Overlay (wie bisher)
     function saveDrawing() {
       const canvas = document.getElementById("drawCanvas");
       const dataURL = canvas.toDataURL("image/png");
@@ -736,7 +763,7 @@
       saveCardsToLocalStorage();
       toggleDrawOverlay();
     }
-    // Neuer Button "Addieren": Speichert die aktuelle Zeichnung, löscht den Canvas aber lässt das Overlay offen, um weitere Zeichnungen hinzuzufügen
+    // Neuer Button "Addieren": Speichert die aktuelle Zeichnung, leert den Canvas, lässt das Overlay aber offen
     function addDrawing() {
       const canvas = document.getElementById("drawCanvas");
       const dataURL = canvas.toDataURL("image/png");
@@ -809,7 +836,7 @@
     }
     window.addEventListener('resize', updateCardSize);
 
-    /* --- Bilder im Karteninhalt bearbeiten: Drag & Drop --- */
+    /* --- Bilder im Karteninhalt bearbeiten (Drag & Drop) --- */
     let dragItem = null;
     let offsetX = 0, offsetY = 0;
     function startDrag(e) {
