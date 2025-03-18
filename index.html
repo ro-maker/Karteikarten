@@ -145,13 +145,13 @@
       font-size: 1.2rem;
       line-height: 20px;
       background-color: #f9f9f9;
-      /* Standard: Subtile Punkte – dezent, damit Texte ordentlich erscheinen */
+      /* Standard: Subtile Punkte – hier etwas dunkler (0.15) */
       background-image: repeating-linear-gradient(
         to bottom,
         transparent,
         transparent 29px,
-        rgba(0,0,0,0.05) 29px,
-        rgba(0,0,0,0.05) 30px
+        rgba(0,0,0,0.15) 29px,
+        rgba(0,0,0,0.15) 30px
       );
       transform: rotateY(180deg);
       z-index: 1;
@@ -307,6 +307,10 @@
     .editable-image {
       cursor: move;
     }
+    /* Weiße Farbe in der Farbpalette sichtbar machen */
+    .color-palette button[style*="#ffffff"] {
+      border: 1px solid #999;
+    }
   </style>
 </head>
 <body>
@@ -357,9 +361,9 @@
           <button onclick="toggleDrawOverlay();"><i class="fas fa-pencil-alt"></i> Zeichnen</button>
           <button onclick="openOverlay('colorOverlay');"><i class="fas fa-palette"></i> Farbe</button>
           <button onclick="toggleProblem();"><i class="fas fa-exclamation-triangle"></i> P</button>
-          <!-- Angepasster Muster-Button: Klick stoppt das Event-Bubbling -->
-          <button id="patternButton" onclick="event.stopPropagation(); cyclePattern();">
-            <i class="fas fa-ellipsis-h"></i> Punkte
+          <!-- Muster-Button: Klick stoppt das Event, Text bleibt immer "Muster Boden" -->
+          <button id="patternButton" onclick="event.stopPropagation(); cyclePattern(); return false;">
+            <i class="fas fa-th"></i> Muster Boden
           </button>
         </div>
       </div>
@@ -467,17 +471,17 @@
       document.getElementById("cardFrontFace").style.backgroundColor = c.color;
       document.getElementById("cardBackFace").style.backgroundColor  = c.color;
       
-      // Muster einstellen
+      // Muster einstellen – hier werden die Gradients etwas dunkler (0.15)
       if(c.pattern === 'lines') {
         document.getElementById("cardBackFace").style.backgroundImage = 
-          "repeating-linear-gradient(0deg, transparent, transparent 29px, rgba(0,0,0,0.05) 29px, rgba(0,0,0,0.05) 30px)";
+          "repeating-linear-gradient(0deg, transparent, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px)";
       } else if(c.pattern === 'grid') {
         document.getElementById("cardBackFace").style.backgroundImage = 
-          "linear-gradient(0deg, transparent 29px, rgba(0,0,0,0.05) 29px, rgba(0,0,0,0.05) 30px), linear-gradient(90deg, transparent 29px, rgba(0,0,0,0.05) 29px, rgba(0,0,0,0.05) 30px)";
+          "linear-gradient(0deg, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px), linear-gradient(90deg, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px)";
         document.getElementById("cardBackFace").style.backgroundSize = "30px 30px";
       } else if(c.pattern === 'dotted') {
         document.getElementById("cardBackFace").style.backgroundImage = 
-          "repeating-radial-gradient(circle, rgba(0,0,0,0.05) 0, rgba(0,0,0,0.05) 1px, transparent 1px, transparent 20px)";
+          "repeating-radial-gradient(circle, rgba(0,0,0,0.15) 0, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 20px)";
       } else if(c.pattern === 'none') {
         document.getElementById("cardBackFace").style.backgroundImage = "none";
       }
@@ -652,8 +656,8 @@
     }
 
     /* --- Muster-Funktionalität --- */
-    // Der Muster-Button wechselt bei jedem Klick in der Reihenfolge:
-    // "lines" (subtile Linien) -> "grid" (kariert) -> "dotted" (Punkte) -> "none" (kein Muster)
+    // Beim Klick auf den Muster-Button wird intern zwischen den Zuständen "lines", "grid", "dotted" und "none" gewechselt.
+    // Der Buttontext bleibt dabei immer "Muster Boden".
     function cyclePattern() {
       let patternOrder = ["lines", "grid", "dotted", "none"];
       let current = cards[currentIndex].pattern;
@@ -662,32 +666,12 @@
       cards[currentIndex].pattern = patternOrder[nextIndex];
       loadCard(currentIndex);
       saveCardsToLocalStorage();
+      return false;
     }
-    // Aktualisiert den Muster-Button (Icon und Text) gemäß dem aktuellen Zustand
+    // Der Muster-Button zeigt immer denselben Text
     function updatePatternButton() {
       let btn = document.getElementById("patternButton");
-      let pattern = cards[currentIndex].pattern;
-      let iconClass = "";
-      let text = "";
-      switch(pattern) {
-        case "lines":
-          iconClass = "fas fa-grip-lines";
-          text = "Linien";
-          break;
-        case "grid":
-          iconClass = "fas fa-th";
-          text = "Gitter";
-          break;
-        case "dotted":
-          iconClass = "fas fa-ellipsis-h";
-          text = "Punkte";
-          break;
-        case "none":
-          iconClass = "fas fa-ban";
-          text = "Kein Muster";
-          break;
-      }
-      btn.innerHTML = `<i class="${iconClass}"></i> ${text}`;
+      btn.innerHTML = `<i class="fas fa-th"></i> Muster Boden`;
     }
 
     /* --- Zeichnen --- */
