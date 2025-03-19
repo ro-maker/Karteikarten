@@ -36,7 +36,8 @@
       gap: 20px;
       width: 100%;
       max-width: 1400px;
-      justify-content: center; /* Zentriert den Hauptcontainer */
+      justify-content: flex-start; /* Linksbündig, damit Plus und Nummern ganz links sind */
+      margin: 0 auto; /* zentriert den Hauptcontainer horizontal in der Seite */
     }
     /* Linke Spalte: Plus-Button & Liste */
     .left-panel {
@@ -45,6 +46,7 @@
       gap: 10px;
       align-items: center;
       min-width: 80px;
+      margin-right: 20px; 
     }
     .add-card-button {
       background-color: #28a745;
@@ -74,21 +76,21 @@
       background-color: #972D54;
       color: white;
     }
-    /* Kartenbereich */
+    /* Kartenwrapper */
     .card-wrapper {
       display: flex;
       flex-direction: column;
       align-items: center; /* Karte + Buttons in der Mitte */
       gap: 10px;
       width: 100%;
-      max-width: 900px; /* etwas breiterer Rahmen, falls nötig */
+      max-width: 900px; 
     }
     /* Container für Karte und Side-Buttons */
     .card-and-sides {
       display: flex;
       gap: 20px;
       align-items: flex-start;
-      justify-content: center; /* Karte & Buttons nebeneinander mittig */
+      justify-content: center;
       position: relative;
       width: 100%;
       max-width: 900px;
@@ -105,7 +107,6 @@
       border-radius: 8px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       overflow: auto;
-      /* Damit du beim Schreiben den Cursor setzen kannst */
       cursor: text;
       transition: border-top 0.3s;
     }
@@ -124,7 +125,6 @@
       left: 0;
       width: 100%;
       min-height: 300px;
-      /* Weniger Padding oben, damit der Text weiter oben beginnt */
       padding: 10px 20px 20px 20px;
       border-radius: 8px;
       backface-visibility: hidden;
@@ -147,9 +147,9 @@
       white-space: pre-wrap;
       word-wrap: break-word;
       font-size: 1.2rem;
-      line-height: 20px;
+      /* Zeilenhöhe 30px, damit Text exakt auf den Linien sitzt */
+      line-height: 30px;
       background-color: #f9f9f9;
-      /* Standard: Subtile Punkte – etwas dunkler (0.15) */
       background-image: repeating-linear-gradient(
         to bottom,
         transparent,
@@ -157,6 +157,8 @@
         rgba(0,0,0,0.15) 29px,
         rgba(0,0,0,0.15) 30px
       );
+      background-position: 0 0;
+      background-size: 30px 30px;
       transform: rotateY(180deg);
       z-index: 1;
     }
@@ -166,7 +168,7 @@
       flex-direction: column;
       gap: 5px;
       justify-content: flex-start;
-      align-items: center; /* Buttons nebeneinander zentriert in der Spalte */
+      align-items: center;
     }
     .side-buttons-container button {
       padding: 6px 10px;
@@ -179,13 +181,13 @@
       display: flex;
       align-items: center;
       gap: 5px;
-      width: 120px; /* Feste Breite, damit Icons + Text gleichmäßig aussehen */
+      width: 110px; /* Feste Breite, damit Icons + Text gleichmäßig aussehen */
       justify-content: center;
     }
     .side-buttons-container button:hover {
       opacity: 0.9;
     }
-    /* Inline-Edit Toolbar: erscheint unter den Side-Buttons */
+    /* Inline-Edit Toolbar */
     .inline-edit-toolbar {
       display: none;
       margin-top: 10px;
@@ -216,8 +218,9 @@
     .bottom-buttons {
       display: flex;
       gap: 10px;
-      justify-content: flex-start; /* "leicht nach links" */
-      width: 600px; /* gleiche Mindestbreite wie die Karte */
+      /* "Genau unter der Karteikarte" => selbe Breite wie .card (600px) */
+      width: 600px;
+      justify-content: flex-start; /* leicht nach links */
     }
     .bottom-buttons button {
       flex: 1;
@@ -375,7 +378,7 @@
         </div>
       </div>
 
-      <!-- Bewertungsbuttons (leicht nach links unter der Karte) -->
+      <!-- Bewertungsbuttons (links unter der Karte) -->
       <div class="bottom-buttons" id="bottomButtons">
         <button class="btn-falsch" onclick="rateCard('Falsch')">Falsch</button>
         <button class="btn-muehsam" onclick="rateCard('Mühsam')">Mühsam</button>
@@ -410,6 +413,7 @@
   <input type="file" id="hiddenImageUpload" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
 
   <script>
+    // Karten-Daten – Standardmäßig mit "dotted" (Punkte)
     let cards = [
       {
         question: "Was ist JavaScript?",
@@ -446,22 +450,22 @@
       document.getElementById("backAnswer").innerHTML   = c.answer.replace(/\n/g, "<br>");
       document.getElementById("cardFrontFace").style.backgroundColor = c.color;
       document.getElementById("cardBackFace").style.backgroundColor  = c.color;
-
+      
       // Muster einstellen
       if(c.pattern === 'lines') {
-        document.getElementById("cardBackFace").style.backgroundImage =
+        document.getElementById("cardBackFace").style.backgroundImage = 
           "repeating-linear-gradient(0deg, transparent, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px)";
       } else if(c.pattern === 'grid') {
-        document.getElementById("cardBackFace").style.backgroundImage =
+        document.getElementById("cardBackFace").style.backgroundImage = 
           "linear-gradient(0deg, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px), linear-gradient(90deg, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px)";
         document.getElementById("cardBackFace").style.backgroundSize = "30px 30px";
       } else if(c.pattern === 'dotted') {
-        document.getElementById("cardBackFace").style.backgroundImage =
+        document.getElementById("cardBackFace").style.backgroundImage = 
           "repeating-radial-gradient(circle, rgba(0,0,0,0.15) 0, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 20px)";
       } else if(c.pattern === 'none') {
         document.getElementById("cardBackFace").style.backgroundImage = "none";
       }
-
+      
       const cardEl = document.getElementById("card");
       cardEl.style.borderTop = c.problem ? "5px solid red" : "2px solid #ccc";
       cardEl.classList.remove("flip");
@@ -477,13 +481,9 @@
       document.getElementById("totalCards").textContent = cards.length;
     }
     function maybeFlip(e) {
-      // Falls der Klick in den Side-Buttons erfolgt, nichts tun
+      // Wenn Klick auf .side-buttons-container oder patternButton => nicht flippen
       if(e.target.closest('.side-buttons-container')) return;
-      if(!isEditing) {
-        flipCard();
-      } else {
-        e.stopPropagation();
-      }
+      flipCard();
     }
     function flipCard() {
       document.getElementById("card").classList.toggle("flip");
