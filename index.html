@@ -22,6 +22,9 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      /* Damit der Inhalt vertikal zentriert ist */
+      justify-content: center;
+      min-height: 100vh;
     }
     header {
       text-align: center;
@@ -30,15 +33,16 @@
     header h2 {
       color: #972D54;
     }
-    /* Hauptcontainer: Linke Liste + Kartenbereich */
+    /* Hauptcontainer */
     .main-container {
       display: flex;
+      flex-direction: column;
+      align-items: center;
       gap: 20px;
       width: 100%;
       max-width: 1400px;
-      justify-content: center;
     }
-    /* Linke Spalte: Plus-Button & Liste */
+    /* Linke Spalte (unverändert) */
     .left-panel {
       display: flex;
       flex-direction: column;
@@ -78,7 +82,7 @@
     .card-wrapper {
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: center;  /* Zentriert die Karteikarte und Buttons */
       gap: 10px;
       width: 100%;
     }
@@ -86,7 +90,8 @@
     .card-and-sides {
       display: flex;
       gap: 20px;
-      align-items: flex-start;
+      align-items: center;  /* Vertikal zentriert */
+      justify-content: center;
       position: relative;
     }
     /* Die Karte */
@@ -101,7 +106,6 @@
       border-radius: 8px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       overflow: auto;
-      /* Damit du beim Schreiben den Cursor setzen kannst */
       cursor: text;
       transition: border-top 0.3s;
     }
@@ -120,7 +124,6 @@
       left: 0;
       width: 100%;
       min-height: 300px;
-      /* Weniger Padding oben, damit der Text weiter oben beginnt */
       padding: 10px 20px 20px 20px;
       border-radius: 8px;
       backface-visibility: hidden;
@@ -143,9 +146,9 @@
       white-space: pre-wrap;
       word-wrap: break-word;
       font-size: 1.2rem;
-      line-height: 20px;
+      /* Zeilenhöhe angepasst auf 30px, damit Text auf den Linien sitzt */
+      line-height: 30px;
       background-color: #f9f9f9;
-      /* Standard: Subtile Punkte – hier etwas dunkler (0.15) */
       background-image: repeating-linear-gradient(
         to bottom,
         transparent,
@@ -153,15 +156,18 @@
         rgba(0,0,0,0.15) 29px,
         rgba(0,0,0,0.15) 30px
       );
+      background-position: 0 0;
+      background-size: 30px 30px;
       transform: rotateY(180deg);
       z-index: 1;
     }
-    /* Seitentasten */
+    /* Seitentasten (rechts neben der Karte) */
     .side-buttons-container {
       display: flex;
       flex-direction: column;
       gap: 5px;
-      justify-content: flex-start;
+      align-items: center;
+      justify-content: center;
     }
     .side-buttons-container button {
       padding: 6px 10px;
@@ -178,7 +184,7 @@
     .side-buttons-container button:hover {
       opacity: 0.9;
     }
-    /* Inline-Edit Toolbar: erscheint unter den Side-Buttons */
+    /* Inline-Edit Toolbar (unverändert) */
     .inline-edit-toolbar {
       display: none;
       margin-top: 10px;
@@ -205,11 +211,10 @@
       padding: 4px 8px;
       margin-right: 5px;
     }
-    /* Untere Bewertungsbuttons */
+    /* Bewertungsbuttons (unter der Karte, zentriert mit fester Breite) */
     .bottom-buttons {
-      min-width: 600px;
-      width: auto;
-      max-width: 90vw;
+      width: 600px;
+      margin: 0 auto;
       display: flex;
       gap: 10px;
       justify-content: space-between;
@@ -228,7 +233,7 @@
     .btn-muehsam { background-color: #f39c12; color: #000; }
     .btn-gut    { background-color: #2ecc71; }
     .btn-einfach { background-color: #1abc9c; }
-    /* Overlays */
+    /* Overlays (unverändert) */
     .overlay {
       display: none;
       position: fixed;
@@ -258,7 +263,7 @@
       border-radius: 4px;
       margin-right: 5px;
     }
-    /* Zeichnen-Overlay */
+    /* Zeichnen-Overlay (unverändert) */
     .draw-overlay {
       position: absolute;
       top: 0;
@@ -471,10 +476,11 @@
       document.getElementById("cardFrontFace").style.backgroundColor = c.color;
       document.getElementById("cardBackFace").style.backgroundColor  = c.color;
       
-      // Muster einstellen – hier werden die Gradients etwas dunkler (0.15)
+      // Muster einstellen
       if(c.pattern === 'lines') {
         document.getElementById("cardBackFace").style.backgroundImage = 
           "repeating-linear-gradient(0deg, transparent, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px)";
+        document.getElementById("cardBackFace").style.backgroundSize = "30px 30px";
       } else if(c.pattern === 'grid') {
         document.getElementById("cardBackFace").style.backgroundImage = 
           "linear-gradient(0deg, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px), linear-gradient(90deg, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px)";
@@ -482,6 +488,7 @@
       } else if(c.pattern === 'dotted') {
         document.getElementById("cardBackFace").style.backgroundImage = 
           "repeating-radial-gradient(circle, rgba(0,0,0,0.15) 0, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 20px)";
+        document.getElementById("cardBackFace").style.backgroundSize = "30px 30px";
       } else if(c.pattern === 'none') {
         document.getElementById("cardBackFace").style.backgroundImage = "none";
       }
@@ -502,6 +509,8 @@
       document.getElementById("totalCards").textContent = cards.length;
     }
     function maybeFlip(e) {
+      // Falls der Klick in den Side-Buttons erfolgt, nichts tun
+      if (e.target.closest('.side-buttons-container')) return;
       if(!isEditing) {
         flipCard();
       } else {
@@ -748,7 +757,7 @@
       saveCardsToLocalStorage();
       toggleDrawOverlay();
     }
-    // Neuer Button "Addieren": Speichert die aktuelle Zeichnung und leert den Canvas, ohne das Overlay zu schließen
+    // "Addieren": Speichert die aktuelle Zeichnung und leert den Canvas, ohne das Overlay zu schließen
     function addDrawing() {
       const canvas = document.getElementById("drawCanvas");
       const dataURL = canvas.toDataURL("image/png");
