@@ -22,9 +22,6 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      /* Damit der Inhalt vertikal zentriert ist */
-      justify-content: center;
-      min-height: 100vh;
     }
     header {
       text-align: center;
@@ -33,16 +30,15 @@
     header h2 {
       color: #972D54;
     }
-    /* Hauptcontainer */
+    /* Hauptcontainer: Linke Liste + Kartenbereich */
     .main-container {
       display: flex;
-      flex-direction: column;
-      align-items: center;
       gap: 20px;
       width: 100%;
       max-width: 1400px;
+      justify-content: center; /* Zentriert den Hauptcontainer */
     }
-    /* Linke Spalte (unverändert) */
+    /* Linke Spalte: Plus-Button & Liste */
     .left-panel {
       display: flex;
       flex-direction: column;
@@ -82,17 +78,20 @@
     .card-wrapper {
       display: flex;
       flex-direction: column;
-      align-items: center;  /* Zentriert die Karteikarte und Buttons */
+      align-items: center; /* Karte + Buttons in der Mitte */
       gap: 10px;
       width: 100%;
+      max-width: 900px; /* etwas breiterer Rahmen, falls nötig */
     }
     /* Container für Karte und Side-Buttons */
     .card-and-sides {
       display: flex;
       gap: 20px;
-      align-items: center;  /* Vertikal zentriert */
-      justify-content: center;
+      align-items: flex-start;
+      justify-content: center; /* Karte & Buttons nebeneinander mittig */
       position: relative;
+      width: 100%;
+      max-width: 900px;
     }
     /* Die Karte */
     .card {
@@ -106,6 +105,7 @@
       border-radius: 8px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       overflow: auto;
+      /* Damit du beim Schreiben den Cursor setzen kannst */
       cursor: text;
       transition: border-top 0.3s;
     }
@@ -124,6 +124,7 @@
       left: 0;
       width: 100%;
       min-height: 300px;
+      /* Weniger Padding oben, damit der Text weiter oben beginnt */
       padding: 10px 20px 20px 20px;
       border-radius: 8px;
       backface-visibility: hidden;
@@ -146,9 +147,9 @@
       white-space: pre-wrap;
       word-wrap: break-word;
       font-size: 1.2rem;
-      /* Zeilenhöhe angepasst auf 30px, damit Text auf den Linien sitzt */
-      line-height: 30px;
+      line-height: 20px;
       background-color: #f9f9f9;
+      /* Standard: Subtile Punkte – etwas dunkler (0.15) */
       background-image: repeating-linear-gradient(
         to bottom,
         transparent,
@@ -156,18 +157,16 @@
         rgba(0,0,0,0.15) 29px,
         rgba(0,0,0,0.15) 30px
       );
-      background-position: 0 0;
-      background-size: 30px 30px;
       transform: rotateY(180deg);
       z-index: 1;
     }
-    /* Seitentasten (rechts neben der Karte) */
+    /* Seitentasten */
     .side-buttons-container {
       display: flex;
       flex-direction: column;
       gap: 5px;
-      align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
+      align-items: center; /* Buttons nebeneinander zentriert in der Spalte */
     }
     .side-buttons-container button {
       padding: 6px 10px;
@@ -180,11 +179,13 @@
       display: flex;
       align-items: center;
       gap: 5px;
+      width: 120px; /* Feste Breite, damit Icons + Text gleichmäßig aussehen */
+      justify-content: center;
     }
     .side-buttons-container button:hover {
       opacity: 0.9;
     }
-    /* Inline-Edit Toolbar (unverändert) */
+    /* Inline-Edit Toolbar: erscheint unter den Side-Buttons */
     .inline-edit-toolbar {
       display: none;
       margin-top: 10px;
@@ -211,14 +212,12 @@
       padding: 4px 8px;
       margin-right: 5px;
     }
-    /* Bewertungsbuttons (unter der Karte, zentriert mit fester Breite) */
+    /* Untere Bewertungsbuttons */
     .bottom-buttons {
-      width: 600px;
-      margin: 0 auto;
       display: flex;
       gap: 10px;
-      justify-content: space-between;
-      margin-top: 10px;
+      justify-content: flex-start; /* "leicht nach links" */
+      width: 600px; /* gleiche Mindestbreite wie die Karte */
     }
     .bottom-buttons button {
       flex: 1;
@@ -233,7 +232,7 @@
     .btn-muehsam { background-color: #f39c12; color: #000; }
     .btn-gut    { background-color: #2ecc71; }
     .btn-einfach { background-color: #1abc9c; }
-    /* Overlays (unverändert) */
+    /* Overlays */
     .overlay {
       display: none;
       position: fixed;
@@ -263,7 +262,7 @@
       border-radius: 4px;
       margin-right: 5px;
     }
-    /* Zeichnen-Overlay (unverändert) */
+    /* Zeichnen-Overlay */
     .draw-overlay {
       position: absolute;
       top: 0;
@@ -322,12 +321,14 @@
   <header>
     <h2>Heute: <span id="currentCardIndex">0</span>/<span id="totalCards">0</span></h2>
   </header>
+
   <div class="main-container">
     <!-- Linke Spalte -->
     <div class="left-panel">
       <button class="add-card-button" onclick="addCard()">+</button>
       <div id="cardList"></div>
     </div>
+
     <!-- Kartenbereich -->
     <div class="card-wrapper">
       <div class="card-and-sides">
@@ -359,51 +360,22 @@
             <canvas id="drawCanvas"></canvas>
           </div>
         </div>
-        <!-- Side-Buttons -->
+
+        <!-- Side-Buttons mit Icons -->
         <div class="side-buttons-container">
           <button onclick="startInlineEdit();"><i class="fas fa-edit"></i> Bearbeiten</button>
-          <button onclick="openOverlay('imageOverlay');"><i class="fas fa-camera"></i> Bild importieren</button>
+          <button onclick="openOverlay('imageOverlay');"><i class="fas fa-image"></i> Bild</button>
           <button onclick="toggleDrawOverlay();"><i class="fas fa-pencil-alt"></i> Zeichnen</button>
           <button onclick="openOverlay('colorOverlay');"><i class="fas fa-palette"></i> Farbe</button>
           <button onclick="toggleProblem();"><i class="fas fa-exclamation-triangle"></i> P</button>
-          <!-- Muster-Button: Klick stoppt das Event, Text bleibt immer "Muster Boden" -->
+          <!-- Muster-Button -->
           <button id="patternButton" onclick="event.stopPropagation(); cyclePattern(); return false;">
             <i class="fas fa-th"></i> Muster Boden
           </button>
         </div>
       </div>
-      <!-- Inline-Edit Toolbar -->
-      <div id="inlineEditToolbar" class="inline-edit-toolbar">
-        <div class="toolbar">
-          <button onclick="execCmd('bold')"><b>B</b></button>
-          <button onclick="execCmd('italic')"><i>I</i></button>
-          <button onclick="execCmd('underline')"><u>U</u></button>
-          <button onclick="execCmd('justifyLeft')">Links</button>
-          <button onclick="execCmd('justifyCenter')">Mitte</button>
-          <button onclick="execCmd('justifyRight')">Rechts</button>
-          <button onclick="changeFontSize()">Größe</button>
-        </div>
-        <div class="color-palette">
-          <button style="background:#000;" onclick="execCmdColor('#000')"></button>
-          <button style="background:red;" onclick="execCmdColor('red')"></button>
-          <button style="background:green;" onclick="execCmdColor('green')"></button>
-          <button style="background:blue;" onclick="execCmdColor('blue')"></button>
-          <button style="background:#8e44ad;" onclick="execCmdColor('#8e44ad')"></button>
-          <button style="background:#ffffff;" onclick="execCmdColor('#ffffff')"></button>
-        </div>
-        <div class="highlight-palette">
-          <button style="background:yellow;" onclick="execCmdHighlight('yellow')"></button>
-          <button style="background:#f39c12;" onclick="execCmdHighlight('#f39c12')"></button>
-          <button style="background:#9b59b6;" onclick="execCmdHighlight('#9b59b6')"></button>
-          <button style="background:#bdc3c7;" onclick="execCmdHighlight('#bdc3c7')"></button>
-          <button style="background:pink;" onclick="execCmdHighlight('pink')"></button>
-        </div>
-        <div style="margin-top:5px;">
-          <button onclick="saveInlineEdit()">Speichern</button>
-          <button onclick="cancelInlineEdit()">Abbrechen</button>
-        </div>
-      </div>
-      <!-- Bewertungsbuttons -->
+
+      <!-- Bewertungsbuttons (leicht nach links unter der Karte) -->
       <div class="bottom-buttons" id="bottomButtons">
         <button class="btn-falsch" onclick="rateCard('Falsch')">Falsch</button>
         <button class="btn-muehsam" onclick="rateCard('Mühsam')">Mühsam</button>
@@ -438,7 +410,6 @@
   <input type="file" id="hiddenImageUpload" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
 
   <script>
-    // Karten-Daten – Standardmäßig mit "dotted" (Punkte)
     let cards = [
       {
         question: "Was ist JavaScript?",
@@ -475,24 +446,22 @@
       document.getElementById("backAnswer").innerHTML   = c.answer.replace(/\n/g, "<br>");
       document.getElementById("cardFrontFace").style.backgroundColor = c.color;
       document.getElementById("cardBackFace").style.backgroundColor  = c.color;
-      
+
       // Muster einstellen
       if(c.pattern === 'lines') {
-        document.getElementById("cardBackFace").style.backgroundImage = 
+        document.getElementById("cardBackFace").style.backgroundImage =
           "repeating-linear-gradient(0deg, transparent, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px)";
-        document.getElementById("cardBackFace").style.backgroundSize = "30px 30px";
       } else if(c.pattern === 'grid') {
-        document.getElementById("cardBackFace").style.backgroundImage = 
+        document.getElementById("cardBackFace").style.backgroundImage =
           "linear-gradient(0deg, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px), linear-gradient(90deg, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px)";
         document.getElementById("cardBackFace").style.backgroundSize = "30px 30px";
       } else if(c.pattern === 'dotted') {
-        document.getElementById("cardBackFace").style.backgroundImage = 
+        document.getElementById("cardBackFace").style.backgroundImage =
           "repeating-radial-gradient(circle, rgba(0,0,0,0.15) 0, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 20px)";
-        document.getElementById("cardBackFace").style.backgroundSize = "30px 30px";
       } else if(c.pattern === 'none') {
         document.getElementById("cardBackFace").style.backgroundImage = "none";
       }
-      
+
       const cardEl = document.getElementById("card");
       cardEl.style.borderTop = c.problem ? "5px solid red" : "2px solid #ccc";
       cardEl.classList.remove("flip");
@@ -501,7 +470,6 @@
       renderCardList();
       updateCardSize();
       updatePatternButton();
-      // Bilder in der Karte bearbeitbar machen (Drag & Drop)
       makeImagesEditable();
     }
     function updateCardCounter() {
@@ -510,7 +478,7 @@
     }
     function maybeFlip(e) {
       // Falls der Klick in den Side-Buttons erfolgt, nichts tun
-      if (e.target.closest('.side-buttons-container')) return;
+      if(e.target.closest('.side-buttons-container')) return;
       if(!isEditing) {
         flipCard();
       } else {
@@ -639,7 +607,7 @@
         reader.readAsDataURL(file);
       }
     }
-    // Erweiterte Bildbearbeitung: Größenänderung oder Zuschneiden
+    // Bildbearbeitung
     function resizeImage(img) {
       let action = prompt("Gib 'resize' ein, um die Größe zu ändern oder 'crop' zum Zuschneiden:", "resize");
       if(action === "resize") {
@@ -665,8 +633,6 @@
     }
 
     /* --- Muster-Funktionalität --- */
-    // Beim Klick auf den Muster-Button wird intern zwischen den Zuständen "lines", "grid", "dotted" und "none" gewechselt.
-    // Der Buttontext bleibt dabei immer "Muster Boden".
     function cyclePattern() {
       let patternOrder = ["lines", "grid", "dotted", "none"];
       let current = cards[currentIndex].pattern;
@@ -677,7 +643,6 @@
       saveCardsToLocalStorage();
       return false;
     }
-    // Der Muster-Button zeigt immer denselben Text
     function updatePatternButton() {
       let btn = document.getElementById("patternButton");
       btn.innerHTML = `<i class="fas fa-th"></i> Muster Boden`;
@@ -757,7 +722,6 @@
       saveCardsToLocalStorage();
       toggleDrawOverlay();
     }
-    // "Addieren": Speichert die aktuelle Zeichnung und leert den Canvas, ohne das Overlay zu schließen
     function addDrawing() {
       const canvas = document.getElementById("drawCanvas");
       const dataURL = canvas.toDataURL("image/png");
