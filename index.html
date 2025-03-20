@@ -297,7 +297,7 @@
     .color-palette button[style*="#ffffff"] {
       border: 1px solid #999;
     }
-    /* Inline-Edit Overlay für Textformatierung – reduziert auf drei Buttons */
+    /* Inline-Edit Overlay für Textformatierung – wie früher */
     #inlineEditOverlay {
       display: none;
       position: fixed;
@@ -309,7 +309,7 @@
       border-radius: 8px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.2);
       z-index: 1100;
-      max-width: 300px;
+      max-width: 420px;
       width: 90%;
     }
     #inlineEditOverlay.active {
@@ -320,10 +320,9 @@
     }
     #inlineEditOverlay .toolbar {
       display: flex;
-      flex-wrap: nowrap;
+      flex-wrap: wrap;
       gap: 5px;
       margin-bottom: 10px;
-      justify-content: center;
     }
     #inlineEditOverlay .toolbar button {
       padding: 6px 10px;
@@ -335,7 +334,6 @@
       display: flex;
       align-items: center;
       gap: 3px;
-      font-size: 1rem;
     }
   </style>
 </head>
@@ -349,7 +347,7 @@
     <div class="left-panel">
       <button class="add-card-button" onclick="addCard()">+</button>
       <div id="cardList"></div>
-      <!-- Trash-Button zum Löschen der ausgewählten Karte -->
+      <!-- Trash-Button -->
       <button id="deleteCardButton" onclick="deleteSelectedCard()"><i class="fas fa-trash"></i></button>
     </div>
 
@@ -385,7 +383,7 @@
           </div>
         </div>
 
-        <!-- Side-Buttons mit Icons -->
+        <!-- Seitentasten -->
         <div class="side-buttons-container">
           <button onclick="openInlineEditOverlay();"><i class="fas fa-edit"></i> Bearbeiten</button>
           <button onclick="openOverlay('imageOverlay');"><i class="fas fa-image"></i> Bild</button>
@@ -431,7 +429,7 @@
     <button onclick="closeOverlay('colorOverlay')">Schließen</button>
   </div>
 
-  <!-- Inline Edit Overlay für Textformatierung – nur drei Buttons -->
+  <!-- Inline-Edit Overlay (wie früher) -->
   <div id="inlineEditOverlay">
     <h3>Text formatieren</h3>
     <div class="toolbar">
@@ -593,7 +591,7 @@
 
     /* --- Bewertung & Problem --- */
     function rateCard(rating) {
-      // Bei "Einfach" wird die Karte als inaktiv markiert und übersprungen, bleibt aber in der Liste
+      // Bei "Einfach" wird die Karte als inaktiv markiert, bleibt aber in der Liste
       if(rating === "Einfach") {
         cards[currentIndex].active = false;
         // Suche nach nächster aktiver Karte
@@ -612,7 +610,6 @@
         }
         currentIndex = nextIndex;
       } else {
-        // Bei anderen Bewertungen: normale Reihenfolge
         currentIndex = (currentIndex + 1) % cards.length;
       }
       loadCard(currentIndex);
@@ -652,9 +649,9 @@
       }
     }
 
-    /* Bildbearbeitung */
+    /* Bildbearbeitung: resize oder crop */
     function resizeImage(img) {
-      let action = prompt("Gib 'resize' ein, um die Größe zu ändern oder 'crop' zum Zuschneiden:", "resize");
+      let action = prompt("Gib 'resize' ein, um die Größe anzupassen oder 'crop' zum Zuschneiden:", "resize");
       if(action === "resize") {
         let newWidth = prompt("Neue Breite (z.B. 50% oder 300px):", "50%");
         if(newWidth) {
