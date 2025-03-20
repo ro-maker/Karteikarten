@@ -36,7 +36,7 @@
       gap: 20px;
       width: 100%;
       max-width: 1400px;
-      justify-content: flex-start; /* Linke Spalte bleibt links */
+      justify-content: flex-start;
       margin: 0 auto;
     }
     /* Linke Spalte: Plus-Button & Liste */
@@ -135,6 +135,7 @@
       font-size: 1.2rem;
       background-color: #fff;
       z-index: 2;
+      line-height: 30px; /* Text exakt auf den Linien */
     }
     /* Rückseite (Antwort) */
     .card-back {
@@ -183,7 +184,6 @@
     .bottom-buttons {
       display: flex;
       gap: 10px;
-      width: 600px;
       margin: 0 auto;
       justify-content: center;
     }
@@ -427,11 +427,14 @@
   <div id="inlineEditOverlay">
     <h3>Text formatieren</h3>
     <div class="toolbar">
-      <button onclick="execCmd('bold')"><i class="fas fa-bold"></i></button>
-      <button onclick="execCmd('italic')"><i class="fas fa-italic"></i></button>
-      <button onclick="execCmd('underline')"><i class="fas fa-underline"></i></button>
-      <button style="background: yellow;" onclick="execCmdColor('yellow')"><i class="fas fa-highlighter"></i></button>
-      <button style="background: lightblue;" onclick="execCmdColor('lightblue')"><i class="fas fa-highlighter"></i></button>
+      <button onclick="execCmd('bold')"><i class="fas fa-bold"></i> B</button>
+      <button onclick="execCmd('italic')"><i class="fas fa-italic"></i> I</button>
+      <button onclick="execCmd('underline')"><i class="fas fa-underline"></i> U</button>
+      <button style="background: yellow;" onclick="execCmdColor('yellow')"><i class="fas fa-highlighter"></i> Gelb</button>
+      <button style="background: lightblue;" onclick="execCmdColor('lightblue')"><i class="fas fa-highlighter"></i> Hellblau</button>
+      <button style="background: red;" onclick="execCmdColor('red')"><i class="fas fa-highlighter"></i> Rot</button>
+      <button style="background: lightgreen;" onclick="execCmdColor('lightgreen')"><i class="fas fa-highlighter"></i> Grün</button>
+      <button style="background: orange;" onclick="execCmdColor('orange')"><i class="fas fa-highlighter"></i> Orange</button>
       <select onchange="changeFontSize(this.value)">
         <option value="">Schriftgröße</option>
         <option value="14px">14px</option>
@@ -459,7 +462,6 @@
     ];
     let currentIndex = 0;
     let isEditing = false;
-    let originalHTML = "";
     let editingSide = null; // "front" oder "back"
 
     // Zeichnen
@@ -473,10 +475,11 @@
       renderCardList();
       setupCanvasDrawing();
       updateCardSize();
+      updateBottomButtonsWidth();
     });
 
     /* --- Karte laden --- */
-    function loadCard(index) {
+    function loadCard(index, preserveFlip = false) {
       if(!cards[index]) return;
       currentIndex = index;
       let c = cards[index];
@@ -515,13 +518,16 @@
       
       const cardEl = document.getElementById("card");
       cardEl.style.borderTop = c.problem ? "5px solid red" : "2px solid #ccc";
-      cardEl.classList.remove("flip");
+      if(!preserveFlip){
+        cardEl.classList.remove("flip");
+      }
       updateBottomButtons();
       updateCardCounter();
       renderCardList();
       updateCardSize();
       updatePatternButton();
       makeImagesEditable();
+      updateBottomButtonsWidth();
     }
 
     function updateCardCounter() {
@@ -530,9 +536,7 @@
     }
 
     function maybeFlip(e) {
-      // Kein Flip, wenn auf Side-Buttons oder Inline-Edit Overlay geklickt wird
       if(e.target.closest('.side-buttons-container') || e.target.closest('#inlineEditOverlay')) return;
-      // Wenn gerade Text editiert wird, flip nicht
       if(isEditing) return;
       flipCard();
     }
@@ -542,6 +546,10 @@
     }
     function updateBottomButtons() {
       document.getElementById("bottomButtons").style.display = "flex";
+    }
+    function updateBottomButtonsWidth() {
+      const cardWidth = document.getElementById("card").clientWidth;
+      document.getElementById("bottomButtons").style.width = cardWidth + "px";
     }
 
     /* --- Inline-Edit Overlay --- */
@@ -670,7 +678,8 @@
       let index = patternOrder.indexOf(current);
       let nextIndex = (index + 1) % patternOrder.length;
       cards[currentIndex].pattern = patternOrder[nextIndex];
-      loadCard(currentIndex);
+      // Beim Musterwechsel den Flip-Zustand beibehalten
+      loadCard(currentIndex, true);
       saveCardsToLocalStorage();
       return false;
     }
@@ -823,7 +832,10 @@
       const maxHeight = window.innerHeight * 0.9;
       card.style.height = Math.min(contentHeight, maxHeight) + 'px';
     }
-    window.addEventListener('resize', updateCardSize);
+    window.addEventListener('resize', () => {
+      updateCardSize();
+      updateBottomButtonsWidth();
+    });
 
     /* --- Bilder im Karteninhalt bearbeiten (Drag & Drop) --- */
     let dragItem = null;
