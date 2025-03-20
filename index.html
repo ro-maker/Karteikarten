@@ -30,7 +30,6 @@
     header h2 {
       color: #972D54;
     }
-
     /* Hauptcontainer: Linke Liste + Kartenbereich */
     .main-container {
       display: flex;
@@ -38,9 +37,8 @@
       width: 100%;
       max-width: 1400px;
       justify-content: flex-start; /* Linke Spalte bleibt links */
-      margin: 0 auto; /* Hauptcontainer insgesamt zentriert */
+      margin: 0 auto;
     }
-
     /* Linke Spalte: Plus-Button & Liste */
     .left-panel {
       display: flex;
@@ -78,18 +76,16 @@
       background-color: #972D54;
       color: white;
     }
-
     /* Kartenwrapper zentrieren */
     .card-wrapper {
       display: flex;
       flex-direction: column;
-      align-items: center; /* Karte + Buttons in der Mitte */
+      align-items: center;
       gap: 10px;
       width: 100%;
-      max-width: 900px; 
-      margin: 0 auto; /* Zentriert den Karten-Bereich */
+      max-width: 900px;
+      margin: 0 auto;
     }
-
     /* Container für Karte und Side-Buttons */
     .card-and-sides {
       display: flex;
@@ -99,9 +95,8 @@
       position: relative;
       width: 100%;
       max-width: 900px;
-      margin: 0 auto; /* Zusätzliche Zentrierung */
+      margin: 0 auto;
     }
-
     /* Die Karte */
     .card {
       position: relative;
@@ -125,7 +120,6 @@
     .card.flip .card-inner {
       transform: rotateY(180deg);
     }
-
     /* Vorderseite (Frage) */
     .card-front {
       position: absolute;
@@ -142,7 +136,6 @@
       background-color: #fff;
       z-index: 2;
     }
-
     /* Rückseite (Antwort) */
     .card-back {
       position: absolute;
@@ -156,12 +149,11 @@
       white-space: pre-wrap;
       word-wrap: break-word;
       font-size: 1.2rem;
-      line-height: 30px; /* Damit Text exakt auf den Linien sitzt */
+      line-height: 30px; /* Text exakt auf den Linien */
       background-color: #f9f9f9;
       transform: rotateY(180deg);
       z-index: 1;
     }
-
     /* Seitentasten */
     .side-buttons-container {
       display: flex;
@@ -181,20 +173,19 @@
       display: flex;
       align-items: center;
       gap: 5px;
-      width: 110px; /* Feste Breite, damit Icons + Text gleichmäßig aussehen */
+      width: 110px;
       justify-content: center;
     }
     .side-buttons-container button:hover {
       opacity: 0.9;
     }
-
     /* Untere Bewertungsbuttons */
     .bottom-buttons {
       display: flex;
       gap: 10px;
-      width: 600px;         /* Gleiche Breite wie die Karte (mind. 600px) */
-      margin: 0 auto;       /* Zentriert sie unter der Karte */
-      justify-content: center; /* Buttons selbst zentrieren */
+      width: 600px;
+      margin: 0 auto;
+      justify-content: center;
     }
     .bottom-buttons button {
       flex: 1;
@@ -291,8 +282,6 @@
     .editable-image {
       cursor: move;
     }
-
-    /* Weiße Farbe in der Farbpalette sichtbar machen */
     .color-palette button[style*="#ffffff"] {
       border: 1px solid #999;
     }
@@ -320,7 +309,7 @@
     }
     #inlineEditOverlay .toolbar {
       display: flex;
-      flex-wrap: wrap; /* Damit die Buttons umbrechen können */
+      flex-wrap: wrap;
       gap: 5px;
       margin-bottom: 10px;
     }
@@ -389,7 +378,7 @@
 
         <!-- Side-Buttons mit Icons -->
         <div class="side-buttons-container">
-          <!-- Beim Klick auf diese Buttons (z.B. Bearbeiten) wird kein Flip getriggert -->
+          <!-- Diese Buttons sollen kein Flip auslösen -->
           <button onclick="openInlineEditOverlay();"><i class="fas fa-edit"></i> Bearbeiten</button>
           <button onclick="openOverlay('imageOverlay');"><i class="fas fa-image"></i> Bild</button>
           <button onclick="toggleDrawOverlay();"><i class="fas fa-pencil-alt"></i> Zeichnen</button>
@@ -438,20 +427,11 @@
   <div id="inlineEditOverlay">
     <h3>Text formatieren</h3>
     <div class="toolbar">
-      <!-- Standard-Formatierungen -->
       <button onclick="execCmd('bold')"><i class="fas fa-bold"></i></button>
       <button onclick="execCmd('italic')"><i class="fas fa-italic"></i></button>
       <button onclick="execCmd('underline')"><i class="fas fa-underline"></i></button>
-
-      <!-- Beispielhafte Textmarker-Farben -->
-      <button style="background: yellow;" onclick="execCmdColor('yellow')">
-        <i class="fas fa-highlighter"></i>
-      </button>
-      <button style="background: lightblue;" onclick="execCmdColor('lightblue')">
-        <i class="fas fa-highlighter"></i>
-      </button>
-
-      <!-- Schriftgröße ändern -->
+      <button style="background: yellow;" onclick="execCmdColor('yellow')"><i class="fas fa-highlighter"></i></button>
+      <button style="background: lightblue;" onclick="execCmdColor('lightblue')"><i class="fas fa-highlighter"></i></button>
       <select onchange="changeFontSize(this.value)">
         <option value="">Schriftgröße</option>
         <option value="14px">14px</option>
@@ -459,11 +439,7 @@
         <option value="24px">24px</option>
         <option value="32px">32px</option>
       </select>
-
-      <!-- Formatierung entfernen -->
-      <button onclick="execCmd('removeFormat')">
-        <i class="fas fa-eraser"></i>
-      </button>
+      <button onclick="execCmd('removeFormat')"><i class="fas fa-eraser"></i></button>
     </div>
     <button onclick="closeInlineEditOverlay()">Schließen</button>
   </div>
@@ -471,27 +447,27 @@
   <input type="file" id="hiddenImageUpload" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
 
   <script>
-    /* Karten-Daten – Standardmäßig mit \"dotted\" */
+    // Karten-Daten – Standardmäßig mit "dotted"
     let cards = [
       {
-        question: \"Was ist JavaScript?\",
-        answer: \"JavaScript ist eine Programmiersprache für Webentwicklung.\\n\\n- Dynamische Inhalte\\n- Interaktive Webseiten\",
-        color: \"#fff\",
+        question: "Was ist JavaScript?",
+        answer: "JavaScript ist eine Programmiersprache für Webentwicklung.\n\n- Dynamische Inhalte\n- Interaktive Webseiten",
+        color: "#fff",
         problem: false,
-        pattern: \"dotted\"
+        pattern: "dotted"
       }
     ];
     let currentIndex = 0;
-    let isEditing = false;        // Ob wir gerade Text bearbeiten
-    let editingSide = null;       // \"front\" oder \"back\"
+    let isEditing = false;
+    let originalHTML = "";
+    let editingSide = null; // "front" oder "back"
 
-    /* Zeichnen */
+    // Zeichnen
     let isDrawing = false;
-    let currentDrawingColor = \"#000\";
+    let currentDrawingColor = "#000";
     let currentLineWidth = 3;
 
-    /* Beim Laden */
-    document.addEventListener(\"DOMContentLoaded\", () => {
+    document.addEventListener("DOMContentLoaded", () => {
       loadCardsFromLocalStorage();
       if(cards.length > 0) loadCard(currentIndex);
       renderCardList();
@@ -499,53 +475,47 @@
       updateCardSize();
     });
 
-    /* Karte laden */
+    /* --- Karte laden --- */
     function loadCard(index) {
       if(!cards[index]) return;
       currentIndex = index;
       let c = cards[index];
-
-      // Frage & Antwort einfügen
-      document.getElementById(\"frontQuestion\").innerHTML = c.question.replace(/\\n/g, \"<br>\");
-      document.getElementById(\"backAnswer\").innerHTML   = c.answer.replace(/\\n/g, \"<br>\");
-
-      // Kartenfarbe
-      document.getElementById(\"cardFrontFace\").style.backgroundColor = c.color;
-      document.getElementById(\"cardBackFace\").style.backgroundColor  = c.color;
+      document.getElementById("frontQuestion").innerHTML = c.question.replace(/\n/g, "<br>");
+      document.getElementById("backAnswer").innerHTML   = c.answer.replace(/\n/g, "<br>");
+      document.getElementById("cardFrontFace").style.backgroundColor = c.color;
+      document.getElementById("cardBackFace").style.backgroundColor  = c.color;
       
-      // Muster (Rückseite)
-      let backFace = document.getElementById(\"cardBackFace\");
-      backFace.style.backgroundImage = \"none\";
-      backFace.style.backgroundSize = \"\";
-      backFace.style.backgroundPosition = \"\";
-      backFace.style.lineHeight = \"30px\";
-      backFace.style.paddingTop = \"10px\";
+      // Muster einstellen
+      let backFace = document.getElementById("cardBackFace");
+      backFace.style.backgroundImage = "none";
+      backFace.style.backgroundSize = "";
+      backFace.style.backgroundPosition = "";
+      backFace.style.lineHeight = "30px";
+      backFace.style.paddingTop = "10px";
 
       if(c.pattern === 'lines') {
         backFace.style.backgroundImage = 
-          \"repeating-linear-gradient(to bottom, transparent, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px)\";
-        backFace.style.backgroundPosition = \"0 15px\";
-        backFace.style.paddingTop = \"15px\";
+          "repeating-linear-gradient(to bottom, transparent, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px)";
+        backFace.style.backgroundPosition = "0 15px";
+        backFace.style.paddingTop = "15px";
       } 
       else if(c.pattern === 'grid') {
         backFace.style.backgroundImage = 
-          \"linear-gradient(0deg, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px), linear-gradient(90deg, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px)\";
-        backFace.style.backgroundSize = \"30px 30px\";
+          "linear-gradient(0deg, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px), linear-gradient(90deg, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px)";
+        backFace.style.backgroundSize = "30px 30px";
       } 
       else if(c.pattern === 'dotted') {
         backFace.style.backgroundImage =
-          \"radial-gradient(rgba(0,0,0,0.15) 1px, transparent 1px)\";
-        backFace.style.backgroundSize = \"20px 20px\";
+          "radial-gradient(rgba(0,0,0,0.15) 1px, transparent 1px)";
+        backFace.style.backgroundSize = "20px 20px";
       }
       else if(c.pattern === 'none') {
-        backFace.style.backgroundImage = \"none\";
+        backFace.style.backgroundImage = "none";
       }
-
-      // Problem-Markierung
-      const cardEl = document.getElementById(\"card\");
-      cardEl.style.borderTop = c.problem ? \"5px solid red\" : \"2px solid #ccc\";
-      cardEl.classList.remove(\"flip\");
-
+      
+      const cardEl = document.getElementById("card");
+      cardEl.style.borderTop = c.problem ? "5px solid red" : "2px solid #ccc";
+      cardEl.classList.remove("flip");
       updateBottomButtons();
       updateCardCounter();
       renderCardList();
@@ -554,58 +524,49 @@
       makeImagesEditable();
     }
 
-    /* Anzeige des aktuellen Karten-Index */
     function updateCardCounter() {
-      document.getElementById(\"currentCardIndex\").textContent = currentIndex + 1;
-      document.getElementById(\"totalCards\").textContent = cards.length;
+      document.getElementById("currentCardIndex").textContent = currentIndex + 1;
+      document.getElementById("totalCards").textContent = cards.length;
     }
 
-    /* Klick auf die Karte => flippen, außer es wird auf Buttons geklickt */
     function maybeFlip(e) {
-      // Keine Drehung, wenn Klick auf Side-Buttons oder InlineEdit-Overlay
+      // Kein Flip, wenn auf Side-Buttons oder Inline-Edit Overlay geklickt wird
       if(e.target.closest('.side-buttons-container') || e.target.closest('#inlineEditOverlay')) return;
-      // Keine Drehung, wenn gerade Text editiert wird
+      // Wenn gerade Text editiert wird, flip nicht
       if(isEditing) return;
       flipCard();
     }
     function flipCard() {
-      document.getElementById(\"card\").classList.toggle(\"flip\");
+      document.getElementById("card").classList.toggle("flip");
       setTimeout(updateCardSize, 300);
     }
-
     function updateBottomButtons() {
-      document.getElementById(\"bottomButtons\").style.display = \"flex\";
+      document.getElementById("bottomButtons").style.display = "flex";
     }
 
-    /* --- Inline-Edit-Funktionen --- */
+    /* --- Inline-Edit Overlay --- */
     function openInlineEditOverlay() {
-      // Welche Seite ist sichtbar?
-      const isFlipped = document.getElementById(\"card\").classList.contains(\"flip\");
-      editingSide = isFlipped ? \"back\" : \"front\";
-
-      // Inhalt editierbar machen
-      if(editingSide === \"front\") {
-        document.getElementById(\"frontQuestion\").contentEditable = \"true\";
-        document.getElementById(\"frontQuestion\").focus();
+      const isFlipped = document.getElementById("card").classList.contains("flip");
+      editingSide = isFlipped ? "back" : "front";
+      if(editingSide === "front") {
+        document.getElementById("frontQuestion").contentEditable = "true";
+        document.getElementById("frontQuestion").focus();
       } else {
-        document.getElementById(\"backAnswer\").contentEditable = \"true\";
-        document.getElementById(\"backAnswer\").focus();
+        document.getElementById("backAnswer").contentEditable = "true";
+        document.getElementById("backAnswer").focus();
       }
       isEditing = true;
-      document.getElementById(\"inlineEditOverlay\").classList.add(\"active\");
+      document.getElementById("inlineEditOverlay").classList.add("active");
     }
     function closeInlineEditOverlay() {
-      // Bearbeitung beenden
-      document.getElementById(\"frontQuestion\").contentEditable = \"false\";
-      document.getElementById(\"backAnswer\").contentEditable = \"false\";
-      document.getElementById(\"inlineEditOverlay\").classList.remove(\"active\");
+      document.getElementById("frontQuestion").contentEditable = "false";
+      document.getElementById("backAnswer").contentEditable = "false";
+      document.getElementById("inlineEditOverlay").classList.remove("active");
       isEditing = false;
-
-      // Änderungen in cards speichern
-      if(editingSide === \"front\") {
-        cards[currentIndex].question = document.getElementById(\"frontQuestion\").innerHTML;
+      if(editingSide === "front") {
+        cards[currentIndex].question = document.getElementById("frontQuestion").innerHTML;
       } else {
-        cards[currentIndex].answer = document.getElementById(\"backAnswer\").innerHTML;
+        cards[currentIndex].answer = document.getElementById("backAnswer").innerHTML;
       }
       saveCardsToLocalStorage();
       updateCardSize();
@@ -614,32 +575,29 @@
       document.execCommand(cmd, false, null);
     }
     function execCmdColor(color) {
-      document.execCommand(\"hiliteColor\", false, color);
+      document.execCommand("hiliteColor", false, color);
     }
     function changeFontSize(size) {
       if(!size) return;
-      // Workaround: setze fontSize=7, dann im DOM die Größe anpassen
-      document.execCommand(\"fontSize\", false, \"7\");
-      const fonts = document.querySelectorAll(\"font[size='7']\");
+      document.execCommand("fontSize", false, "7");
+      const fonts = document.querySelectorAll("font[size='7']");
       for(let f of fonts) {
-        f.removeAttribute(\"size\");
+        f.removeAttribute("size");
         f.style.fontSize = size;
       }
     }
 
     /* --- Bewertung & Problem --- */
     function rateCard(rating) {
-      if(rating === \"Einfach\") {
-        // Karte entfernen
+      if(rating === "Einfach") {
         cards.splice(currentIndex, 1);
         if(cards.length === 0) {
-          alert(\"Keine Karten mehr!\");
+          alert("Keine Karten mehr!");
           saveCardsToLocalStorage();
           return;
         }
         if(currentIndex >= cards.length) currentIndex = cards.length - 1;
       } else {
-        // nächste Karte
         currentIndex = (currentIndex + 1) % cards.length;
       }
       loadCard(currentIndex);
@@ -653,25 +611,24 @@
 
     /* --- Overlays (Bild, Farbe) --- */
     function openOverlay(id) {
-      document.getElementById(id).classList.add(\"active\");
+      document.getElementById(id).classList.add("active");
     }
     function closeOverlay(id) {
-      document.getElementById(id).classList.remove(\"active\");
+      document.getElementById(id).classList.remove("active");
     }
     function uploadImage() {
-      document.getElementById(\"hiddenImageUpload\").click();
+      document.getElementById("hiddenImageUpload").click();
     }
     function handleImageUpload(event) {
       const file = event.target.files[0];
       if(file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-          // je nach Flip auf Front oder Rückseite einfügen
-          const isFlipped = document.getElementById(\"card\").classList.contains(\"flip\");
+          const isFlipped = document.getElementById("card").classList.contains("flip");
           if(!isFlipped) {
-            cards[currentIndex].question += `<br><img src=\"${e.target.result}\" class=\"editable-image\" style=\"max-width:100%; cursor:move;\" ondblclick=\"resizeImage(this)\" onclick=\"if(confirm('Bild entfernen?')) { this.remove(); }\"><br>`;
+            cards[currentIndex].question += `<br><img src="${e.target.result}" class="editable-image" style="max-width:100%; cursor:move;" ondblclick="resizeImage(this)" onclick="if(confirm('Bild entfernen?')) { this.remove(); }"><br>`;
           } else {
-            cards[currentIndex].answer += `<br><img src=\"${e.target.result}\" class=\"editable-image\" style=\"max-width:100%; cursor:move;\" ondblclick=\"resizeImage(this)\" onclick=\"if(confirm('Bild entfernen?')) { this.remove(); }\"><br>`;
+            cards[currentIndex].answer += `<br><img src="${e.target.result}" class="editable-image" style="max-width:100%; cursor:move;" ondblclick="resizeImage(this)" onclick="if(confirm('Bild entfernen?')) { this.remove(); }"><br>`;
           }
           loadCard(currentIndex);
           saveCardsToLocalStorage();
@@ -682,17 +639,17 @@
 
     /* Bildbearbeitung */
     function resizeImage(img) {
-      let action = prompt(\"Gib 'resize' ein, um die Größe zu ändern oder 'crop' zum Zuschneiden:\", \"resize\");
-      if(action === \"resize\") {
-        let newWidth = prompt(\"Neue Breite (z.B. 50% oder 300px):\", \"50%\");
+      let action = prompt("Gib 'resize' ein, um die Größe zu ändern oder 'crop' zum Zuschneiden:", "resize");
+      if(action === "resize") {
+        let newWidth = prompt("Neue Breite (z.B. 50% oder 300px):", "50%");
         if(newWidth) {
           img.style.width = newWidth;
         }
-      } else if(action === \"crop\") {
-        let top = prompt(\"Zuschneiden: Abstand von oben (z.B. 10px):\", \"10px\");
-        let right = prompt(\"Zuschneiden: Abstand von rechts (z.B. 10px):\", \"10px\");
-        let bottom = prompt(\"Zuschneiden: Abstand von unten (z.B. 10px):\", \"10px\");
-        let left = prompt(\"Zuschneiden: Abstand von links (z.B. 10px):\", \"10px\");
+      } else if(action === "crop") {
+        let top = prompt("Zuschneiden: Abstand von oben (z.B. 10px):", "10px");
+        let right = prompt("Zuschneiden: Abstand von rechts (z.B. 10px):", "10px");
+        let bottom = prompt("Zuschneiden: Abstand von unten (z.B. 10px):", "10px");
+        let left = prompt("Zuschneiden: Abstand von links (z.B. 10px):", "10px");
         if(top && right && bottom && left) {
           img.style.clipPath = `inset(${top} ${right} ${bottom} ${left})`;
         }
@@ -708,7 +665,7 @@
     /* --- Muster-Funktion (kein Flip) --- */
     function cyclePattern(event) {
       event.stopPropagation();
-      let patternOrder = [\"lines\", \"grid\", \"dotted\", \"none\"];
+      let patternOrder = ["lines", "grid", "dotted", "none"];
       let current = cards[currentIndex].pattern;
       let index = patternOrder.indexOf(current);
       let nextIndex = (index + 1) % patternOrder.length;
@@ -718,36 +675,36 @@
       return false;
     }
     function updatePatternButton() {
-      let btn = document.getElementById(\"patternButton\");
-      btn.innerHTML = `<i class=\"fas fa-th\"></i> Muster Boden`;
+      let btn = document.getElementById("patternButton");
+      btn.innerHTML = `<i class="fas fa-th"></i> Muster Boden`;
     }
 
     /* --- Zeichnen --- */
     function setupCanvasDrawing() {
-      const canvas = document.getElementById(\"drawCanvas\");
-      const ctx = canvas.getContext(\"2d\");
-      canvas.addEventListener(\"pointerdown\", (e) => {
+      const canvas = document.getElementById("drawCanvas");
+      const ctx = canvas.getContext("2d");
+      canvas.addEventListener("pointerdown", (e) => {
         isDrawing = true;
         ctx.beginPath();
         const pos = getCanvasPos(canvas, e);
         ctx.moveTo(pos.x, pos.y);
         e.preventDefault();
       });
-      canvas.addEventListener(\"pointermove\", (e) => {
+      canvas.addEventListener("pointermove", (e) => {
         if(!isDrawing) return;
         const pos = getCanvasPos(canvas, e);
         ctx.lineWidth = currentLineWidth;
-        ctx.lineCap = \"round\";
+        ctx.lineCap = "round";
         ctx.strokeStyle = currentDrawingColor;
         ctx.lineTo(pos.x, pos.y);
         ctx.stroke();
         e.preventDefault();
       });
-      canvas.addEventListener(\"pointerup\", (e) => {
+      canvas.addEventListener("pointerup", (e) => {
         isDrawing = false;
         e.preventDefault();
       });
-      canvas.addEventListener(\"pointercancel\", (e) => {
+      canvas.addEventListener("pointercancel", (e) => {
         isDrawing = false;
         e.preventDefault();
       });
@@ -766,44 +723,44 @@
       currentLineWidth = parseInt(val, 10);
     }
     function eraseDrawing() {
-      const canvas = document.getElementById(\"drawCanvas\");
-      const ctx = canvas.getContext(\"2d\");
+      const canvas = document.getElementById("drawCanvas");
+      const ctx = canvas.getContext("2d");
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
     function toggleDrawOverlay() {
-      const overlay = document.getElementById(\"drawOverlay\");
-      if(overlay.classList.contains(\"active\")) {
-        overlay.classList.remove(\"active\");
+      const overlay = document.getElementById("drawOverlay");
+      if(overlay.classList.contains("active")) {
+        overlay.classList.remove("active");
       } else {
-        const cardEl = document.getElementById(\"card\");
-        const canvas = document.getElementById(\"drawCanvas\");
+        const cardEl = document.getElementById("card");
+        const canvas = document.getElementById("drawCanvas");
         canvas.width = cardEl.clientWidth;
         canvas.height = cardEl.clientHeight;
         eraseDrawing();
-        overlay.classList.add(\"active\");
+        overlay.classList.add("active");
       }
     }
     function saveDrawing() {
-      const canvas = document.getElementById(\"drawCanvas\");
-      const dataURL = canvas.toDataURL(\"image/png\");
-      const isFlipped = document.getElementById(\"card\").classList.contains(\"flip\");
+      const canvas = document.getElementById("drawCanvas");
+      const dataURL = canvas.toDataURL("image/png");
+      const isFlipped = document.getElementById("card").classList.contains("flip");
       if(!isFlipped) {
-        cards[currentIndex].question += `<br><img src=\"${dataURL}\" class=\"editable-image\" style=\"max-width:100%; cursor:move;\" ondblclick=\"resizeImage(this)\" onclick=\"if(confirm('Zeichnung entfernen?')) { this.remove(); }\"><br>`;
+        cards[currentIndex].question += `<br><img src="${dataURL}" class="editable-image" style="max-width:100%; cursor:move;" ondblclick="resizeImage(this)" onclick="if(confirm('Zeichnung entfernen?')) { this.remove(); }"><br>`;
       } else {
-        cards[currentIndex].answer += `<br><img src=\"${dataURL}\" class=\"editable-image\" style=\"max-width:100%; cursor:move;\" ondblclick=\"resizeImage(this)\" onclick=\"if(confirm('Zeichnung entfernen?')) { this.remove(); }\"><br>`;
+        cards[currentIndex].answer += `<br><img src="${dataURL}" class="editable-image" style="max-width:100%; cursor:move;" ondblclick="resizeImage(this)" onclick="if(confirm('Zeichnung entfernen?')) { this.remove(); }"><br>`;
       }
       loadCard(currentIndex);
       saveCardsToLocalStorage();
       toggleDrawOverlay();
     }
     function addDrawing() {
-      const canvas = document.getElementById(\"drawCanvas\");
-      const dataURL = canvas.toDataURL(\"image/png\");
-      const isFlipped = document.getElementById(\"card\").classList.contains(\"flip\");
+      const canvas = document.getElementById("drawCanvas");
+      const dataURL = canvas.toDataURL("image/png");
+      const isFlipped = document.getElementById("card").classList.contains("flip");
       if(!isFlipped) {
-        cards[currentIndex].question += `<br><img src=\"${dataURL}\" class=\"editable-image\" style=\"max-width:100%; cursor:move;\" ondblclick=\"resizeImage(this)\" onclick=\"if(confirm('Zeichnung entfernen?')) { this.remove(); }\"><br>`;
+        cards[currentIndex].question += `<br><img src="${dataURL}" class="editable-image" style="max-width:100%; cursor:move;" ondblclick="resizeImage(this)" onclick="if(confirm('Zeichnung entfernen?')) { this.remove(); }"><br>`;
       } else {
-        cards[currentIndex].answer += `<br><img src=\"${dataURL}\" class=\"editable-image\" style=\"max-width:100%; cursor:move;\" ondblclick=\"resizeImage(this)\" onclick=\"if(confirm('Zeichnung entfernen?')) { this.remove(); }\"><br>`;
+        cards[currentIndex].answer += `<br><img src="${dataURL}" class="editable-image" style="max-width:100%; cursor:move;" ondblclick="resizeImage(this)" onclick="if(confirm('Zeichnung entfernen?')) { this.remove(); }"><br>`;
       }
       loadCard(currentIndex);
       saveCardsToLocalStorage();
@@ -812,15 +769,15 @@
 
     /* --- Karten hinzufügen & speichern --- */
     function addCard() {
-      let newQuestion = prompt(\"Neue Frage:\");
-      let newAnswer   = prompt(\"Neue Antwort:\");
+      let newQuestion = prompt("Neue Frage:");
+      let newAnswer   = prompt("Neue Antwort:");
       if(newQuestion && newAnswer) {
         cards.splice(currentIndex+1, 0, {
           question: newQuestion,
           answer: newAnswer,
-          color: \"#fff\",
+          color: "#fff",
           problem: false,
-          pattern: \"dotted\"
+          pattern: "dotted"
         });
         currentIndex++;
         loadCard(currentIndex);
@@ -828,23 +785,23 @@
       }
     }
     function saveCardsToLocalStorage() {
-      localStorage.setItem(\"myJuraCards\", JSON.stringify(cards));
+      localStorage.setItem("myJuraCards", JSON.stringify(cards));
       renderCardList();
     }
     function loadCardsFromLocalStorage() {
-      let data = localStorage.getItem(\"myJuraCards\");
+      let data = localStorage.getItem("myJuraCards");
       if(data) {
         cards = JSON.parse(data);
       }
     }
     function renderCardList() {
-      const listDiv = document.getElementById(\"cardList\");
-      listDiv.innerHTML = \"\";
+      const listDiv = document.getElementById("cardList");
+      listDiv.innerHTML = "";
       cards.forEach((c, i) => {
-        const btn = document.createElement(\"button\");
+        const btn = document.createElement("button");
         btn.textContent = i + 1;
         btn.onclick = () => { loadCard(i); };
-        if(i === currentIndex) btn.classList.add(\"active\");
+        if(i === currentIndex) btn.classList.add("active");
         listDiv.appendChild(btn);
       });
     }
@@ -861,10 +818,8 @@
       clone.style.height = 'auto';
       clone.style.padding = getComputedStyle(visibleFace).padding;
       card.appendChild(clone);
-
       const contentHeight = clone.offsetHeight;
       card.removeChild(clone);
-
       const maxHeight = window.innerHeight * 0.9;
       card.style.height = Math.min(contentHeight, maxHeight) + 'px';
     }
