@@ -188,13 +188,13 @@
       opacity: 0.9;
     }
 
-    /* Untere Bewertungsbuttons: jetzt exakt unter der Karte zentriert */
+    /* Untere Bewertungsbuttons */
     .bottom-buttons {
       display: flex;
       gap: 10px;
-      width: 600px;          /* Gleiche Breite wie die Karte (mind. 600px) */
-      margin: 0 auto;        /* zentriert sie unter der Karte */
-      justify-content: flex-start; /* oder 'center', wenn du sie mittig haben willst */
+      width: 600px;         /* Gleiche Breite wie die Karte (mind. 600px) */
+      margin: 0 auto;       /* Zentriert sie unter der Karte */
+      justify-content: center; /* Buttons selbst zentrieren */
     }
     .bottom-buttons button {
       flex: 1;
@@ -471,23 +471,27 @@
   <input type="file" id="hiddenImageUpload" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
 
   <script>
+    /* Karten-Daten – Standardmäßig mit \"dotted\" */
     let cards = [
       {
-        question: "Was ist JavaScript?",
-        answer: "JavaScript ist eine Programmiersprache für Webentwicklung.\n\n- Dynamische Inhalte\n- Interaktive Webseiten",
-        color: "#fff",
+        question: \"Was ist JavaScript?\",
+        answer: \"JavaScript ist eine Programmiersprache für Webentwicklung.\\n\\n- Dynamische Inhalte\\n- Interaktive Webseiten\",
+        color: \"#fff\",
         problem: false,
-        pattern: "dotted"
+        pattern: \"dotted\"
       }
     ];
     let currentIndex = 0;
-    let isEditing = false;
-    let isDrawing = false;
-    let currentDrawingColor = "#000";
-    let currentLineWidth = 3;
-    let editingSide = null; // 'front' oder 'back'
+    let isEditing = false;        // Ob wir gerade Text bearbeiten
+    let editingSide = null;       // \"front\" oder \"back\"
 
-    document.addEventListener("DOMContentLoaded", () => {
+    /* Zeichnen */
+    let isDrawing = false;
+    let currentDrawingColor = \"#000\";
+    let currentLineWidth = 3;
+
+    /* Beim Laden */
+    document.addEventListener(\"DOMContentLoaded\", () => {
       loadCardsFromLocalStorage();
       if(cards.length > 0) loadCard(currentIndex);
       renderCardList();
@@ -495,16 +499,22 @@
       updateCardSize();
     });
 
+    /* Karte laden */
     function loadCard(index) {
       if(!cards[index]) return;
       currentIndex = index;
       let c = cards[index];
-      document.getElementById("frontQuestion").innerHTML = c.question.replace(/\\n/g, \"<br>\");
-      document.getElementById("backAnswer").innerHTML   = c.answer.replace(/\\n/g, \"<br>\");
-      document.getElementById("cardFrontFace").style.backgroundColor = c.color;
-      document.getElementById("cardBackFace").style.backgroundColor  = c.color;
+
+      // Frage & Antwort einfügen
+      document.getElementById(\"frontQuestion\").innerHTML = c.question.replace(/\\n/g, \"<br>\");
+      document.getElementById(\"backAnswer\").innerHTML   = c.answer.replace(/\\n/g, \"<br>\");
+
+      // Kartenfarbe
+      document.getElementById(\"cardFrontFace\").style.backgroundColor = c.color;
+      document.getElementById(\"cardBackFace\").style.backgroundColor  = c.color;
       
-      let backFace = document.getElementById("cardBackFace");
+      // Muster (Rückseite)
+      let backFace = document.getElementById(\"cardBackFace\");
       backFace.style.backgroundImage = \"none\";
       backFace.style.backgroundSize = \"\";
       backFace.style.backgroundPosition = \"\";
@@ -530,10 +540,12 @@
       else if(c.pattern === 'none') {
         backFace.style.backgroundImage = \"none\";
       }
-      
+
+      // Problem-Markierung
       const cardEl = document.getElementById(\"card\");
       cardEl.style.borderTop = c.problem ? \"5px solid red\" : \"2px solid #ccc\";
       cardEl.classList.remove(\"flip\");
+
       updateBottomButtons();
       updateCardCounter();
       renderCardList();
@@ -542,13 +554,17 @@
       makeImagesEditable();
     }
 
+    /* Anzeige des aktuellen Karten-Index */
     function updateCardCounter() {
       document.getElementById(\"currentCardIndex\").textContent = currentIndex + 1;
       document.getElementById(\"totalCards\").textContent = cards.length;
     }
 
+    /* Klick auf die Karte => flippen, außer es wird auf Buttons geklickt */
     function maybeFlip(e) {
+      // Keine Drehung, wenn Klick auf Side-Buttons oder InlineEdit-Overlay
       if(e.target.closest('.side-buttons-container') || e.target.closest('#inlineEditOverlay')) return;
+      // Keine Drehung, wenn gerade Text editiert wird
       if(isEditing) return;
       flipCard();
     }
@@ -556,15 +572,18 @@
       document.getElementById(\"card\").classList.toggle(\"flip\");
       setTimeout(updateCardSize, 300);
     }
+
     function updateBottomButtons() {
       document.getElementById(\"bottomButtons\").style.display = \"flex\";
     }
 
+    /* --- Inline-Edit-Funktionen --- */
     function openInlineEditOverlay() {
-      const cardEl = document.getElementById(\"card\");
-      const isFlipped = cardEl.classList.contains(\"flip\");
+      // Welche Seite ist sichtbar?
+      const isFlipped = document.getElementById(\"card\").classList.contains(\"flip\");
       editingSide = isFlipped ? \"back\" : \"front\";
 
+      // Inhalt editierbar machen
       if(editingSide === \"front\") {
         document.getElementById(\"frontQuestion\").contentEditable = \"true\";
         document.getElementById(\"frontQuestion\").focus();
@@ -572,17 +591,17 @@
         document.getElementById(\"backAnswer\").contentEditable = \"true\";
         document.getElementById(\"backAnswer\").focus();
       }
-
       isEditing = true;
       document.getElementById(\"inlineEditOverlay\").classList.add(\"active\");
     }
-
     function closeInlineEditOverlay() {
+      // Bearbeitung beenden
       document.getElementById(\"frontQuestion\").contentEditable = \"false\";
       document.getElementById(\"backAnswer\").contentEditable = \"false\";
       document.getElementById(\"inlineEditOverlay\").classList.remove(\"active\");
       isEditing = false;
 
+      // Änderungen in cards speichern
       if(editingSide === \"front\") {
         cards[currentIndex].question = document.getElementById(\"frontQuestion\").innerHTML;
       } else {
@@ -591,7 +610,6 @@
       saveCardsToLocalStorage();
       updateCardSize();
     }
-
     function execCmd(cmd) {
       document.execCommand(cmd, false, null);
     }
@@ -600,6 +618,7 @@
     }
     function changeFontSize(size) {
       if(!size) return;
+      // Workaround: setze fontSize=7, dann im DOM die Größe anpassen
       document.execCommand(\"fontSize\", false, \"7\");
       const fonts = document.querySelectorAll(\"font[size='7']\");
       for(let f of fonts) {
@@ -608,8 +627,10 @@
       }
     }
 
+    /* --- Bewertung & Problem --- */
     function rateCard(rating) {
       if(rating === \"Einfach\") {
+        // Karte entfernen
         cards.splice(currentIndex, 1);
         if(cards.length === 0) {
           alert(\"Keine Karten mehr!\");
@@ -618,18 +639,19 @@
         }
         if(currentIndex >= cards.length) currentIndex = cards.length - 1;
       } else {
+        // nächste Karte
         currentIndex = (currentIndex + 1) % cards.length;
       }
       loadCard(currentIndex);
       saveCardsToLocalStorage();
     }
-
     function toggleProblem() {
       cards[currentIndex].problem = !cards[currentIndex].problem;
       loadCard(currentIndex);
       saveCardsToLocalStorage();
     }
 
+    /* --- Overlays (Bild, Farbe) --- */
     function openOverlay(id) {
       document.getElementById(id).classList.add(\"active\");
     }
@@ -644,6 +666,7 @@
       if(file) {
         const reader = new FileReader();
         reader.onload = function(e) {
+          // je nach Flip auf Front oder Rückseite einfügen
           const isFlipped = document.getElementById(\"card\").classList.contains(\"flip\");
           if(!isFlipped) {
             cards[currentIndex].question += `<br><img src=\"${e.target.result}\" class=\"editable-image\" style=\"max-width:100%; cursor:move;\" ondblclick=\"resizeImage(this)\" onclick=\"if(confirm('Bild entfernen?')) { this.remove(); }\"><br>`;
@@ -656,6 +679,8 @@
         reader.readAsDataURL(file);
       }
     }
+
+    /* Bildbearbeitung */
     function resizeImage(img) {
       let action = prompt(\"Gib 'resize' ein, um die Größe zu ändern oder 'crop' zum Zuschneiden:\", \"resize\");
       if(action === \"resize\") {
@@ -680,6 +705,7 @@
       closeOverlay('colorOverlay');
     }
 
+    /* --- Muster-Funktion (kein Flip) --- */
     function cyclePattern(event) {
       event.stopPropagation();
       let patternOrder = [\"lines\", \"grid\", \"dotted\", \"none\"];
@@ -696,6 +722,7 @@
       btn.innerHTML = `<i class=\"fas fa-th\"></i> Muster Boden`;
     }
 
+    /* --- Zeichnen --- */
     function setupCanvasDrawing() {
       const canvas = document.getElementById(\"drawCanvas\");
       const ctx = canvas.getContext(\"2d\");
@@ -783,6 +810,7 @@
       eraseDrawing();
     }
 
+    /* --- Karten hinzufügen & speichern --- */
     function addCard() {
       let newQuestion = prompt(\"Neue Frage:\");
       let newAnswer   = prompt(\"Neue Antwort:\");
@@ -821,6 +849,7 @@
       });
     }
 
+    /* --- Dynamische Kartengröße --- */
     function updateCardSize() {
       const card = document.getElementById('card');
       const visibleFace = card.classList.contains('flip')
@@ -841,6 +870,7 @@
     }
     window.addEventListener('resize', updateCardSize);
 
+    /* --- Bilder im Karteninhalt bearbeiten (Drag & Drop) --- */
     let dragItem = null;
     let offsetX = 0, offsetY = 0;
     function startDrag(e) {
