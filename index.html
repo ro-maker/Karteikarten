@@ -39,7 +39,7 @@
       justify-content: flex-start;
       margin: 0 auto;
     }
-    /* Linke Spalte: Plus-Button & Liste */
+    /* Linke Spalte: Plus-Button, Liste & Löschen */
     .left-panel {
       display: flex;
       flex-direction: column;
@@ -75,6 +75,21 @@
     #cardList button.active {
       background-color: #972D54;
       color: white;
+    }
+    /* Inaktive Karteikarten in der Liste */
+    #cardList button.inactive {
+      opacity: 0.5;
+    }
+    /* Trash-Button in der linken Spalte */
+    #deleteCardButton {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      cursor: pointer;
+      font-size: 1.2rem;
     }
     /* Kartenwrapper zentrieren */
     .card-wrapper {
@@ -135,7 +150,7 @@
       font-size: 1.2rem;
       background-color: #fff;
       z-index: 2;
-      line-height: 30px; /* Text exakt auf den Linien */
+      line-height: 30px;
     }
     /* Rückseite (Antwort) */
     .card-back {
@@ -150,7 +165,7 @@
       white-space: pre-wrap;
       word-wrap: break-word;
       font-size: 1.2rem;
-      line-height: 30px; /* Text exakt auf den Linien */
+      line-height: 30px;
       background-color: #f9f9f9;
       transform: rotateY(180deg);
       z-index: 1;
@@ -200,7 +215,6 @@
     .btn-muehsam { background-color: #f39c12; color: #000; }
     .btn-gut    { background-color: #2ecc71; }
     .btn-einfach { background-color: #1abc9c; }
-
     /* Overlays */
     .overlay {
       display: none;
@@ -231,7 +245,6 @@
       border-radius: 4px;
       margin-right: 5px;
     }
-
     /* Zeichnen-Overlay */
     .draw-overlay {
       position: absolute;
@@ -277,7 +290,6 @@
     .draw-toolbar input[type="range"] {
       width: 80px;
     }
-
     /* Bilder im Karteninhalt bearbeiten */
     .editable-image {
       cursor: move;
@@ -285,8 +297,7 @@
     .color-palette button[style*="#ffffff"] {
       border: 1px solid #999;
     }
-
-    /* Inline-Edit Overlay für Textformatierung */
+    /* Inline-Edit Overlay für Textformatierung – reduziert auf drei Buttons */
     #inlineEditOverlay {
       display: none;
       position: fixed;
@@ -298,7 +309,7 @@
       border-radius: 8px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.2);
       z-index: 1100;
-      max-width: 420px;
+      max-width: 300px;
       width: 90%;
     }
     #inlineEditOverlay.active {
@@ -309,9 +320,10 @@
     }
     #inlineEditOverlay .toolbar {
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       gap: 5px;
       margin-bottom: 10px;
+      justify-content: center;
     }
     #inlineEditOverlay .toolbar button {
       padding: 6px 10px;
@@ -323,12 +335,7 @@
       display: flex;
       align-items: center;
       gap: 3px;
-    }
-    #inlineEditOverlay .toolbar select {
-      padding: 4px 6px;
-      border-radius: 4px;
-      border: 1px solid #ddd;
-      cursor: pointer;
+      font-size: 1rem;
     }
   </style>
 </head>
@@ -342,6 +349,8 @@
     <div class="left-panel">
       <button class="add-card-button" onclick="addCard()">+</button>
       <div id="cardList"></div>
+      <!-- Trash-Button zum Löschen der ausgewählten Karte -->
+      <button id="deleteCardButton" onclick="deleteSelectedCard()"><i class="fas fa-trash"></i></button>
     </div>
 
     <!-- Kartenbereich -->
@@ -378,7 +387,6 @@
 
         <!-- Side-Buttons mit Icons -->
         <div class="side-buttons-container">
-          <!-- Diese Buttons sollen kein Flip auslösen -->
           <button onclick="openInlineEditOverlay();"><i class="fas fa-edit"></i> Bearbeiten</button>
           <button onclick="openOverlay('imageOverlay');"><i class="fas fa-image"></i> Bild</button>
           <button onclick="toggleDrawOverlay();"><i class="fas fa-pencil-alt"></i> Zeichnen</button>
@@ -423,26 +431,13 @@
     <button onclick="closeOverlay('colorOverlay')">Schließen</button>
   </div>
 
-  <!-- Inline Edit Overlay für Textformatierung -->
+  <!-- Inline Edit Overlay für Textformatierung – nur drei Buttons -->
   <div id="inlineEditOverlay">
     <h3>Text formatieren</h3>
     <div class="toolbar">
       <button onclick="execCmd('bold')"><i class="fas fa-bold"></i> B</button>
       <button onclick="execCmd('italic')"><i class="fas fa-italic"></i> I</button>
-      <button onclick="execCmd('underline')"><i class="fas fa-underline"></i> U</button>
-      <button style="background: yellow;" onclick="execCmdColor('yellow')"><i class="fas fa-highlighter"></i> Gelb</button>
-      <button style="background: lightblue;" onclick="execCmdColor('lightblue')"><i class="fas fa-highlighter"></i> Hellblau</button>
-      <button style="background: red;" onclick="execCmdColor('red')"><i class="fas fa-highlighter"></i> Rot</button>
-      <button style="background: lightgreen;" onclick="execCmdColor('lightgreen')"><i class="fas fa-highlighter"></i> Grün</button>
-      <button style="background: orange;" onclick="execCmdColor('orange')"><i class="fas fa-highlighter"></i> Orange</button>
-      <select onchange="changeFontSize(this.value)">
-        <option value="">Schriftgröße</option>
-        <option value="14px">14px</option>
-        <option value="18px">18px</option>
-        <option value="24px">24px</option>
-        <option value="32px">32px</option>
-      </select>
-      <button onclick="execCmd('removeFormat')"><i class="fas fa-eraser"></i></button>
+      <button onclick="execCmd('underline')"><i class="fas fa-underline"></i> <span style="text-decoration: underline;">U</span></button>
     </div>
     <button onclick="closeInlineEditOverlay()">Schließen</button>
   </div>
@@ -457,7 +452,8 @@
         answer: "JavaScript ist eine Programmiersprache für Webentwicklung.\n\n- Dynamische Inhalte\n- Interaktive Webseiten",
         color: "#fff",
         problem: false,
-        pattern: "dotted"
+        pattern: "dotted",
+        active: true
       }
     ];
     let currentIndex = 0;
@@ -597,15 +593,26 @@
 
     /* --- Bewertung & Problem --- */
     function rateCard(rating) {
+      // Bei "Einfach" wird die Karte als inaktiv markiert und übersprungen, bleibt aber in der Liste
       if(rating === "Einfach") {
-        cards.splice(currentIndex, 1);
-        if(cards.length === 0) {
-          alert("Keine Karten mehr!");
-          saveCardsToLocalStorage();
+        cards[currentIndex].active = false;
+        // Suche nach nächster aktiver Karte
+        let nextIndex = currentIndex;
+        let found = false;
+        for(let i = 0; i < cards.length; i++){
+          nextIndex = (nextIndex + 1) % cards.length;
+          if(cards[nextIndex].active !== false) {
+            found = true;
+            break;
+          }
+        }
+        if(!found){
+          alert("Keine aktiven Karten mehr!");
           return;
         }
-        if(currentIndex >= cards.length) currentIndex = cards.length - 1;
+        currentIndex = nextIndex;
       } else {
+        // Bei anderen Bewertungen: normale Reihenfolge
         currentIndex = (currentIndex + 1) % cards.length;
       }
       loadCard(currentIndex);
@@ -678,7 +685,6 @@
       let index = patternOrder.indexOf(current);
       let nextIndex = (index + 1) % patternOrder.length;
       cards[currentIndex].pattern = patternOrder[nextIndex];
-      // Beim Musterwechsel den Flip-Zustand beibehalten
       loadCard(currentIndex, true);
       saveCardsToLocalStorage();
       return false;
@@ -786,7 +792,8 @@
           answer: newAnswer,
           color: "#fff",
           problem: false,
-          pattern: "dotted"
+          pattern: "dotted",
+          active: true
         });
         currentIndex++;
         loadCard(currentIndex);
@@ -811,8 +818,24 @@
         btn.textContent = i + 1;
         btn.onclick = () => { loadCard(i); };
         if(i === currentIndex) btn.classList.add("active");
+        if(c.active === false) btn.classList.add("inactive");
         listDiv.appendChild(btn);
       });
+    }
+
+    /* --- Löschen der ausgewählten Karte über den Trash-Button --- */
+    function deleteSelectedCard() {
+      if(confirm("Diese Karte endgültig löschen?")) {
+        cards.splice(currentIndex, 1);
+        if(cards.length === 0){
+          alert("Keine Karten mehr!");
+          saveCardsToLocalStorage();
+          return;
+        }
+        if(currentIndex >= cards.length) currentIndex = cards.length - 1;
+        loadCard(currentIndex);
+        saveCardsToLocalStorage();
+      }
     }
 
     /* --- Dynamische Kartengröße --- */
