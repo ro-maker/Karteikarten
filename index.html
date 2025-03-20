@@ -179,13 +179,13 @@
     .side-buttons-container button:hover {
       opacity: 0.9;
     }
-    /* Untere Bewertungsbuttons */
+    /* Untere Bewertungsbuttons: leicht nach links verschoben */
     .bottom-buttons {
       display: flex;
       gap: 10px;
       width: 600px;
-      justify-content: center; /* Zentriert die Buttons unter der Karte */
-      margin: 0 auto; /* Zusätzliche Zentrierung */
+      justify-content: flex-start; /* Buttons beginnen links */
+      margin: 0 auto 0 50px; /* linke Verschiebung */
     }
     .bottom-buttons button {
       flex: 1;
@@ -283,6 +283,27 @@
     .color-palette button[style*="#ffffff"] {
       border: 1px solid #999;
     }
+    /* Inline-Edit Overlay für Textformatierung */
+    #inlineEditOverlay {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      z-index: 1100;
+      max-width: 400px;
+      width: 90%;
+    }
+    #inlineEditOverlay.active { display: block; }
+    #inlineEditOverlay .toolbar {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 <body>
@@ -331,7 +352,8 @@
 
         <!-- Side-Buttons mit Icons -->
         <div class="side-buttons-container">
-          <button onclick="startInlineEdit();"><i class="fas fa-edit"></i> Bearbeiten</button>
+          <!-- Beim Klick auf diese Buttons (z.B. Bearbeiten) wird kein Flip getriggert -->
+          <button onclick="openInlineEditOverlay();"><i class="fas fa-edit"></i> Bearbeiten</button>
           <button onclick="openOverlay('imageOverlay');"><i class="fas fa-image"></i> Bild</button>
           <button onclick="toggleDrawOverlay();"><i class="fas fa-pencil-alt"></i> Zeichnen</button>
           <button onclick="openOverlay('colorOverlay');"><i class="fas fa-palette"></i> Farbe</button>
@@ -373,6 +395,20 @@
       <button style="background:#ffddee;" onclick="setCardColor('#ffddee')"></button>
     </div>
     <button onclick="closeOverlay('colorOverlay')">Schließen</button>
+  </div>
+
+  <!-- Inline Edit Overlay für Textformatierung -->
+  <div id="inlineEditOverlay">
+    <h3>Text formatieren</h3>
+    <div class="toolbar">
+      <button onclick="execCmd('bold')"><i class="fas fa-bold"></i></button>
+      <button onclick="execCmd('italic')"><i class="fas fa-italic"></i></button>
+      <button onclick="execCmd('underline')"><i class="fas fa-underline"></i></button>
+      <!-- Beispielhafte Farbpalette für Textmarker -->      
+      <button style="background: yellow;" onclick="execCmdColor('yellow')"><i class="fas fa-highlighter"></i></button>
+      <button style="background: lightblue;" onclick="execCmdColor('lightblue')"><i class="fas fa-highlighter"></i></button>
+    </div>
+    <button onclick="closeInlineEditOverlay()">Schließen</button>
   </div>
 
   <input type="file" id="hiddenImageUpload" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
@@ -464,8 +500,10 @@
     }
 
     function maybeFlip(e) {
-      // Wenn Klick auf .side-buttons-container => nicht flippen
-      if(e.target.closest('.side-buttons-container')) return;
+      // Wenn Klick auf .side-buttons-container oder Inline-Edit Overlay => nicht flippen
+      if(e.target.closest('.side-buttons-container') || e.target.closest('#inlineEditOverlay')) return;
+      // Wenn gerade Text editiert wird, soll kein Flip erfolgen
+      if(isEditing) return;
       flipCard();
     }
     function flipCard() {
@@ -476,52 +514,34 @@
       document.getElementById("bottomButtons").style.display = "flex";
     }
 
-    /* --- Inline-Bearbeitung (ohne Toolbar) --- */
-    function startInlineEdit() {
+    /* --- Inline-Bearbeitung mit Editor Overlay --- */
+    function openInlineEditOverlay() {
       isEditing = true;
-      const isFlipped = document.getElementById("card").classList.contains("flip");
-      const frontEl = document.getElementById("frontQuestion");
-      const backEl  = document.getElementById("backAnswer");
+      // Setze den ContentEditable-Modus für die aktive Seite (Vorder- oder Rückseite)
+      let cardEl = document.getElementById("card");
+      let isFlipped = cardEl.classList.contains("flip");
       if(isFlipped) {
-        editingSide = "back";
-        originalHTML = cards[currentIndex].answer;
-        backEl.contentEditable = "true";
-        backEl.focus();
+        document.getElementById("backAnswer").contentEditable = "true";
+        document.getElementById("backAnswer").focus();
       } else {
-        editingSide = "front";
-        originalHTML = cards[currentIndex].question;
-        frontEl.contentEditable = "true";
-        frontEl.focus();
+        document.getElementById("frontQuestion").contentEditable = "true";
+        document.getElementById("frontQuestion").focus();
       }
+      document.getElementById("inlineEditOverlay").classList.add("active");
     }
-    function finishInlineEdit() {
+    function closeInlineEditOverlay() {
       document.getElementById("frontQuestion").contentEditable = "false";
       document.getElementById("backAnswer").contentEditable = "false";
+      document.getElementById("inlineEditOverlay").classList.remove("active");
       isEditing = false;
-      editingSide = null;
       updateCardSize();
-    }
-    function saveInlineEdit() {
-      const frontEl = document.getElementById("frontQuestion");
-      const backEl  = document.getElementById("backAnswer");
-      if(editingSide === "front") {
-        cards[currentIndex].question = frontEl.innerHTML;
-      } else {
-        cards[currentIndex].answer = backEl.innerHTML;
-      }
-      finishInlineEdit();
       saveCardsToLocalStorage();
-      loadCard(currentIndex);
     }
-    function cancelInlineEdit() {
-      const frontEl = document.getElementById("frontQuestion");
-      const backEl  = document.getElementById("backAnswer");
-      if(editingSide === "front") {
-        frontEl.innerHTML = originalHTML;
-      } else {
-        backEl.innerHTML = originalHTML;
-      }
-      finishInlineEdit();
+    function execCmd(cmd) {
+      document.execCommand(cmd, false, null);
+    }
+    function execCmdColor(btnColor) {
+      document.execCommand("hiliteColor", false, btnColor);
     }
 
     /* --- Bewertung & Problem --- */
