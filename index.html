@@ -36,8 +36,8 @@
       gap: 20px;
       width: 100%;
       max-width: 1400px;
-      justify-content: flex-start; /* Linksbündig, damit Plus und Nummern ganz links sind */
-      margin: 0 auto; /* zentriert den Hauptcontainer horizontal in der Seite */
+      justify-content: flex-start; /* Linke Spalte bleibt links */
+      margin: 0 auto; /* Hauptcontainer insgesamt zentriert */
     }
     /* Linke Spalte: Plus-Button & Liste */
     .left-panel {
@@ -76,7 +76,7 @@
       background-color: #972D54;
       color: white;
     }
-    /* Kartenwrapper */
+    /* Kartenwrapper zentrieren */
     .card-wrapper {
       display: flex;
       flex-direction: column;
@@ -84,6 +84,7 @@
       gap: 10px;
       width: 100%;
       max-width: 900px; 
+      margin: 0 auto; /* Zentriert den Karten-Bereich */
     }
     /* Container für Karte und Side-Buttons */
     .card-and-sides {
@@ -94,6 +95,7 @@
       position: relative;
       width: 100%;
       max-width: 900px;
+      margin: 0 auto; /* Zusätzliche Zentrierung */
     }
     /* Die Karte */
     .card {
@@ -147,18 +149,8 @@
       white-space: pre-wrap;
       word-wrap: break-word;
       font-size: 1.2rem;
-      /* Zeilenhöhe 30px, damit Text exakt auf den Linien sitzt */
-      line-height: 30px;
+      line-height: 30px; /* Damit Text exakt auf den Linien sitzt */
       background-color: #f9f9f9;
-      background-image: repeating-linear-gradient(
-        to bottom,
-        transparent,
-        transparent 29px,
-        rgba(0,0,0,0.15) 29px,
-        rgba(0,0,0,0.15) 30px
-      );
-      background-position: 0 0;
-      background-size: 30px 30px;
       transform: rotateY(180deg);
       z-index: 1;
     }
@@ -187,40 +179,13 @@
     .side-buttons-container button:hover {
       opacity: 0.9;
     }
-    /* Inline-Edit Toolbar */
-    .inline-edit-toolbar {
-      display: none;
-      margin-top: 10px;
-      padding: 6px;
-      border: 2px solid #972D54;
-      border-radius: 4px;
-      background: #fff;
-    }
-    .inline-edit-toolbar .toolbar,
-    .inline-edit-toolbar .color-palette,
-    .inline-edit-toolbar .highlight-palette {
-      display: flex;
-      gap: 5px;
-      flex-wrap: wrap;
-      margin-bottom: 5px;
-    }
-    .inline-edit-toolbar button {
-      background-color: #972D54;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      padding: 4px 8px;
-      margin-right: 5px;
-    }
     /* Untere Bewertungsbuttons */
     .bottom-buttons {
       display: flex;
       gap: 10px;
-      /* "Genau unter der Karteikarte" => selbe Breite wie .card (600px) */
       width: 600px;
-      justify-content: flex-start; /* leicht nach links */
+      justify-content: center; /* Zentriert die Buttons unter der Karte */
+      margin: 0 auto; /* Zusätzliche Zentrierung */
     }
     .bottom-buttons button {
       flex: 1;
@@ -371,14 +336,14 @@
           <button onclick="toggleDrawOverlay();"><i class="fas fa-pencil-alt"></i> Zeichnen</button>
           <button onclick="openOverlay('colorOverlay');"><i class="fas fa-palette"></i> Farbe</button>
           <button onclick="toggleProblem();"><i class="fas fa-exclamation-triangle"></i> P</button>
-          <!-- Muster-Button -->
-          <button id="patternButton" onclick="event.stopPropagation(); cyclePattern(); return false;">
+          <!-- Muster-Button (ohne Flip) -->
+          <button id="patternButton" onclick="cyclePattern(event)">
             <i class="fas fa-th"></i> Muster Boden
           </button>
         </div>
       </div>
 
-      <!-- Bewertungsbuttons (links unter der Karte) -->
+      <!-- Bewertungsbuttons -->
       <div class="bottom-buttons" id="bottomButtons">
         <button class="btn-falsch" onclick="rateCard('Falsch')">Falsch</button>
         <button class="btn-muehsam" onclick="rateCard('Mühsam')">Mühsam</button>
@@ -452,18 +417,34 @@
       document.getElementById("cardBackFace").style.backgroundColor  = c.color;
       
       // Muster einstellen
+      let backFace = document.getElementById("cardBackFace");
+      // Standard Reset:
+      backFace.style.backgroundImage = "none";
+      backFace.style.backgroundSize = "";
+      backFace.style.backgroundPosition = "";
+      backFace.style.lineHeight = "30px";
+      backFace.style.paddingTop = "10px"; // leichte Korrektur
+
       if(c.pattern === 'lines') {
-        document.getElementById("cardBackFace").style.backgroundImage = 
-          "repeating-linear-gradient(0deg, transparent, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px)";
-      } else if(c.pattern === 'grid') {
-        document.getElementById("cardBackFace").style.backgroundImage = 
+        backFace.style.backgroundImage = 
+          "repeating-linear-gradient(to bottom, transparent, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px)";
+        // Damit Text exakt auf den Linien sitzt:
+        backFace.style.backgroundPosition = "0 15px";
+        backFace.style.paddingTop = "15px"; 
+      } 
+      else if(c.pattern === 'grid') {
+        backFace.style.backgroundImage = 
           "linear-gradient(0deg, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px), linear-gradient(90deg, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px)";
-        document.getElementById("cardBackFace").style.backgroundSize = "30px 30px";
-      } else if(c.pattern === 'dotted') {
-        document.getElementById("cardBackFace").style.backgroundImage = 
-          "repeating-radial-gradient(circle, rgba(0,0,0,0.15) 0, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 20px)";
-      } else if(c.pattern === 'none') {
-        document.getElementById("cardBackFace").style.backgroundImage = "none";
+        backFace.style.backgroundSize = "30px 30px";
+      } 
+      else if(c.pattern === 'dotted') {
+        // Gleichmäßiges Punktgitter
+        backFace.style.backgroundImage =
+          "radial-gradient(rgba(0,0,0,0.15) 1px, transparent 1px)";
+        backFace.style.backgroundSize = "20px 20px";
+      }
+      else if(c.pattern === 'none') {
+        backFace.style.backgroundImage = "none";
       }
       
       const cardEl = document.getElementById("card");
@@ -476,12 +457,14 @@
       updatePatternButton();
       makeImagesEditable();
     }
+
     function updateCardCounter() {
       document.getElementById("currentCardIndex").textContent = currentIndex + 1;
       document.getElementById("totalCards").textContent = cards.length;
     }
+
     function maybeFlip(e) {
-      // Wenn Klick auf .side-buttons-container oder patternButton => nicht flippen
+      // Wenn Klick auf .side-buttons-container => nicht flippen
       if(e.target.closest('.side-buttons-container')) return;
       flipCard();
     }
@@ -493,7 +476,7 @@
       document.getElementById("bottomButtons").style.display = "flex";
     }
 
-    /* --- Inline-Bearbeitung --- */
+    /* --- Inline-Bearbeitung (ohne Toolbar) --- */
     function startInlineEdit() {
       isEditing = true;
       const isFlipped = document.getElementById("card").classList.contains("flip");
@@ -510,14 +493,12 @@
         frontEl.contentEditable = "true";
         frontEl.focus();
       }
-      document.getElementById("inlineEditToolbar").style.display = "block";
     }
     function finishInlineEdit() {
       document.getElementById("frontQuestion").contentEditable = "false";
       document.getElementById("backAnswer").contentEditable = "false";
       isEditing = false;
       editingSide = null;
-      document.getElementById("inlineEditToolbar").style.display = "none";
       updateCardSize();
     }
     function saveInlineEdit() {
@@ -541,26 +522,6 @@
         backEl.innerHTML = originalHTML;
       }
       finishInlineEdit();
-    }
-
-    /* --- Exec Commands (WYSIWYG) --- */
-    function execCmd(cmd) {
-      document.execCommand(cmd, false, null);
-    }
-    function changeFontSize() {
-      let size = prompt("Schriftgröße (z.B. 18px):", "18px");
-      if(!size) return;
-      document.execCommand("fontSize", false, "5");
-      document.querySelectorAll("font[size='5']").forEach(f => {
-        f.removeAttribute("size");
-        f.style.fontSize = size;
-      });
-    }
-    function execCmdColor(btnColor) {
-      document.execCommand("foreColor", false, btnColor);
-    }
-    function execCmdHighlight(btnColor) {
-      document.execCommand("hiliteColor", false, btnColor);
     }
 
     /* --- Bewertung & Problem --- */
@@ -632,8 +593,9 @@
       closeOverlay('colorOverlay');
     }
 
-    /* --- Muster-Funktionalität --- */
-    function cyclePattern() {
+    /* --- Muster-Funktionalität (kein Flip bei Klick) --- */
+    function cyclePattern(event) {
+      event.stopPropagation(); // verhindert flip
       let patternOrder = ["lines", "grid", "dotted", "none"];
       let current = cards[currentIndex].pattern;
       let index = patternOrder.indexOf(current);
