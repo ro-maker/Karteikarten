@@ -8,7 +8,8 @@
   <!-- Font Awesome via CDN (Version 6) -->
   <link rel="stylesheet" 
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
-        integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+        integrity="sha512-..."
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 
   <style>
     /* Globales Styling */
@@ -78,7 +79,6 @@
       background-color: #972D54;
       color: white;
     }
-    /* Inaktive Karteikarten in der Liste */
     #cardList button.inactive {
       opacity: 0.5;
     }
@@ -164,15 +164,20 @@
       transform: rotateY(180deg);
       z-index: 1;
     }
-    /* Seitentasten */
+    /* Seitentasten – jetzt linksbündig ausgerichtet */
     .side-buttons-container {
       display: flex;
       flex-direction: column;
       gap: 5px;
       justify-content: flex-start;
-      align-items: center;
+      align-items: flex-start; /* <--- linksbündig */
     }
     .side-buttons-container button {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start; /* <--- linksbündig Icon + Text */
+      text-align: left;
+      gap: 8px;
       padding: 6px 10px;
       border: none;
       border-radius: 4px;
@@ -180,11 +185,7 @@
       color: #fff;
       cursor: pointer;
       font-size: 0.85rem;
-      display: flex;
-      align-items: center;
-      gap: 5px;
       width: 110px;
-      justify-content: center;
     }
     .side-buttons-container button:hover {
       opacity: 0.9;
@@ -195,6 +196,7 @@
       gap: 10px;
       margin: 0 auto;
       justify-content: center;
+      transition: width 0.3s;
     }
     .bottom-buttons button {
       flex: 1;
@@ -209,23 +211,29 @@
     .btn-muehsam { background-color: #f39c12; color: #000; }
     .btn-gut    { background-color: #2ecc71; }
     .btn-einfach { background-color: #1abc9c; }
-    /* Overlays */
+    /* Overlays – moderneres Aussehen & draggable */
     .overlay {
       display: none;
       position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      top: 100px; /* leicht nach unten versetzt, damit man es sofort sieht */
+      left: 100px; /* und nach rechts */
       background: #fff;
       padding: 15px;
       border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2); /* stärkerer Shadow */
       z-index: 1000;
       max-width: 600px;
       width: 90%;
+      /* Leichter Farbverlauf im Hintergrund */
+      background: linear-gradient(135deg, #ffffff 0%, #f3f3f3 100%);
+      cursor: move; /* zeigt an, dass man das Fenster verschieben kann */
+      transition: box-shadow 0.2s;
     }
     .overlay.active {
       display: block;
+    }
+    .overlay:hover {
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
     }
     .overlay h3 {
       margin-bottom: 10px;
@@ -293,18 +301,7 @@
     }
     /* Inline-Edit Overlay (mit Farbpalette & Schriftgrößenauswahl) */
     #inlineEditOverlay {
-      display: none;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: #fff;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      z-index: 1100;
-      max-width: 420px;
-      width: 90%;
+      /* schon in overlay-Klasse enthalten */
     }
     #inlineEditOverlay.active {
       display: block;
@@ -361,7 +358,9 @@
       <button class="add-card-button" onclick="addCard()">+</button>
       <div id="cardList"></div>
       <!-- Löschen-Button mit Mülleimer-Icon -->
-      <button id="deleteCardButton" onclick="deleteCardChoice()" title="Löschen"><i class="fa-solid fa-trash"></i></button>
+      <button id="deleteCardButton" onclick="deleteCardChoice()" title="Löschen">
+        <i class="fa-solid fa-trash"></i>
+      </button>
     </div>
 
     <!-- Kartenbereich -->
@@ -410,7 +409,7 @@
         </div>
       </div>
 
-      <!-- Bewertungsbuttons: Containerbreite wird an die Kartengröße angepasst -->
+      <!-- Bewertungsbuttons -->
       <div class="bottom-buttons" id="bottomButtons">
         <button class="btn-falsch" onclick="rateCard('Falsch')">Falsch</button>
         <button class="btn-muehsam" onclick="rateCard('Mühsam')">Mühsam</button>
@@ -443,7 +442,7 @@
   </div>
 
   <!-- Inline-Edit Overlay (mit Farbpalette und Schriftgrößenauswahl) -->
-  <div id="inlineEditOverlay">
+  <div id="inlineEditOverlay" class="overlay">
     <h3>Text formatieren</h3>
     <div class="toolbar">
       <button onclick="execCmd('bold')"><i class="fas fa-bold"></i> B</button>
@@ -463,12 +462,21 @@
       <button style="background: #FF073A;" onclick="execCmdColor('#FF073A')"></button>
       <button style="background: #0FF0FC;" onclick="execCmdColor('#0FF0FC')"></button>
     </div>
+    <!-- Neue Schriftarten-Auswahl -->
     <select onchange="changeFontSize(this.value)">
       <option value="">Schriftgröße</option>
       <option value="14px">14px</option>
       <option value="18px">18px</option>
       <option value="24px">24px</option>
       <option value="32px">32px</option>
+    </select>
+    <select onchange="changeFontFamily(this.value)">
+      <option value="">Schriftart</option>
+      <option value="Arial">Arial</option>
+      <option value="Times New Roman">Times New Roman</option>
+      <option value="Courier New">Courier New</option>
+      <option value="Georgia">Georgia</option>
+      <option value="Verdana">Verdana</option>
     </select>
     <button onclick="closeInlineEditOverlay()">Schließen</button>
   </div>
@@ -503,6 +511,7 @@
       setupCanvasDrawing();
       updateCardSize();
       updateBottomButtonsWidth();
+      makeAllOverlaysDraggable();
     });
 
     /* --- Karte laden --- */
@@ -524,7 +533,7 @@
       backFace.style.paddingTop = "10px"; // Standard für andere Muster
 
       if(c.pattern === 'lines') {
-        // Wiederherstellung der "alten" Linie – und so wird der Text exakt auf der Linie platziert:
+        // Originales "lines"-Muster, Text sitzt auf der Linie
         backFace.style.backgroundImage =
           "repeating-linear-gradient(to bottom, transparent, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px)";
         backFace.style.backgroundPosition = "0 15px";
@@ -622,6 +631,10 @@
         f.removeAttribute("size");
         f.style.fontSize = size;
       }
+    }
+    function changeFontFamily(font) {
+      if(!font) return;
+      document.execCommand("fontName", false, font);
     }
 
     /* --- Bewertung & Problem --- */
@@ -944,6 +957,39 @@
         img.style.cursor = 'move';
         img.addEventListener('mousedown', startDrag);
       });
+    }
+
+    /* --- Overlays draggable machen --- */
+    function makeAllOverlaysDraggable() {
+      const overlays = document.querySelectorAll('.overlay');
+      overlays.forEach(overlay => {
+        overlay.addEventListener('mousedown', startOverlayDrag);
+      });
+    }
+    let overlayDragTarget = null;
+    let overlayDragOffsetX = 0;
+    let overlayDragOffsetY = 0;
+
+    function startOverlayDrag(e) {
+      // Nur linken Mausklick verwenden
+      if(e.button !== 0) return;
+      overlayDragTarget = e.currentTarget; // das Overlay selbst
+      // Abstand merken
+      overlayDragOffsetX = e.clientX - overlayDragTarget.offsetLeft;
+      overlayDragOffsetY = e.clientY - overlayDragTarget.offsetTop;
+      document.addEventListener('mousemove', onOverlayDrag);
+      document.addEventListener('mouseup', endOverlayDrag);
+      e.preventDefault();
+    }
+    function onOverlayDrag(e) {
+      if(!overlayDragTarget) return;
+      overlayDragTarget.style.left = (e.clientX - overlayDragOffsetX) + 'px';
+      overlayDragTarget.style.top  = (e.clientY - overlayDragOffsetY) + 'px';
+    }
+    function endOverlayDrag(e) {
+      overlayDragTarget = null;
+      document.removeEventListener('mousemove', onOverlayDrag);
+      document.removeEventListener('mouseup', endOverlayDrag);
     }
   </script>
 </body>
