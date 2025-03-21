@@ -5,8 +5,10 @@
   <title>Jura-Karteikarten</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-  <!-- Font Awesome für Icons -->
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <!-- Font Awesome via CDN (Version 6) -->
+  <link rel="stylesheet" 
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
+        integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
 
   <style>
     /* Globales Styling */
@@ -80,7 +82,7 @@
     #cardList button.inactive {
       opacity: 0.5;
     }
-    /* Trash-Button in der linken Spalte – Mülleimer-Symbol */
+    /* Trash-Button – Mülleimer-Symbol */
     #deleteCardButton {
       background-color: #e74c3c;
       color: white;
@@ -104,7 +106,7 @@
       max-width: 900px;
       margin: 0 auto;
     }
-    /* Container für Karte und Side-Buttons */
+    /* Container für Karte und Seitentasten */
     .card-and-sides {
       display: flex;
       gap: 20px;
@@ -138,8 +140,8 @@
     .card.flip .card-inner {
       transform: rotateY(180deg);
     }
-    /* Vorderseite (Frage) */
-    .card-front {
+    /* Vorder- und Rückseite */
+    .card-front, .card-back {
       position: absolute;
       top: 0;
       left: 0;
@@ -147,28 +149,17 @@
       min-height: 300px;
       padding: 10px 20px 20px 20px;
       border-radius: 8px;
-      backface-visibility: hidden;
       white-space: pre-wrap;
       word-wrap: break-word;
       font-size: 1.2rem;
+      line-height: 30px;
+      backface-visibility: hidden;
+    }
+    .card-front {
       background-color: #fff;
       z-index: 2;
-      line-height: 30px;
     }
-    /* Rückseite (Antwort) */
     .card-back {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      min-height: 300px;
-      padding: 10px 20px 20px 20px;
-      border-radius: 8px;
-      backface-visibility: hidden;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      font-size: 1.2rem;
-      line-height: 30px;
       background-color: #f9f9f9;
       transform: rotateY(180deg);
       z-index: 1;
@@ -198,7 +189,7 @@
     .side-buttons-container button:hover {
       opacity: 0.9;
     }
-    /* Untere Bewertungsbuttons */
+    /* Bewertungsbuttons – Container bekommt exakt die Kartenbreite */
     .bottom-buttons {
       display: flex;
       gap: 10px;
@@ -300,7 +291,7 @@
     .color-palette button[style*="#ffffff"] {
       border: 1px solid #999;
     }
-    /* Inline-Edit Overlay für Textformatierung – mit Farbpalette & Schriftgrößenauswahl */
+    /* Inline-Edit Overlay (mit Farbpalette & Schriftgrößenauswahl) */
     #inlineEditOverlay {
       display: none;
       position: fixed;
@@ -345,7 +336,6 @@
       border: 1px solid #ddd;
       cursor: pointer;
     }
-    /* Farbpalette im Bearbeitungsfenster */
     #inlineEditOverlay .color-palette {
       display: flex;
       gap: 5px;
@@ -370,10 +360,8 @@
     <div class="left-panel">
       <button class="add-card-button" onclick="addCard()">+</button>
       <div id="cardList"></div>
-      <!-- Trash-Button mit erweiterter Löschfunktion -->
-      <button id="deleteCardButton" onclick="deleteCardChoice()" title="Klicken, um Karten zu löschen">
-        <i class="fas fa-trash"></i>
-      </button>
+      <!-- Löschen-Button mit Mülleimer-Icon -->
+      <button id="deleteCardButton" onclick="deleteCardChoice()" title="Löschen"><i class="fa-solid fa-trash"></i></button>
     </div>
 
     <!-- Kartenbereich -->
@@ -383,11 +371,11 @@
         <div class="card" id="card" onclick="maybeFlip(event)">
           <div class="card-inner">
             <!-- Vorderseite -->
-            <div class="card-face card-front" id="cardFrontFace" contenteditable="false">
+            <div class="card-front" id="cardFrontFace" contenteditable="false">
               <div id="frontQuestion">Frage wird geladen...</div>
             </div>
             <!-- Rückseite -->
-            <div class="card-face card-back" id="cardBackFace" contenteditable="false">
+            <div class="card-back" id="cardBackFace" contenteditable="false">
               <div id="backAnswer">Antwort wird geladen...</div>
             </div>
           </div>
@@ -422,7 +410,7 @@
         </div>
       </div>
 
-      <!-- Bewertungsbuttons -->
+      <!-- Bewertungsbuttons: Containerbreite wird an die Kartengröße angepasst -->
       <div class="bottom-buttons" id="bottomButtons">
         <button class="btn-falsch" onclick="rateCard('Falsch')">Falsch</button>
         <button class="btn-muehsam" onclick="rateCard('Mühsam')">Mühsam</button>
@@ -536,16 +524,11 @@
       backFace.style.paddingTop = "10px"; // Standard für andere Muster
 
       if(c.pattern === 'lines') {
-        /*
-          Wir verwenden hier ein 30px-Raster, wobei 1px die Linie ist und 29px transparent.
-          Durch background-position: 0 12px + padding-top: 12px sitzt die erste Zeile
-          relativ weit oben. Du kannst die Zahlen nach Belieben justieren,
-          damit es "perfekt" aussieht (z.B. 10px, 12px, 15px etc.).
-        */
+        // Wiederherstellung der "alten" Linie – und so wird der Text exakt auf der Linie platziert:
         backFace.style.backgroundImage =
-          "repeating-linear-gradient(to bottom, rgba(0,0,0,0.15) 1px, transparent 29px)";
-        backFace.style.backgroundPosition = "0 12px";
-        backFace.style.paddingTop = "12px";
+          "repeating-linear-gradient(to bottom, transparent, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px)";
+        backFace.style.backgroundPosition = "0 15px";
+        backFace.style.paddingTop = "15px";
       } 
       else if(c.pattern === 'grid') {
         backFace.style.backgroundImage = 
@@ -593,7 +576,7 @@
       document.getElementById("bottomButtons").style.display = "flex";
     }
     function updateBottomButtonsWidth() {
-      // Dynamische Anpassung an die Breite der Karte
+      // Container-Breite wird exakt an die Kartenbreite angepasst (min. 600px)
       const cardWidth = document.getElementById("card").clientWidth;
       document.getElementById("bottomButtons").style.width = cardWidth + "px";
     }
@@ -877,10 +860,8 @@
       // Der Nutzer wählt: ALLE Karten löschen oder nur diese Karte
       let choice = confirm("Möchtest du ALLE Karteikarten löschen? (OK = Alle löschen, Abbrechen = Nur diese Karte)");
       if(choice) {
-        // Alle löschen
         deleteAllCards();
       } else {
-        // Nur ausgewählte Karte löschen
         deleteSelectedCard();
       }
     }
