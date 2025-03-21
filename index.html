@@ -14,15 +14,26 @@
 
   <style>
     /* ===== GLOBAL STYLES ===== */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     body {
       background-color: #fefefe;
       padding: 20px;
       font-family: Arial, sans-serif;
-      display: flex; flex-direction: column; align-items: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-    header { text-align: center; margin-bottom: 20px; }
-    header h2 { color: #972D54; }
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    header h2 {
+      color: #972D54;
+    }
 
     /* ===== MAIN CONTAINER ===== */
     .main-container {
@@ -53,7 +64,11 @@
       height: 50px;
       cursor: pointer;
     }
-    #cardList { display: flex; flex-direction: column; gap: 5px; }
+    #cardList {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
     #cardList button {
       width: 30px;
       height: 30px;
@@ -63,8 +78,13 @@
       cursor: pointer;
       font-size: 0.8rem;
     }
-    #cardList button.active { background-color: #972D54; color: white; }
-    #cardList button.inactive { opacity: 0.5; }
+    #cardList button.active {
+      background-color: #972D54;
+      color: white;
+    }
+    #cardList button.inactive {
+      opacity: 0.5;
+    }
     /* Löschbuttons */
     #deleteCardButton {
       background-color: #e74c3c;
@@ -134,7 +154,9 @@
       position: relative;
       z-index: 1;
     }
-    .card.flip .card-inner { transform: rotateY(180deg); }
+    .card.flip .card-inner {
+      transform: rotateY(180deg);
+    }
     .card-front, .card-back {
       position: absolute;
       top: 0; left: 0;
@@ -148,15 +170,25 @@
       line-height: 30px;
       backface-visibility: hidden;
     }
-    .card-front { background-color: #fff; z-index: 2; }
-    .card-back { background-color: #f9f9f9; transform: rotateY(180deg); z-index: 1; }
+    .card-front {
+      background-color: #fff;
+      z-index: 2;
+    }
+    .card-back {
+      background-color: #f9f9f9;
+      transform: rotateY(180deg);
+      z-index: 1;
+    }
 
     /* ===== ZEICHNEN: CANVAS IN DER KARTE ===== */
     #drawCanvas {
       position: absolute;
       top: 0; left: 0;
       z-index: 3;
-      pointer-events: none; /* wird im Zeichnen-Modus aktiviert */
+      /* Standardmäßig pointer-events: none, 
+         damit man Text markieren kann, 
+         wenn nicht im Zeichnen-Modus */
+      pointer-events: none;
     }
 
     /* ===== SIDE BUTTONS (RECHTS) ===== */
@@ -181,7 +213,9 @@
       width: 110px;
       text-align: left;
     }
-    .side-buttons-container button:hover { opacity: 0.9; }
+    .side-buttons-container button:hover {
+      opacity: 0.9;
+    }
 
     /* ===== BOTTOM BUTTONS ===== */
     .bottom-buttons {
@@ -220,8 +254,12 @@
       z-index: 1000;
       cursor: move;
     }
-    .overlay.active { display: block; }
-    .overlay h3 { margin-bottom: 10px; }
+    .overlay.active {
+      display: block;
+    }
+    .overlay h3 {
+      margin-bottom: 10px;
+    }
     .overlay button {
       padding: 8px 12px;
       background-color: #972D54;
@@ -295,7 +333,7 @@
               <div id="backAnswer">Antwort wird geladen...</div>
             </div>
           </div>
-          <!-- Der Zeichen-Canvas, direkt über der Karte -->
+          <!-- Zeichen-Canvas -->
           <canvas id="drawCanvas"></canvas>
         </div>
 
@@ -306,11 +344,11 @@
           <button onclick="toggleDrawingMode();"><i class="fas fa-pencil-alt"></i> Zeichnen</button>
           <button onclick="openOverlay('colorOverlay');"><i class="fas fa-palette"></i> Farbe</button>
           <button onclick="toggleProblem();"><i class="fas fa-exclamation-triangle"></i> P</button>
-          <button id="patternButton" onclick="cyclePattern(event)"><i class="fas fa-th"></i> Muster&nbsp;Boden</button>
+          <button id="patternButton" onclick="cyclePattern(event)"><i class="fas fa-th"></i> Muster Boden</button>
         </div>
       </div>
 
-      <!-- BOTTOM BUTTONS (passen sich der Kartenbreite an) -->
+      <!-- BOTTOM BUTTONS -->
       <div class="bottom-buttons" id="bottomButtons">
         <button class="btn-falsch" onclick="rateCard('Falsch')">Falsch</button>
         <button class="btn-muehsam" onclick="rateCard('Mühsam')">Mühsam</button>
@@ -320,7 +358,6 @@
     </div>
   </div>
 
-  <!-- OVERLAYS -->
   <!-- Bild-Overlay -->
   <div id="imageOverlay" class="overlay">
     <h3>Bild hinzufügen</h3>
@@ -343,7 +380,7 @@
     <button onclick="closeOverlay('colorOverlay')">Schließen</button>
   </div>
 
-  <!-- Inline-Edit Overlay (mit Farbpalette, Schriftgröße, Schriftart & Text hinzufügen) -->
+  <!-- Inline-Edit Overlay (Bearbeiten) -->
   <div id="inlineEditOverlay" class="overlay">
     <h3>Text formatieren</h3>
     <div class="toolbar">
@@ -383,32 +420,9 @@
     <button onclick="closeInlineEditOverlay()">Schließen</button>
   </div>
 
-  <!-- Zeichnen-Kontrolloverlay -->
-  <div id="drawControlsOverlay" class="overlay">
-    <h3>Zeichnen</h3>
-    <div class="draw-toolbar">
-      <!-- Farbpalette -->
-      <button onclick="setDrawingColor('black')" title="Schwarz"><i class="fas fa-tint"></i> Schwarz</button>
-      <button onclick="setDrawingColor('red')" title="Rot"><i class="fas fa-tint"></i> Rot</button>
-      <button onclick="setDrawingColor('green')" title="Grün"><i class="fas fa-tint"></i> Grün</button>
-      <button onclick="setDrawingColor('blue')" title="Blau"><i class="fas fa-tint"></i> Blau</button>
-      <!-- Linienbreite -->
-      <label>Linienbreite: 
-        <input type="range" id="lineWidthRange2" min="1" max="10" value="3" onchange="changeLineWidth(this.value)">
-      </label>
-      <!-- Radierer -->
-      <button onclick="setDrawingMode('erase')" title="Radierer"><i class="fas fa-eraser"></i> Radierer</button>
-      <button onclick="setDrawingMode('draw')" title="Zeichnen"><i class="fas fa-pen"></i> Zeichnen</button>
-      <!-- Speichern & Schließen -->
-      <button onclick="saveDrawing()" title="Speichern"><i class="fas fa-save"></i> Speichern</button>
-      <button onclick="closeDrawControls()" title="Schließen"><i class="fas fa-times"></i> Schließen</button>
-    </div>
-  </div>
-
   <input type="file" id="hiddenImageUpload" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
 
   <script>
-    // execCommand soll CSS nutzen
     document.execCommand("styleWithCSS", false, true);
 
     let cards = [
@@ -431,106 +445,7 @@
     let drawingMode = "draw"; // "draw" oder "erase"
     let currentDrawingColor = "#000";
     let currentLineWidth = 2;
-    let isDrawingModeActive = false;
-
-    // Zeichnen direkt auf der Karte (Canvas im Card-Element)
-    function setupCanvasDrawing() {
-      const card = document.getElementById("card");
-      const canvas = document.getElementById("drawCanvas");
-      canvas.width = card.offsetWidth;
-      canvas.height = card.offsetHeight;
-      canvas.style.top = "0";
-      canvas.style.left = "0";
-      // Pointer-Events immer aktiv, da wir über das Overlay steuern
-      canvas.style.pointerEvents = "auto";
-      const ctx = canvas.getContext("2d");
-      if(cards[currentIndex].canvasData) {
-        const img = new Image();
-        img.onload = () => { ctx.drawImage(img, 0, 0, canvas.width, canvas.height); };
-        img.src = cards[currentIndex].canvasData;
-      }
-      canvas.addEventListener("mousedown", startZeichnen);
-      canvas.addEventListener("mousemove", zeichne);
-      canvas.addEventListener("mouseup", stopZeichnen);
-      canvas.addEventListener("mouseout", stopZeichnen);
-    }
-    function startZeichnen(e) {
-      if(!isDrawingModeActive) return;
-      isDrawing = true;
-      const pos = getCanvasPos(e);
-      const ctx = document.getElementById("drawCanvas").getContext("2d");
-      ctx.beginPath();
-      ctx.moveTo(pos.x, pos.y);
-    }
-    function zeichne(e) {
-      if(!isDrawingModeActive || !isDrawing) return;
-      const pos = getCanvasPos(e);
-      const ctx = document.getElementById("drawCanvas").getContext("2d");
-      if(drawingMode === "draw") {
-        ctx.globalCompositeOperation = "source-over";
-        ctx.strokeStyle = currentDrawingColor;
-      } else if(drawingMode === "erase") {
-        ctx.globalCompositeOperation = "destination-out";
-      }
-      ctx.lineWidth = currentLineWidth;
-      ctx.lineCap = "round";
-      ctx.lineTo(pos.x, pos.y);
-      ctx.stroke();
-    }
-    function stopZeichnen() {
-      if(isDrawing && isDrawingModeActive) {
-        isDrawing = false;
-        const canvas = document.getElementById("drawCanvas");
-        cards[currentIndex].canvasData = canvas.toDataURL("image/png");
-        saveCardsToLocalStorage();
-      }
-    }
-    function getCanvasPos(e) {
-      const canvas = document.getElementById("drawCanvas");
-      const rect = canvas.getBoundingClientRect();
-      return { x: e.clientX - rect.left, y: e.clientY - rect.top };
-    }
-    function setDrawingMode(mode) {
-      drawingMode = mode;
-    }
-    function setDrawingColor(color) {
-      currentDrawingColor = color;
-      drawingMode = "draw";
-    }
-    function changeLineWidth(val) {
-      currentLineWidth = parseInt(val, 10);
-    }
-    function clearCanvas() {
-      const canvas = document.getElementById("drawCanvas");
-      const ctx = canvas.getContext("2d");
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      cards[currentIndex].canvasData = "";
-      saveCardsToLocalStorage();
-    }
-    // Zeichnen-Modus umschalten und Overlay für Zeichen-Kontrollen anzeigen
-    function toggleDrawingMode() {
-      isDrawingModeActive = !isDrawingModeActive;
-      // Zeige/Verstecke das Zeichnen-Kontrolloverlay
-      const overlay = document.getElementById("drawControlsOverlay");
-      if(isDrawingModeActive) {
-        overlay.classList.add("active");
-      } else {
-        overlay.classList.remove("active");
-      }
-      // Aktualisiere den Canvas (sofern in Zeichnen-Modus, ist er interaktiv)
-      setupCanvasDrawing();
-    }
-    function saveDrawing() {
-      // Zustand speichern und Overlay schließen
-      const canvas = document.getElementById("drawCanvas");
-      cards[currentIndex].canvasData = canvas.toDataURL("image/png");
-      saveCardsToLocalStorage();
-      closeDrawControls();
-    }
-    function closeDrawControls() {
-      isDrawingModeActive = false;
-      document.getElementById("drawControlsOverlay").classList.remove("active");
-    }
+    let isDrawingModeActive = false; // ob man gerade zeichnet
 
     document.addEventListener("DOMContentLoaded", () => {
       loadCardsFromLocalStorage();
@@ -546,11 +461,16 @@
       if(!cards[index]) return;
       currentIndex = index;
       let c = cards[index];
+
+      // Frage/Antwort
       document.getElementById("frontQuestion").innerHTML = c.question.replace(/\n/g, "<br>");
       document.getElementById("backAnswer").innerHTML   = c.answer.replace(/\n/g, "<br>");
+
+      // Farbe
       document.getElementById("cardFrontFace").style.backgroundColor = c.color;
       document.getElementById("cardBackFace").style.backgroundColor  = c.color;
 
+      // Muster
       let backFace = document.getElementById("cardBackFace");
       backFace.style.backgroundImage = "none";
       backFace.style.backgroundSize = "";
@@ -574,9 +494,13 @@
         backFace.style.backgroundSize = "20px 20px";
       }
 
+      // Problem-Karte?
       const cardEl = document.getElementById("card");
       cardEl.style.borderTop = c.problem ? "5px solid red" : "2px solid #ccc";
-      if(!preserveFlip) { cardEl.classList.remove("flip"); }
+
+      if(!preserveFlip) {
+        cardEl.classList.remove("flip");
+      }
       updateCardCounter();
       renderCardList();
       updateCardSize();
@@ -613,6 +537,7 @@
       document.getElementById("card").classList.toggle("flip");
       setTimeout(updateCardSize, 300);
     }
+
     function updateBottomButtonsWidth() {
       const cardWidth = document.getElementById("card").offsetWidth;
       document.getElementById("bottomButtons").style.width = cardWidth + "px";
@@ -621,9 +546,7 @@
       document.getElementById("bottomButtons").style.display = "flex";
     }
 
-    /* =============================
-       INLINE-EDIT OVERLAY
-       ============================= */
+    /* --- Inline Edit Overlay --- */
     function openInlineEditOverlay() {
       const isFlipped = document.getElementById("card").classList.contains("flip");
       editingSide = isFlipped ? "back" : "front";
@@ -694,9 +617,9 @@
         if(dragText) {
           const cardRect = document.getElementById("card").getBoundingClientRect();
           let newLeft = e.clientX - cardRect.left - textOffsetX;
-          let newTop = e.clientY - cardRect.top - textOffsetY;
+          let newTop  = e.clientY - cardRect.top  - textOffsetY;
           dragText.style.left = newLeft + "px";
-          dragText.style.top = newTop + "px";
+          dragText.style.top  = newTop + "px";
         }
       }
       function onTextDragEnd(e) {
@@ -706,9 +629,7 @@
       }
     }
 
-    /* =============================
-       BEWERTUNG & PROBLEM
-       ============================= */
+    /* --- Bewertung & Problem --- */
     function rateCard(rating) {
       if(rating === "Einfach") {
         cards[currentIndex].active = false;
@@ -721,7 +642,10 @@
             break;
           }
         }
-        if(!found) { alert("Keine aktiven Karten mehr!"); return; }
+        if(!found) {
+          alert("Keine aktiven Karten mehr!");
+          return;
+        }
         currentIndex = nextIndex;
       } else {
         currentIndex = (currentIndex + 1) % cards.length;
@@ -735,9 +659,7 @@
       saveCardsToLocalStorage();
     }
 
-    /* =============================
-       BILDER
-       ============================= */
+    /* --- Bilder --- */
     function openOverlay(id) {
       document.getElementById(id).classList.add("active");
     }
@@ -754,9 +676,11 @@
         reader.onload = function(e) {
           const isFlipped = document.getElementById("card").classList.contains("flip");
           if(!isFlipped) {
-            cards[currentIndex].question += `<br><img src="${e.target.result}" class="editable-image" style="max-width:100%; cursor:move;" ondblclick="resizeImage(this)"><br>`;
+            cards[currentIndex].question += 
+              `<br><img src="${e.target.result}" class="editable-image" style="max-width:100%; cursor:move;" ondblclick="resizeImage(this)"><br>`;
           } else {
-            cards[currentIndex].answer += `<br><img src="${e.target.result}" class="editable-image" style="max-width:100%; cursor:move;" ondblclick="resizeImage(this)"><br>`;
+            cards[currentIndex].answer += 
+              `<br><img src="${e.target.result}" class="editable-image" style="max-width:100%; cursor:move;" ondblclick="resizeImage(this)"><br>`;
           }
           loadCard(currentIndex, true);
           saveCardsToLocalStorage();
@@ -786,9 +710,7 @@
       closeOverlay('colorOverlay');
     }
 
-    /* =============================
-       MUSTER-FUNKTION (kein Flip)
-       ============================= */
+    /* --- Muster-Funktion (kein Flip) --- */
     function cyclePattern(e) {
       e.stopPropagation();
       let patternOrder = ["lines", "grid", "dotted", "none"];
@@ -801,12 +723,10 @@
       return false;
     }
     function updatePatternButton() {
-      document.getElementById("patternButton").innerHTML = `<i class="fas fa-th"></i> Muster&nbsp;Boden`;
+      document.getElementById("patternButton").innerHTML = `<i class="fas fa-th"></i> Muster Boden`;
     }
 
-    /* =============================
-       ZEICHNEN: CANVAS (direkt in der Karte)
-       ============================= */
+    /* --- Zeichnen (Canvas) --- */
     function setupCanvasDrawing() {
       const card = document.getElementById("card");
       const canvas = document.getElementById("drawCanvas");
@@ -814,30 +734,31 @@
       canvas.height = card.offsetHeight;
       canvas.style.top = "0";
       canvas.style.left = "0";
-      // Immer interaktiv, da der Zeichnen-Modus über das separate Overlay gesteuert wird
-      canvas.style.pointerEvents = "auto";
+      // Canvas pointer-events nur aktivieren, wenn isDrawingModeActive == true
+      canvas.style.pointerEvents = isDrawingModeActive ? "auto" : "none";
+
       const ctx = canvas.getContext("2d");
       if(cards[currentIndex].canvasData) {
         const img = new Image();
         img.onload = () => { ctx.drawImage(img, 0, 0, canvas.width, canvas.height); };
         img.src = cards[currentIndex].canvasData;
       }
-      canvas.addEventListener("mousedown", startZeichnen);
-      canvas.addEventListener("mousemove", zeichne);
-      canvas.addEventListener("mouseup", stopZeichnen);
-      canvas.addEventListener("mouseout", stopZeichnen);
+      canvas.addEventListener("mousedown", startDrawing);
+      canvas.addEventListener("mousemove", drawLine);
+      canvas.addEventListener("mouseup", endDrawing);
+      canvas.addEventListener("mouseout", endDrawing);
     }
-    function startZeichnen(e) {
+    function startDrawing(e) {
       if(!isDrawingModeActive) return;
       isDrawing = true;
-      const pos = getCanvasPos(e);
+      const pos = getMousePos(e);
       const ctx = document.getElementById("drawCanvas").getContext("2d");
       ctx.beginPath();
       ctx.moveTo(pos.x, pos.y);
     }
-    function zeichne(e) {
+    function drawLine(e) {
       if(!isDrawingModeActive || !isDrawing) return;
-      const pos = getCanvasPos(e);
+      const pos = getMousePos(e);
       const ctx = document.getElementById("drawCanvas").getContext("2d");
       if(drawingMode === "draw") {
         ctx.globalCompositeOperation = "source-over";
@@ -850,7 +771,7 @@
       ctx.lineTo(pos.x, pos.y);
       ctx.stroke();
     }
-    function stopZeichnen() {
+    function endDrawing() {
       if(isDrawing && isDrawingModeActive) {
         isDrawing = false;
         const canvas = document.getElementById("drawCanvas");
@@ -858,26 +779,38 @@
         saveCardsToLocalStorage();
       }
     }
-    function getCanvasPos(e) {
+    function getMousePos(e) {
       const canvas = document.getElementById("drawCanvas");
       const rect = canvas.getBoundingClientRect();
       return { x: e.clientX - rect.left, y: e.clientY - rect.top };
     }
-
-    /* =============================
-       ZEICHNEN-KONTROLLOVERLAY (DRAGGABLE)
-       ============================= */
-    function openDrawControls() {
-      document.getElementById("drawControlsOverlay").classList.add("active");
+    function setDrawingMode(mode) {
+      drawingMode = mode;
     }
-    function closeDrawControls() {
-      isDrawingModeActive = false;
-      document.getElementById("drawControlsOverlay").classList.remove("active");
+    function setDrawingColor(color) {
+      currentDrawingColor = color;
+      drawingMode = "draw";
+    }
+    function changeLineWidth(val) {
+      currentLineWidth = parseInt(val, 10);
+    }
+    function clearCanvas() {
+      const canvas = document.getElementById("drawCanvas");
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      cards[currentIndex].canvasData = "";
+      saveCardsToLocalStorage();
+    }
+    function toggleDrawingMode() {
+      // Umschalten, ob gezeichnet werden kann
+      isDrawingModeActive = !isDrawingModeActive;
+      setupCanvasDrawing();
+      alert(isDrawingModeActive 
+        ? "Zeichnen-Modus aktiviert! Farbe & Linie kann per Code geändert werden." 
+        : "Zeichnen-Modus deaktiviert!");
     }
 
-    /* =============================
-       KARTEN HINZUFÜGEN & LÖSCHEN
-       ============================= */
+    /* --- Karten hinzufügen & löschen --- */
     function addCard() {
       let newQuestion = prompt("Neue Frage:");
       let newAnswer   = prompt("Neue Antwort:");
@@ -926,12 +859,12 @@
     }
     function loadCardsFromLocalStorage() {
       let data = localStorage.getItem("myJuraCards");
-      if(data) { cards = JSON.parse(data); }
+      if(data) {
+        cards = JSON.parse(data);
+      }
     }
 
-    /* =============================
-       DYNAMISCHE KARTENGRÖSSE
-       ============================= */
+    /* --- Dynamische Kartengröße --- */
     function updateCardSize() {
       const card = document.getElementById("card");
       const visibleFace = card.classList.contains("flip")
@@ -952,14 +885,8 @@
       updateCardSize();
       updateBottomButtonsWidth();
     });
-    function updateBottomButtonsWidth() {
-      const cardWidth = document.getElementById("card").offsetWidth;
-      document.getElementById("bottomButtons").style.width = cardWidth + "px";
-    }
 
-    /* =============================
-       BILDER & DRAG & DROP
-       ============================= */
+    /* --- Bilder Drag & Drop --- */
     let dragItem = null;
     let offsetX = 0, offsetY = 0;
     function startDrag(e) {
@@ -993,9 +920,7 @@
       });
     }
 
-    /* =============================
-       DRAGGABLE OVERLAYS
-       ============================= */
+    /* --- Overlays draggable machen --- */
     function makeAllOverlaysDraggable() {
       const overlays = document.querySelectorAll(".overlay");
       overlays.forEach(overlay => {
