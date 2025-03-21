@@ -80,7 +80,7 @@
     #cardList button.inactive {
       opacity: 0.5;
     }
-    /* Trash-Button in der linken Spalte – jetzt klar erkennbar als Löschfunktion */
+    /* Trash-Button in der linken Spalte – Mülleimer-Symbol */
     #deleteCardButton {
       background-color: #e74c3c;
       color: white;
@@ -204,7 +204,6 @@
       gap: 10px;
       margin: 0 auto;
       justify-content: center;
-      /* keine feste Breite mehr, wird dynamisch per JS gesetzt */
     }
     .bottom-buttons button {
       flex: 1;
@@ -372,7 +371,9 @@
       <button class="add-card-button" onclick="addCard()">+</button>
       <div id="cardList"></div>
       <!-- Trash-Button mit erweiterter Löschfunktion -->
-      <button id="deleteCardButton" onclick="deleteCardChoice()"><i class="fas fa-trash"></i></button>
+      <button id="deleteCardButton" onclick="deleteCardChoice()" title="Klicken, um Karten zu löschen">
+        <i class="fas fa-trash"></i>
+      </button>
     </div>
 
     <!-- Kartenbereich -->
@@ -532,14 +533,19 @@
       backFace.style.backgroundSize = "";
       backFace.style.backgroundPosition = "";
       backFace.style.lineHeight = "30px";
-      backFace.style.paddingTop = "10px"; // Standard-Rücksetzung
+      backFace.style.paddingTop = "10px"; // Standard für andere Muster
 
       if(c.pattern === 'lines') {
-        // Text weiter oben, aber auf der Linie
-        backFace.style.backgroundImage = 
-          "repeating-linear-gradient(to bottom, transparent, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px)";
-        backFace.style.backgroundPosition = "0 20px"; 
-        backFace.style.paddingTop = "20px";
+        /*
+          Wir verwenden hier ein 30px-Raster, wobei 1px die Linie ist und 29px transparent.
+          Durch background-position: 0 12px + padding-top: 12px sitzt die erste Zeile
+          relativ weit oben. Du kannst die Zahlen nach Belieben justieren,
+          damit es "perfekt" aussieht (z.B. 10px, 12px, 15px etc.).
+        */
+        backFace.style.backgroundImage =
+          "repeating-linear-gradient(to bottom, rgba(0,0,0,0.15) 1px, transparent 29px)";
+        backFace.style.backgroundPosition = "0 12px";
+        backFace.style.paddingTop = "12px";
       } 
       else if(c.pattern === 'grid') {
         backFace.style.backgroundImage = 
@@ -587,6 +593,7 @@
       document.getElementById("bottomButtons").style.display = "flex";
     }
     function updateBottomButtonsWidth() {
+      // Dynamische Anpassung an die Breite der Karte
       const cardWidth = document.getElementById("card").clientWidth;
       document.getElementById("bottomButtons").style.width = cardWidth + "px";
     }
