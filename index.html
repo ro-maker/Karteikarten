@@ -48,7 +48,7 @@
       gap: 10px;
       align-items: center;
       min-width: 80px;
-      margin-right: 20px; 
+      margin-right: 20px;
     }
     .add-card-button {
       background-color: #28a745;
@@ -152,7 +152,8 @@
     }
     .card-front, .card-back {
       position: absolute;
-      top: 0; left: 0;
+      top: 0;
+      left: 0;
       width: 100%;
       min-height: 300px;
       padding: 10px 20px 20px 20px;
@@ -172,13 +173,13 @@
       transform: rotateY(180deg);
       z-index: 1;
     }
-    /* Hier legen wir den Zeichen-Canvas über die Karteikarte */
+    /* Zeichen-Canvas – direkt über der Karteikarte */
     #zeichenCanvas {
       position: absolute;
       top: 0;
       left: 0;
-      pointer-events: none; /* Standardmäßig nicht interaktiv */
       z-index: 3;
+      pointer-events: none; /* Standardmäßig deaktiviert, wird im Zeichnen-Modus aktiviert */
     }
     /* Seitentasten – linksbündig */
     .side-buttons-container {
@@ -314,7 +315,7 @@
               <div id="backAnswer">Antwort wird geladen...</div>
             </div>
           </div>
-          <!-- Der Zeichen-Canvas liegt direkt über der Karteikarte -->
+          <!-- Zeichen-Canvas (liegt direkt über der Karteikarte) -->
           <canvas id="zeichenCanvas"></canvas>
         </div>
 
@@ -322,7 +323,7 @@
         <div class="side-buttons-container">
           <button onclick="openInlineEditOverlay();"><i class="fas fa-edit"></i> Bearbeiten</button>
           <button onclick="openOverlay('imageOverlay');"><i class="fas fa-image"></i> Bild</button>
-          <!-- Der Zeichnen-Button schaltet den Zeichenmodus um -->
+          <!-- Zeichnen-Button: Jetzt wird der Zeichnen-Modus (direkt auf der Karte) umgeschaltet -->
           <button onclick="toggleDrawingMode();"><i class="fas fa-pencil-alt"></i> Zeichnen</button>
           <button onclick="openOverlay('colorOverlay');"><i class="fas fa-palette"></i> Farbe</button>
           <button onclick="toggleProblem();"><i class="fas fa-exclamation-triangle"></i> P</button>
@@ -363,7 +364,7 @@
     <button onclick="closeOverlay('colorOverlay')">Schließen</button>
   </div>
 
-  <!-- Inline-Edit Overlay (mit Farbpalette, Schriftgröße & Schriftart) -->
+  <!-- Inline-Edit Overlay (mit Farbpalette, Schriftgröße, Schriftart & Text hinzufügen) -->
   <div id="inlineEditOverlay" class="overlay">
     <h3>Text formatieren</h3>
     <div class="toolbar">
@@ -398,6 +399,7 @@
         <option value="Georgia">Georgia</option>
         <option value="Verdana">Verdana</option>
       </select>
+      <button onclick="addDraggableText()">Text hinzufügen</button>
     </div>
     <button onclick="closeInlineEditOverlay()">Schließen</button>
   </div>
@@ -405,7 +407,7 @@
   <input type="file" id="hiddenImageUpload" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
 
   <script>
-    // execCommand soll CSS nutzen
+    // Stelle sicher, dass execCommand mit CSS verwendet wird
     document.execCommand("styleWithCSS", false, true);
 
     let cards = [
@@ -416,7 +418,7 @@
         problem: false,
         pattern: "dotted",
         active: true,
-        canvasData: "" // Speichert den Zustand des Zeichnungs-Canvas
+        canvasData: ""
       }
     ];
     let currentIndex = 0;
@@ -428,29 +430,30 @@
     let drawingMode = "draw"; // "draw" oder "erase"
     let currentDrawingColor = "#000";
     let currentLineWidth = 2;
+    let isDrawingModeActive = false; // Globaler Flag für Zeichnen-Modus
 
-    // Der Zeichen-Canvas wird direkt in der Karteikarte verwendet
     function setupZeichenCanvas() {
       const card = document.getElementById("card");
       const canvas = document.getElementById("zeichenCanvas");
       canvas.width = card.offsetWidth;
       canvas.height = card.offsetHeight;
-      // Damit der Canvas anfänglich nicht Eingaben blockiert
-      canvas.style.pointerEvents = "auto";
+      canvas.style.top = "0";
+      canvas.style.left = "0";
+      // Standard: im normalen Modus nicht interaktiv
+      canvas.style.pointerEvents = isDrawingModeActive ? "auto" : "none";
       const ctx = canvas.getContext("2d");
-      // Falls es bereits einen gespeicherten Zustand gibt, laden wir ihn
       if(cards[currentIndex].canvasData) {
-        let img = new Image();
+        const img = new Image();
         img.onload = () => { ctx.drawImage(img, 0, 0, canvas.width, canvas.height); };
         img.src = cards[currentIndex].canvasData;
       }
-      // Zeichen-Eventlistener an den Canvas binden
       canvas.addEventListener("mousedown", startZeichnen);
       canvas.addEventListener("mousemove", zeichne);
       canvas.addEventListener("mouseup", stopZeichnen);
       canvas.addEventListener("mouseout", stopZeichnen);
     }
     function startZeichnen(e) {
+      if(!isDrawingModeActive) return;
       isDrawing = true;
       const pos = getCanvasPos(e);
       const ctx = document.getElementById("zeichenCanvas").getContext("2d");
@@ -458,7 +461,7 @@
       ctx.moveTo(pos.x, pos.y);
     }
     function zeichne(e) {
-      if(!isDrawing) return;
+      if(!isDrawingModeActive || !isDrawing) return;
       const pos = getCanvasPos(e);
       const ctx = document.getElementById("zeichenCanvas").getContext("2d");
       if(drawingMode === "draw") {
@@ -473,9 +476,8 @@
       ctx.stroke();
     }
     function stopZeichnen() {
-      if(isDrawing) {
+      if(isDrawing && isDrawingModeActive) {
         isDrawing = false;
-        // Zustand speichern
         const canvas = document.getElementById("zeichenCanvas");
         cards[currentIndex].canvasData = canvas.toDataURL("image/png");
         saveCardsToLocalStorage();
@@ -484,13 +486,10 @@
     function getCanvasPos(e) {
       const canvas = document.getElementById("zeichenCanvas");
       const rect = canvas.getBoundingClientRect();
-      return {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
-      };
+      return { x: e.clientX - rect.left, y: e.clientY - rect.top };
     }
     function setDrawingMode(mode) {
-      drawingMode = mode; // "draw" oder "erase"
+      drawingMode = mode;
     }
     function setDrawingColor(color) {
       currentDrawingColor = color;
@@ -507,13 +506,12 @@
       saveCardsToLocalStorage();
     }
     function toggleDrawingMode() {
-      // Schalte den Zeichnen-Modus um.
-      // Hier kannst du per Button zwischen "Zeichnen" und "Radieren" wechseln.
-      if(drawingMode === "draw") {
-        setDrawingMode("erase");
-      } else {
-        setDrawingMode("draw");
-      }
+      // Schaltet den Zeichnen-Modus an/aus und passt pointerEvents des Canvas an.
+      isDrawingModeActive = !isDrawingModeActive;
+      const canvas = document.getElementById("zeichenCanvas");
+      canvas.style.pointerEvents = isDrawingModeActive ? "auto" : "none";
+      // Optional: visuelles Feedback, z.B. Rahmenfarbe ändern
+      canvas.style.border = isDrawingModeActive ? "2px dashed #972D54" : "none";
     }
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -656,6 +654,47 @@
       if(!font) return;
       document.execCommand("fontName", false, font);
     }
+    // Fügt ein neues, verschiebbares Textelement in die Karte ein
+    function addDraggableText() {
+      const newText = document.createElement("div");
+      newText.contentEditable = "true";
+      newText.textContent = "Neuer Text";
+      newText.style.position = "absolute";
+      newText.style.top = "20px";
+      newText.style.left = "20px";
+      newText.style.cursor = "move";
+      newText.style.fontSize = "16px";
+      newText.style.border = "1px dashed #ccc";
+      newText.style.padding = "4px";
+      newText.classList.add("draggable-text");
+      document.getElementById("card").appendChild(newText);
+      makeTextDraggable(newText);
+    }
+    function makeTextDraggable(elem) {
+      let dragText = null, textOffsetX = 0, textOffsetY = 0;
+      elem.addEventListener("mousedown", (e) => {
+        dragText = elem;
+        textOffsetX = e.clientX - elem.getBoundingClientRect().left;
+        textOffsetY = e.clientY - elem.getBoundingClientRect().top;
+        document.addEventListener("mousemove", onTextDrag);
+        document.addEventListener("mouseup", onTextDragEnd);
+        e.stopPropagation();
+      });
+      function onTextDrag(e) {
+        if(dragText) {
+          const cardRect = document.getElementById("card").getBoundingClientRect();
+          let newLeft = e.clientX - cardRect.left - textOffsetX;
+          let newTop = e.clientY - cardRect.top - textOffsetY;
+          dragText.style.left = newLeft + "px";
+          dragText.style.top = newTop + "px";
+        }
+      }
+      function onTextDragEnd(e) {
+        dragText = null;
+        document.removeEventListener("mousemove", onTextDrag);
+        document.removeEventListener("mouseup", onTextDragEnd);
+      }
+    }
 
     /* --- Bewertung & Problem --- */
     function rateCard(rating) {
@@ -718,9 +757,7 @@
       let action = prompt("Gib 'resize' ein, um die Größe anzupassen oder 'crop' zum Zuschneiden:", "resize");
       if(action === "resize") {
         let newWidth = prompt("Neue Breite (z.B. 50% oder 300px):", "50%");
-        if(newWidth) {
-          img.style.width = newWidth;
-        }
+        if(newWidth) { img.style.width = newWidth; }
       } else if(action === "crop") {
         let top = prompt("Zuschneiden: Abstand von oben (z.B. 10px):", "10px");
         let right = prompt("Zuschneiden: Abstand von rechts (z.B. 10px):", "10px");
@@ -762,22 +799,21 @@
       canvas.height = card.offsetHeight;
       canvas.style.top = "0";
       canvas.style.left = "0";
-      // Lade eventuell vorhandene Zeichnungsdaten
+      // Standardmäßig nicht aktiv
+      canvas.style.pointerEvents = isDrawingModeActive ? "auto" : "none";
       const ctx = canvas.getContext("2d");
       if(cards[currentIndex].canvasData) {
         const img = new Image();
         img.onload = () => { ctx.drawImage(img, 0, 0, canvas.width, canvas.height); };
         img.src = cards[currentIndex].canvasData;
       }
-      // Binde Eventlistener für das Zeichnen an den Canvas (direkt auf der Karte)
       canvas.addEventListener("mousedown", startZeichnen);
       canvas.addEventListener("mousemove", zeichne);
       canvas.addEventListener("mouseup", stopZeichnen);
       canvas.addEventListener("mouseout", stopZeichnen);
-      // Erlaube Interaktionen – wenn der Zeichenmodus aktiv ist
-      canvas.style.pointerEvents = "auto";
     }
     function startZeichnen(e) {
+      if(!isDrawingModeActive) return;
       isDrawing = true;
       const pos = getCanvasPos(e);
       const ctx = document.getElementById("zeichenCanvas").getContext("2d");
@@ -785,7 +821,7 @@
       ctx.moveTo(pos.x, pos.y);
     }
     function zeichne(e) {
-      if(!isDrawing) return;
+      if(!isDrawingModeActive || !isDrawing) return;
       const pos = getCanvasPos(e);
       const ctx = document.getElementById("zeichenCanvas").getContext("2d");
       if(drawingMode === "draw") {
@@ -800,9 +836,8 @@
       ctx.stroke();
     }
     function stopZeichnen() {
-      if(isDrawing) {
+      if(isDrawing && isDrawingModeActive) {
         isDrawing = false;
-        // Zustand speichern
         const canvas = document.getElementById("zeichenCanvas");
         cards[currentIndex].canvasData = canvas.toDataURL("image/png");
         saveCardsToLocalStorage();
@@ -830,13 +865,13 @@
       cards[currentIndex].canvasData = "";
       saveCardsToLocalStorage();
     }
+    // Schaltet den Zeichnen-Modus ein/aus
+    let isDrawingModeActive = false;
     function toggleDrawingMode() {
-      // Umschalten zwischen Zeichnen und Radieren
-      if(drawingMode === "draw") {
-        setDrawingMode("erase");
-      } else {
-        setDrawingMode("draw");
-      }
+      isDrawingModeActive = !isDrawingModeActive;
+      const canvas = document.getElementById("zeichenCanvas");
+      canvas.style.pointerEvents = isDrawingModeActive ? "auto" : "none";
+      canvas.style.border = isDrawingModeActive ? "2px dashed #972D54" : "none";
     }
 
     /* --- Karten hinzufügen & löschen --- */
@@ -919,7 +954,7 @@
       document.getElementById("bottomButtons").style.width = cardWidth + "px";
     }
 
-    /* --- Bilder im Karteninhalt bearbeiten (Drag & Drop) --- */
+    /* --- Bilder (Drag & Drop) --- */
     let dragItem = null;
     let offsetX = 0, offsetY = 0;
     function startDrag(e) {
@@ -933,9 +968,9 @@
       if(dragItem) {
         const cardRect = document.getElementById("card").getBoundingClientRect();
         let newLeft = e.clientX - cardRect.left - offsetX;
-        let newTop  = e.clientY - cardRect.top  - offsetY;
+        let newTop = e.clientY - cardRect.top - offsetY;
         dragItem.style.left = newLeft + "px";
-        dragItem.style.top  = newTop + "px";
+        dragItem.style.top = newTop + "px";
       }
     }
     function endDrag(e) {
@@ -953,7 +988,7 @@
       });
     }
 
-    /* Overlays draggable machen */
+    /* --- Draggable Overlays --- */
     function makeAllOverlaysDraggable() {
       const overlays = document.querySelectorAll(".overlay");
       overlays.forEach(overlay => {
@@ -975,13 +1010,14 @@
     function onOverlayDrag(e) {
       if(!overlayDragTarget) return;
       overlayDragTarget.style.left = (e.clientX - overlayDragOffsetX) + "px";
-      overlayDragTarget.style.top  = (e.clientY - overlayDragOffsetY) + "px";
+      overlayDragTarget.style.top = (e.clientY - overlayDragOffsetY) + "px";
     }
     function endOverlayDrag(e) {
       overlayDragTarget = null;
       document.removeEventListener("mousemove", onOverlayDrag);
       document.removeEventListener("mouseup", endOverlayDrag);
     }
+
   </script>
 </body>
 </html>
