@@ -80,7 +80,7 @@
     #cardList button.inactive {
       opacity: 0.5;
     }
-    /* Trash-Button in der linken Spalte – Mülltonnen-Symbol */
+    /* Trash-Button in der linken Spalte – jetzt klar erkennbar als Löschfunktion */
     #deleteCardButton {
       background-color: #e74c3c;
       color: white;
@@ -204,7 +204,7 @@
       gap: 10px;
       margin: 0 auto;
       justify-content: center;
-      width: 600px; /* Fest auf 600px */
+      /* keine feste Breite mehr, wird dynamisch per JS gesetzt */
     }
     .bottom-buttons button {
       flex: 1;
@@ -371,8 +371,8 @@
     <div class="left-panel">
       <button class="add-card-button" onclick="addCard()">+</button>
       <div id="cardList"></div>
-      <!-- Trash-Button -->
-      <button id="deleteCardButton" onclick="deleteSelectedCard()"><i class="fas fa-trash"></i></button>
+      <!-- Trash-Button mit erweiterter Löschfunktion -->
+      <button id="deleteCardButton" onclick="deleteCardChoice()"><i class="fas fa-trash"></i></button>
     </div>
 
     <!-- Kartenbereich -->
@@ -532,13 +532,14 @@
       backFace.style.backgroundSize = "";
       backFace.style.backgroundPosition = "";
       backFace.style.lineHeight = "30px";
-      backFace.style.paddingTop = "10px";
+      backFace.style.paddingTop = "10px"; // Standard-Rücksetzung
 
       if(c.pattern === 'lines') {
+        // Text weiter oben, aber auf der Linie
         backFace.style.backgroundImage = 
           "repeating-linear-gradient(to bottom, transparent, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px)";
-        backFace.style.backgroundPosition = "0 15px";
-        backFace.style.paddingTop = "15px";
+        backFace.style.backgroundPosition = "0 20px"; 
+        backFace.style.paddingTop = "20px";
       } 
       else if(c.pattern === 'grid') {
         backFace.style.backgroundImage = 
@@ -586,8 +587,8 @@
       document.getElementById("bottomButtons").style.display = "flex";
     }
     function updateBottomButtonsWidth() {
-      // Fest auf 600px, entsprechend der Mindestbreite der Karte
-      document.getElementById("bottomButtons").style.width = "600px";
+      const cardWidth = document.getElementById("card").clientWidth;
+      document.getElementById("bottomButtons").style.width = cardWidth + "px";
     }
 
     /* --- Inline-Edit Overlay --- */
@@ -864,7 +865,29 @@
       });
     }
 
-    /* --- Löschen der ausgewählten Karte über den Trash-Button --- */
+    /* --- Lösch-Funktionen --- */
+    function deleteCardChoice() {
+      // Der Nutzer wählt: ALLE Karten löschen oder nur diese Karte
+      let choice = confirm("Möchtest du ALLE Karteikarten löschen? (OK = Alle löschen, Abbrechen = Nur diese Karte)");
+      if(choice) {
+        // Alle löschen
+        deleteAllCards();
+      } else {
+        // Nur ausgewählte Karte löschen
+        deleteSelectedCard();
+      }
+    }
+
+    function deleteAllCards() {
+      if(confirm("Willst du wirklich ALLE Karten löschen?")) {
+        cards = [];
+        currentIndex = 0;
+        saveCardsToLocalStorage();
+        renderCardList();
+        alert("Alle Karten wurden gelöscht.");
+      }
+    }
+
     function deleteSelectedCard() {
       if(confirm("Diese Karte endgültig löschen?")) {
         cards.splice(currentIndex, 1);
