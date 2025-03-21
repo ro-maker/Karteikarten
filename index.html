@@ -204,6 +204,7 @@
       gap: 10px;
       margin: 0 auto;
       justify-content: center;
+      width: 600px; /* Fest auf 600px */
     }
     .bottom-buttons button {
       flex: 1;
@@ -300,7 +301,7 @@
     .color-palette button[style*="#ffffff"] {
       border: 1px solid #999;
     }
-    /* Inline-Edit Overlay für Textformatierung – wie früher, aber mit Farbpalette & Schriftgrößenauswahl */
+    /* Inline-Edit Overlay für Textformatierung – mit Farbpalette & Schriftgrößenauswahl */
     #inlineEditOverlay {
       display: none;
       position: fixed;
@@ -458,12 +459,13 @@
     <div class="toolbar">
       <button onclick="execCmd('bold')"><i class="fas fa-bold"></i> B</button>
       <button onclick="execCmd('italic')"><i class="fas fa-italic"></i> I</button>
-      <button onclick="execCmd('underline')"><i class="fas fa-underline"></i> <span style="text-decoration: underline;">U</span></button>
+      <button onclick="execCmd('underline')"><i class="fas fa-underline"></i> U</button>
     </div>
     <div class="color-palette">
       <!-- Standardfarben -->
       <button style="background: yellow;" onclick="execCmdColor('yellow')"></button>
       <button style="background: lightblue;" onclick="execCmdColor('lightblue')"></button>
+      <!-- Weitere Farben -->
       <button style="background: red;" onclick="execCmdColor('red')"></button>
       <button style="background: lightgreen;" onclick="execCmdColor('lightgreen')"></button>
       <button style="background: orange;" onclick="execCmdColor('orange')"></button>
@@ -584,8 +586,8 @@
       document.getElementById("bottomButtons").style.display = "flex";
     }
     function updateBottomButtonsWidth() {
-      const cardWidth = document.getElementById("card").clientWidth;
-      document.getElementById("bottomButtons").style.width = cardWidth + "px";
+      // Fest auf 600px, entsprechend der Mindestbreite der Karte
+      document.getElementById("bottomButtons").style.width = "600px";
     }
 
     /* --- Inline-Edit Overlay --- */
