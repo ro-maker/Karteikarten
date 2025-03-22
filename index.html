@@ -14,11 +14,7 @@
 
   <style>
     /* ===== GLOBAL STYLES ===== */
-    * {
-      margin: 0; 
-      padding: 0; 
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       background-color: #fefefe;
       padding: 20px;
@@ -27,13 +23,8 @@
       flex-direction: column; 
       align-items: center;
     }
-    header {
-      text-align: center; 
-      margin-bottom: 20px;
-    }
-    header h2 {
-      color: #972D54;
-    }
+    header { text-align: center; margin-bottom: 20px; }
+    header h2 { color: #972D54; }
 
     /* ===== MAIN CONTAINER ===== */
     .main-container {
@@ -64,11 +55,7 @@
       height: 50px;
       cursor: pointer;
     }
-    #cardList {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
+    #cardList { display: flex; flex-direction: column; gap: 5px; }
     #cardList button {
       width: 30px;
       height: 30px;
@@ -78,13 +65,8 @@
       cursor: pointer;
       font-size: 0.8rem;
     }
-    #cardList button.active {
-      background-color: #972D54;
-      color: white;
-    }
-    #cardList button.inactive {
-      opacity: 0.5;
-    }
+    #cardList button.active { background-color: #972D54; color: white; }
+    #cardList button.inactive { opacity: 0.5; }
     /* Löschbuttons */
     #deleteCardButton {
       background-color: #e74c3c;
@@ -114,7 +96,8 @@
     .card-wrapper {
       display: flex;
       flex-direction: column;
-      align-items: flex-start; /* Links ausgerichtet */
+      /* Damit die unteren Buttons exakt an der Karte beginnen: */
+      align-items: flex-start;
       gap: 10px;
       width: 100%;
       max-width: 900px;
@@ -154,9 +137,7 @@
       position: relative;
       z-index: 1;
     }
-    .card.flip .card-inner {
-      transform: rotateY(180deg);
-    }
+    .card.flip .card-inner { transform: rotateY(180deg); }
     .card-front, .card-back {
       position: absolute;
       top: 0; left: 0;
@@ -170,23 +151,15 @@
       line-height: 30px;
       backface-visibility: hidden;
     }
-    .card-front {
-      background-color: #fff;
-      z-index: 2;
-    }
-    .card-back {
-      background-color: #f9f9f9;
-      transform: rotateY(180deg);
-      z-index: 1;
-    }
+    .card-front { background-color: #fff; z-index: 2; }
+    .card-back { background-color: #f9f9f9; transform: rotateY(180deg); z-index: 1; }
 
-    /* ===== ZWEI CANVASES (FRONT & BACK) ===== */
+    /* ===== ZEICHNEN: 2 CANVASES (FRONT & BACK) ===== */
     #drawCanvasFront, #drawCanvasBack {
       position: absolute;
-      top: 0; 
-      left: 0;
+      top: 0; left: 0;
       z-index: 3;
-      pointer-events: none;
+      pointer-events: none; /* Standardmäßig deaktiviert – im Zeichnenmodus wird pointer-events aktiviert */
     }
 
     /* ===== SIDE BUTTONS ===== */
@@ -211,14 +184,13 @@
       width: 110px;
       text-align: left;
     }
-    .side-buttons-container button:hover {
-      opacity: 0.9;
-    }
+    .side-buttons-container button:hover { opacity: 0.9; }
 
     /* ===== BOTTOM BUTTONS ===== */
     .bottom-buttons {
       display: flex;
       gap: 10px;
+      /* Containerbreite wird später exakt an die Karte angepasst */
       transition: width 0.3s;
     }
     .bottom-buttons button {
@@ -235,7 +207,7 @@
     .btn-gut    { background-color: #2ecc71; }
     .btn-einfach { background-color: #1abc9c; }
 
-    /* ===== OVERLAYS ===== */
+    /* ===== OVERLAYS (modern, draggable) ===== */
     .overlay {
       display: none;
       position: fixed;
@@ -263,7 +235,7 @@
     }
     .overlay .toolbar {
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;  /* Alle Buttons in einer Zeile */
       gap: 5px;
       margin-bottom: 10px;
     }
@@ -273,17 +245,11 @@
       margin-bottom: 10px;
     }
     .overlay .color-palette button {
-      width: 25px; 
+      width: 25px;
       height: 25px;
-      border: none; 
+      border: none;
       border-radius: 3px;
       cursor: pointer;
-    }
-    .draw-toolbar {
-      display: flex; 
-      flex-wrap: wrap; 
-      gap: 5px; 
-      align-items: center;
     }
 
     /* ===== DRAGGABLE TEXT ===== */
@@ -294,6 +260,14 @@
       position: absolute;
       background: rgba(255,255,255,0.8);
     }
+
+    /* ===== ZEICHNEN-KONTROLLOVERLAY ===== */
+    .draw-toolbar {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 5px;
+      align-items: center;
+    }
   </style>
 </head>
 <body>
@@ -302,7 +276,7 @@
   </header>
 
   <div class="main-container">
-    <!-- Linke Spalte -->
+    <!-- LEFT PANEL -->
     <div class="left-panel">
       <button class="add-card-button" onclick="addCard()">+</button>
       <div id="cardList"></div>
@@ -312,27 +286,27 @@
       <button id="deleteAllButton" onclick="deleteAllCards()" title="Alle löschen">Alle</button>
     </div>
 
-    <!-- Kartenbereich -->
+    <!-- CARD WRAPPER -->
     <div class="card-wrapper">
       <div class="card-and-sides">
-        <!-- Karte -->
+        <!-- CARD -->
         <div class="card" id="card" onclick="maybeFlip(event)">
           <div class="card-inner">
-            <!-- Vorderseite -->
+            <!-- FRONT -->
             <div class="card-front" id="cardFrontFace" contenteditable="false">
               <div id="frontQuestion">Frage wird geladen...</div>
             </div>
-            <!-- Rückseite -->
+            <!-- BACK -->
             <div class="card-back" id="cardBackFace" contenteditable="false">
               <div id="backAnswer">Antwort wird geladen...</div>
             </div>
           </div>
-          <!-- Zwei Canvas: Front & Back -->
+          <!-- Zwei Canvas-Elemente: Front & Back -->
           <canvas id="drawCanvasFront"></canvas>
           <canvas id="drawCanvasBack" style="display:none;"></canvas>
         </div>
 
-        <!-- Seitentasten -->
+        <!-- SIDE BUTTONS -->
         <div class="side-buttons-container">
           <button onclick="openInlineEditOverlay();"><i class="fas fa-edit"></i> Bearbeiten</button>
           <button onclick="openOverlay('imageOverlay');"><i class="fas fa-image"></i> Bild</button>
@@ -343,16 +317,12 @@
         </div>
       </div>
 
-      <!-- Bewertungsbuttons -->
-      <div class="bottom-buttons" id="bottomButtons">
-        <button class="btn-falsch" onclick="rateCard('Falsch')">Falsch</button>
-        <button class="btn-muehsam" onclick="rateCard('Mühsam')">Mühsam</button>
-        <button class="btn-gut" onclick="rateCard('Gut')">Gut</button>
-        <button class="btn-einfach" onclick="rateCard('Einfach')">Einfach</button>
-      </div>
+      <!-- BOTTOM BUTTONS: Diese werden exakt in der Breite der Karte ausgerichtet -->
+      <div class="bottom-buttons" id="bottomButtons"></div>
     </div>
   </div>
 
+  <!-- OVERLAYS -->
   <!-- Bild-Overlay -->
   <div id="imageOverlay" class="overlay">
     <h3>Bild hinzufügen</h3>
@@ -371,7 +341,7 @@
       <button style="background:#ddffdd;" onclick="setCardColor('#ddffdd')"></button>
       <button style="background:#ddeeff;" onclick="setCardColor('#ddeeff')"></button>
       <button style="background:#ffddee;" onclick="setCardColor('#ffddee')"></button>
-      <!-- Neue Farbe: Weiß (zweites Weiß, falls du willst) -->
+      <!-- Weiß als zusätzliche Option -->
       <button style="background:#ffffff;" onclick="setCardColor('#ffffff')"></button>
     </div>
     <button onclick="closeOverlay('colorOverlay')">Schließen</button>
@@ -386,19 +356,18 @@
       <button onclick="execCmd('underline')"><i class="fas fa-underline"></i> U</button>
     </div>
     <div class="color-palette">
-      <!-- Weiß + andere Farben -->
-      <button style="background:white;" onclick="execCmdColor('white')"></button>
-      <button style="background: yellow;" onclick="execCmdColor('yellow')"></button>
-      <button style="background: lightblue;" onclick="execCmdColor('lightblue')"></button>
-      <button style="background: red;" onclick="execCmdColor('red')"></button>
-      <button style="background: lightgreen;" onclick="execCmdColor('lightgreen')"></button>
-      <button style="background: orange;" onclick="execCmdColor('orange')"></button>
-      <button style="background: #39FF14;" onclick="execCmdColor('#39FF14')"></button>
-      <button style="background: #FF073A;" onclick="execCmdColor('#FF073A')"></button>
-      <button style="background: #0FF0FC;" onclick="execCmdColor('#0FF0FC')"></button>
+      <button style="background:white;" onclick="toggleTextColor('white')"></button>
+      <button style="background: yellow;" onclick="toggleTextColor('yellow')"></button>
+      <button style="background: lightblue;" onclick="toggleTextColor('lightblue')"></button>
+      <button style="background: red;" onclick="toggleTextColor('red')"></button>
+      <button style="background: lightgreen;" onclick="toggleTextColor('lightgreen')"></button>
+      <button style="background: orange;" onclick="toggleTextColor('orange')"></button>
+      <button style="background: #39FF14;" onclick="toggleTextColor('#39FF14')"></button>
+      <button style="background: #FF073A;" onclick="toggleTextColor('#FF073A')"></button>
+      <button style="background: #0FF0FC;" onclick="toggleTextColor('#0FF0FC')"></button>
     </div>
     <div class="toolbar">
-      <select onchange="changeFontSize(this.value)">
+      <select onchange="toggleFontSize(this.value)">
         <option value="">Schriftgröße</option>
         <option value="12px">12px</option>
         <option value="14px">14px</option>
@@ -406,7 +375,7 @@
         <option value="24px">24px</option>
         <option value="32px">32px</option>
       </select>
-      <select onchange="changeFontFamily(this.value)">
+      <select onchange="toggleFontName(this.value)">
         <option value="">Schriftart</option>
         <option value="Arial">Arial</option>
         <option value="Times New Roman">Times New Roman</option>
@@ -430,8 +399,8 @@
       <label style="font-size:0.85rem;">Linienbreite:
         <input type="range" min="1" max="10" value="3" onchange="changeLineWidth(this.value)">
       </label>
-      <button onclick="setDrawingMode('erase')"><i class="fas fa-eraser"></i> Radierer</button>
-      <button onclick="setDrawingMode('draw')"><i class="fas fa-pen"></i> Stift</button>
+      <button onclick="setDrawingMode('erase'); getCurrentCanvas().style.cursor='url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVQoU2NkYGD4z0AEYBxVSFUAAXoYB7gWb5QAAAAASUVORK5CYII=), auto';"><i class="fas fa-eraser"></i> Radierer</button>
+      <button onclick="setDrawingMode('draw'); getCurrentCanvas().style.cursor='crosshair';"><i class="fas fa-pen"></i> Stift</button>
       <button onclick="saveDrawing()"><i class="fas fa-save"></i> Speichern</button>
       <button onclick="closeDrawControls()"><i class="fas fa-times"></i> Schließen</button>
     </div>
@@ -456,10 +425,10 @@
       }
     ];
     let currentIndex = 0;
-    let isEditing = false;      
-    let editingSide = null;     
-    let isDrawing = false;      
-    let drawingMode = "draw";   
+    let isEditing = false;
+    let editingSide = null;
+    let isDrawing = false;
+    let drawingMode = "draw";
     let currentDrawingColor = "#000";
     let currentLineWidth = 3;
     let isDrawingModeActive = false;
@@ -472,6 +441,7 @@
       updateBottomButtonsWidth();
       setupCanvasDrawing();
       makeAllOverlaysDraggable();
+      updateBottomButtons(); // Damit die unteren Buttons initial angezeigt werden
     });
 
     /* ===== KARTE LADEN ===== */
@@ -480,9 +450,9 @@
       currentIndex = index;
       let c = cards[index];
       document.getElementById("frontQuestion").innerHTML = c.question.replace(/\n/g, "<br>");
-      document.getElementById("backAnswer").innerHTML   = c.answer.replace(/\n/g, "<br>");
+      document.getElementById("backAnswer").innerHTML = c.answer.replace(/\n/g, "<br>");
       document.getElementById("cardFrontFace").style.backgroundColor = c.color;
-      document.getElementById("cardBackFace").style.backgroundColor  = c.color;
+      document.getElementById("cardBackFace").style.backgroundColor = c.color;
       
       let backFace = document.getElementById("cardBackFace");
       backFace.style.backgroundImage = "none";
@@ -495,23 +465,19 @@
           "repeating-linear-gradient(to bottom, transparent, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px)";
         backFace.style.backgroundPosition = "0 10px";
         backFace.style.paddingTop = "10px";
-      }
-      else if(c.pattern === "grid") {
+      } else if(c.pattern === "grid") {
         backFace.style.backgroundImage =
           "linear-gradient(0deg, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px), linear-gradient(90deg, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px)";
         backFace.style.backgroundSize = "30px 30px";
-      }
-      else if(c.pattern === "dotted") {
+      } else if(c.pattern === "dotted") {
         backFace.style.backgroundImage =
           "radial-gradient(rgba(0,0,0,0.15) 1px, transparent 1px)";
         backFace.style.backgroundSize = "20px 20px";
       }
-
-      let cardEl = document.getElementById("card");
+      
+      const cardEl = document.getElementById("card");
       cardEl.style.borderTop = c.problem ? "5px solid red" : "2px solid #ccc";
-      if(!preserveFlip) {
-        cardEl.classList.remove("flip");
-      }
+      if(!preserveFlip) { cardEl.classList.remove("flip"); }
       updateCardCounter();
       renderCardList();
       updateCardSize();
@@ -537,25 +503,17 @@
         listDiv.appendChild(btn);
       });
     }
-
-    /* ===== FLIP-FUNKTION ===== */
     function maybeFlip(e) {
-      // Kein Flip, wenn Zeichnenmodus oder Bearbeiten aktiv
       if(isDrawingModeActive || isEditing) return;
       if(e.target.closest(".side-buttons-container") || e.target.closest(".overlay")) return;
       flipCard();
     }
     function flipCard() {
       document.getElementById("card").classList.toggle("flip");
-      setTimeout(() => {
-        setupCanvasDrawing();
-        updateCardSize();
-      }, 300);
+      setTimeout(() => { setupCanvasDrawing(); updateCardSize(); }, 300);
     }
-
-    /* ===== BOTTOM BUTTONS ===== */
     function updateBottomButtonsWidth() {
-      const cardWidth = document.getElementById("card").offsetWidth;
+      let cardWidth = document.getElementById("card").offsetWidth;
       document.getElementById("bottomButtons").style.width = cardWidth + "px";
     }
     function updateBottomButtons() {
@@ -591,7 +549,15 @@
     }
     function execCmd(cmd) { document.execCommand(cmd, false, null); }
     function execCmdColor(color) { document.execCommand("hiliteColor", false, color); }
-    function changeFontSize(size) {
+    function toggleTextColor(color) {
+      let current = document.queryCommandValue("foreColor");
+      if(current && current.toLowerCase() === color.toLowerCase()) {
+        document.execCommand("removeFormat", false, null);
+      } else {
+        document.execCommand("foreColor", false, color);
+      }
+    }
+    function toggleFontSize(size) {
       if(!size) return;
       document.execCommand("fontSize", false, "7");
       document.querySelectorAll("font[size='7']").forEach(f => {
@@ -599,7 +565,7 @@
         f.style.fontSize = size;
       });
     }
-    function changeFontFamily(font) {
+    function toggleFontName(font) {
       if(!font) return;
       document.execCommand("fontName", false, font);
     }
@@ -650,10 +616,7 @@
           nextIndex = (nextIndex + 1) % cards.length;
           if(cards[nextIndex].active !== false) { found = true; break; }
         }
-        if(!found){
-          alert("Keine aktiven Karten mehr!");
-          return;
-        }
+        if(!found) { alert("Keine aktiven Karten mehr!"); return; }
         currentIndex = nextIndex;
       } else {
         currentIndex = (currentIndex + 1) % cards.length;
@@ -668,15 +631,9 @@
     }
 
     /* ===== BILDER ===== */
-    function openOverlay(id) {
-      document.getElementById(id).classList.add("active");
-    }
-    function closeOverlay(id) {
-      document.getElementById(id).classList.remove("active");
-    }
-    function uploadImage() {
-      document.getElementById("hiddenImageUpload").click();
-    }
+    function openOverlay(id) { document.getElementById(id).classList.add("active"); }
+    function closeOverlay(id) { document.getElementById(id).classList.remove("active"); }
+    function uploadImage() { document.getElementById("hiddenImageUpload").click(); }
     function handleImageUpload(event) {
       const file = event.target.files[0];
       if(file) {
@@ -713,7 +670,7 @@
       cards[currentIndex].color = color;
       loadCard(currentIndex, true);
       saveCardsToLocalStorage();
-      closeOverlay('colorOverlay');
+      closeOverlay("colorOverlay");
     }
 
     /* ===== MUSTER-FUNKTION ===== */
@@ -737,58 +694,41 @@
       const card = document.getElementById("card");
       let canvasFront = document.getElementById("drawCanvasFront");
       let canvasBack  = document.getElementById("drawCanvasBack");
-      let isFlipped   = card.classList.contains("flip");
-
+      let isFlipped = card.classList.contains("flip");
       if(isFlipped) {
-        // Rückseite
         canvasFront.style.display = "none";
         canvasBack.style.display  = "block";
         canvasBack.width  = card.offsetWidth;
         canvasBack.height = card.offsetHeight;
         canvasBack.style.top = "0";
-        canvasBack.style.left= "0";
+        canvasBack.style.left = "0";
         canvasBack.style.pointerEvents = isDrawingModeActive ? "auto" : "none";
-
-        // Zeichnung laden
         if(cards[currentIndex].canvasDataBack) {
           let img = new Image();
-          img.onload = () => {
-            let ctx = canvasBack.getContext("2d");
-            ctx.clearRect(0,0,canvasBack.width,canvasBack.height);
-            ctx.drawImage(img, 0, 0, canvasBack.width, canvasBack.height);
-          };
+          img.onload = () => { let ctx = canvasBack.getContext("2d"); ctx.clearRect(0, 0, canvasBack.width, canvasBack.height); ctx.drawImage(img, 0, 0, canvasBack.width, canvasBack.height); };
           img.src = cards[currentIndex].canvasDataBack;
         } else {
-          canvasBack.getContext("2d").clearRect(0,0,canvasBack.width,canvasBack.height);
+          canvasBack.getContext("2d").clearRect(0, 0, canvasBack.width, canvasBack.height);
         }
-
-        // Eventlistener
         canvasBack.onmousedown = startDrawing;
         canvasBack.onmousemove = drawLine;
         canvasBack.onmouseup   = endDrawing;
         canvasBack.onmouseout  = endDrawing;
       } else {
-        // Vorderseite
-        canvasBack.style.display  = "none";
+        canvasBack.style.display = "none";
         canvasFront.style.display = "block";
         canvasFront.width  = card.offsetWidth;
         canvasFront.height = card.offsetHeight;
         canvasFront.style.top = "0";
-        canvasFront.style.left= "0";
+        canvasFront.style.left = "0";
         canvasFront.style.pointerEvents = isDrawingModeActive ? "auto" : "none";
-
         if(cards[currentIndex].canvasDataFront) {
           let img = new Image();
-          img.onload = () => {
-            let ctx = canvasFront.getContext("2d");
-            ctx.clearRect(0,0,canvasFront.width,canvasFront.height);
-            ctx.drawImage(img, 0, 0, canvasFront.width, canvasFront.height);
-          };
+          img.onload = () => { let ctx = canvasFront.getContext("2d"); ctx.clearRect(0, 0, canvasFront.width, canvasFront.height); ctx.drawImage(img, 0, 0, canvasFront.width, canvasFront.height); };
           img.src = cards[currentIndex].canvasDataFront;
         } else {
-          canvasFront.getContext("2d").clearRect(0,0,canvasFront.width,canvasFront.height);
+          canvasFront.getContext("2d").clearRect(0, 0, canvasFront.width, canvasFront.height);
         }
-
         canvasFront.onmousedown = startDrawing;
         canvasFront.onmousemove = drawLine;
         canvasFront.onmouseup   = endDrawing;
@@ -798,15 +738,15 @@
     function startDrawing(e) {
       if(!isDrawingModeActive) return;
       isDrawing = true;
+      let pos = getMousePos(e);
       let ctx = getCurrentCanvas().getContext("2d");
       ctx.beginPath();
-      let pos = getMousePos(e);
       ctx.moveTo(pos.x, pos.y);
     }
     function drawLine(e) {
       if(!isDrawingModeActive || !isDrawing) return;
-      let ctx = getCurrentCanvas().getContext("2d");
       let pos = getMousePos(e);
+      let ctx = getCurrentCanvas().getContext("2d");
       if(drawingMode === "draw") {
         ctx.globalCompositeOperation = "source-over";
         ctx.strokeStyle = currentDrawingColor;
@@ -821,8 +761,8 @@
     function endDrawing() {
       if(isDrawing && isDrawingModeActive) {
         isDrawing = false;
-        let card = document.getElementById("card");
         let canvas = getCurrentCanvas();
+        let card = document.getElementById("card");
         if(card.classList.contains("flip")) {
           cards[currentIndex].canvasDataBack = canvas.toDataURL("image/png");
         } else {
@@ -841,11 +781,17 @@
       return document.getElementById(card.classList.contains("flip") ? "drawCanvasBack" : "drawCanvasFront");
     }
     function setDrawingMode(mode) {
-      drawingMode = mode; // "draw" oder "erase"
+      drawingMode = mode;
+      if(mode === "erase") {
+        getCurrentCanvas().style.cursor = "url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVQoU2NkYGD4z0AEYBxVSFUAAXoYB7gWb5QAAAAASUVORK5CYII=), auto";
+      } else {
+        getCurrentCanvas().style.cursor = "crosshair";
+      }
     }
     function setDrawingColor(color) {
       currentDrawingColor = color;
       drawingMode = "draw";
+      getCurrentCanvas().style.cursor = "crosshair";
     }
     function changeLineWidth(val) {
       currentLineWidth = parseInt(val, 10);
@@ -873,8 +819,8 @@
       setupCanvasDrawing();
     }
     function saveDrawing() {
-      let card = document.getElementById("card");
       let canvas = getCurrentCanvas();
+      let card = document.getElementById("card");
       if(card.classList.contains("flip")) {
         cards[currentIndex].canvasDataBack = canvas.toDataURL("image/png");
       } else {
@@ -934,12 +880,10 @@
     }
     function loadCardsFromLocalStorage() {
       let data = localStorage.getItem("myJuraCards");
-      if(data) {
-        cards = JSON.parse(data);
-      }
+      if(data) { cards = JSON.parse(data); }
     }
 
-    /* ===== DYNAMISCHE GRÖSSE ===== */
+    /* ===== DYNAMISCHE KARTENGRÖSSE ===== */
     function updateCardSize() {
       let card = document.getElementById("card");
       let visibleFace = card.classList.contains("flip")
@@ -960,6 +904,10 @@
       updateCardSize();
       updateBottomButtonsWidth();
     });
+    function updateBottomButtonsWidth() {
+      let cardWidth = document.getElementById("card").offsetWidth;
+      document.getElementById("bottomButtons").style.width = cardWidth + "px";
+    }
 
     /* ===== DRAG & DROP BILDER ===== */
     let dragItem = null;
@@ -973,11 +921,11 @@
     }
     function onDrag(e) {
       if(dragItem) {
-        const cardRect = document.getElementById("card").getBoundingClientRect();
+        let cardRect = document.getElementById("card").getBoundingClientRect();
         let newLeft = e.clientX - cardRect.left - offsetX;
-        let newTop  = e.clientY - cardRect.top  - offsetY;
+        let newTop = e.clientY - cardRect.top - offsetY;
         dragItem.style.left = newLeft + "px";
-        dragItem.style.top  = newTop + "px";
+        dragItem.style.top = newTop + "px";
       }
     }
     function endDrag(e) {
@@ -986,8 +934,8 @@
       document.removeEventListener("mouseup", endDrag);
     }
     function makeImagesEditable() {
-      const card = document.getElementById("card");
-      const imgs = card.querySelectorAll("img.editable-image");
+      let card = document.getElementById("card");
+      let imgs = card.querySelectorAll("img.editable-image");
       imgs.forEach(img => {
         img.style.position = "absolute";
         img.style.cursor = "move";
@@ -997,7 +945,7 @@
 
     /* ===== DRAGGABLE OVERLAYS ===== */
     function makeAllOverlaysDraggable() {
-      const overlays = document.querySelectorAll(".overlay");
+      let overlays = document.querySelectorAll(".overlay");
       overlays.forEach(overlay => {
         overlay.addEventListener("mousedown", startOverlayDrag);
       });
