@@ -185,10 +185,7 @@
       position: absolute;
       top: 0; left: 0;
       z-index: 3;
-      /* Standardmäßig pointer-events: none, 
-         damit man Text markieren kann, 
-         wenn nicht im Zeichnen-Modus */
-      pointer-events: none;
+      pointer-events: none; /* wird im Zeichnenmodus auf auto gesetzt */
     }
 
     /* ===== SIDE BUTTONS (RECHTS) ===== */
@@ -326,9 +323,11 @@
         <!-- CARD -->
         <div class="card" id="card" onclick="maybeFlip(event)">
           <div class="card-inner">
+            <!-- Vorderseite -->
             <div class="card-front" id="cardFrontFace" contenteditable="false">
               <div id="frontQuestion">Frage wird geladen...</div>
             </div>
+            <!-- Rückseite -->
             <div class="card-back" id="cardBackFace" contenteditable="false">
               <div id="backAnswer">Antwort wird geladen...</div>
             </div>
@@ -423,6 +422,10 @@
   <input type="file" id="hiddenImageUpload" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
 
   <script>
+    /* ============= 
+       1) INIT
+       ============= */
+    // execCommand soll CSS nutzen
     document.execCommand("styleWithCSS", false, true);
 
     let cards = [
@@ -445,7 +448,7 @@
     let drawingMode = "draw"; // "draw" oder "erase"
     let currentDrawingColor = "#000";
     let currentLineWidth = 2;
-    let isDrawingModeActive = false; // ob man gerade zeichnet
+    let isDrawingModeActive = false;
 
     document.addEventListener("DOMContentLoaded", () => {
       loadCardsFromLocalStorage();
@@ -457,6 +460,9 @@
       makeAllOverlaysDraggable();
     });
 
+    /* ============= 
+       2) KARTE LADEN
+       ============= */
     function loadCard(index, preserveFlip = false) {
       if(!cards[index]) return;
       currentIndex = index;
@@ -508,7 +514,7 @@
       updateBottomButtons();
       updateBottomButtonsWidth();
       makeImagesEditable();
-      setupCanvasDrawing();
+      setupCanvasDrawing(); // Zeichnung laden
     }
 
     function updateCardCounter() {
@@ -528,6 +534,9 @@
       });
     }
 
+    /* ============= 
+       3) FLIP-FUNKTION
+       ============= */
     function maybeFlip(e) {
       if(e.target.closest(".side-buttons-container") || e.target.closest(".overlay")) return;
       if(isEditing) return;
@@ -538,6 +547,9 @@
       setTimeout(updateCardSize, 300);
     }
 
+    /* ============= 
+       4) BOTTOM BUTTONS
+       ============= */
     function updateBottomButtonsWidth() {
       const cardWidth = document.getElementById("card").offsetWidth;
       document.getElementById("bottomButtons").style.width = cardWidth + "px";
@@ -546,7 +558,9 @@
       document.getElementById("bottomButtons").style.display = "flex";
     }
 
-    /* --- Inline Edit Overlay --- */
+    /* ============= 
+       5) BEARBEITEN-OVERLAY
+       ============= */
     function openInlineEditOverlay() {
       const isFlipped = document.getElementById("card").classList.contains("flip");
       editingSide = isFlipped ? "back" : "front";
@@ -629,7 +643,9 @@
       }
     }
 
-    /* --- Bewertung & Problem --- */
+    /* ============= 
+       6) BEWERTUNG & PROBLEM
+       ============= */
     function rateCard(rating) {
       if(rating === "Einfach") {
         cards[currentIndex].active = false;
@@ -642,7 +658,7 @@
             break;
           }
         }
-        if(!found) {
+        if(!found){
           alert("Keine aktiven Karten mehr!");
           return;
         }
@@ -659,7 +675,9 @@
       saveCardsToLocalStorage();
     }
 
-    /* --- Bilder --- */
+    /* ============= 
+       7) BILDER
+       ============= */
     function openOverlay(id) {
       document.getElementById(id).classList.add("active");
     }
@@ -676,11 +694,9 @@
         reader.onload = function(e) {
           const isFlipped = document.getElementById("card").classList.contains("flip");
           if(!isFlipped) {
-            cards[currentIndex].question += 
-              `<br><img src="${e.target.result}" class="editable-image" style="max-width:100%; cursor:move;" ondblclick="resizeImage(this)"><br>`;
+            cards[currentIndex].question += `<br><img src="${e.target.result}" class="editable-image" style="max-width:100%; cursor:move;" ondblclick="resizeImage(this)"><br>`;
           } else {
-            cards[currentIndex].answer += 
-              `<br><img src="${e.target.result}" class="editable-image" style="max-width:100%; cursor:move;" ondblclick="resizeImage(this)"><br>`;
+            cards[currentIndex].answer += `<br><img src="${e.target.result}" class="editable-image" style="max-width:100%; cursor:move;" ondblclick="resizeImage(this)"><br>`;
           }
           loadCard(currentIndex, true);
           saveCardsToLocalStorage();
@@ -710,7 +726,9 @@
       closeOverlay('colorOverlay');
     }
 
-    /* --- Muster-Funktion (kein Flip) --- */
+    /* ============= 
+       8) MUSTER-FUNKTION
+       ============= */
     function cyclePattern(e) {
       e.stopPropagation();
       let patternOrder = ["lines", "grid", "dotted", "none"];
@@ -726,7 +744,9 @@
       document.getElementById("patternButton").innerHTML = `<i class="fas fa-th"></i> Muster Boden`;
     }
 
-    /* --- Zeichnen (Canvas) --- */
+    /* ============= 
+       9) ZEICHNEN
+       ============= */
     function setupCanvasDrawing() {
       const card = document.getElementById("card");
       const canvas = document.getElementById("drawCanvas");
@@ -734,10 +754,11 @@
       canvas.height = card.offsetHeight;
       canvas.style.top = "0";
       canvas.style.left = "0";
-      // Canvas pointer-events nur aktivieren, wenn isDrawingModeActive == true
+      // pointer-events nur aktiv, wenn Zeichnenmodus an
       canvas.style.pointerEvents = isDrawingModeActive ? "auto" : "none";
 
       const ctx = canvas.getContext("2d");
+      // Falls schon was gezeichnet wurde
       if(cards[currentIndex].canvasData) {
         const img = new Image();
         img.onload = () => { ctx.drawImage(img, 0, 0, canvas.width, canvas.height); };
@@ -751,19 +772,19 @@
     function startDrawing(e) {
       if(!isDrawingModeActive) return;
       isDrawing = true;
-      const pos = getMousePos(e);
+      const pos = getCanvasPos(e);
       const ctx = document.getElementById("drawCanvas").getContext("2d");
       ctx.beginPath();
       ctx.moveTo(pos.x, pos.y);
     }
     function drawLine(e) {
       if(!isDrawingModeActive || !isDrawing) return;
-      const pos = getMousePos(e);
+      const pos = getCanvasPos(e);
       const ctx = document.getElementById("drawCanvas").getContext("2d");
       if(drawingMode === "draw") {
         ctx.globalCompositeOperation = "source-over";
         ctx.strokeStyle = currentDrawingColor;
-      } else if(drawingMode === "erase") {
+      } else {
         ctx.globalCompositeOperation = "destination-out";
       }
       ctx.lineWidth = currentLineWidth;
@@ -779,13 +800,13 @@
         saveCardsToLocalStorage();
       }
     }
-    function getMousePos(e) {
+    function getCanvasPos(e) {
       const canvas = document.getElementById("drawCanvas");
       const rect = canvas.getBoundingClientRect();
       return { x: e.clientX - rect.left, y: e.clientY - rect.top };
     }
     function setDrawingMode(mode) {
-      drawingMode = mode;
+      drawingMode = mode; // "draw" oder "erase"
     }
     function setDrawingColor(color) {
       currentDrawingColor = color;
@@ -802,15 +823,16 @@
       saveCardsToLocalStorage();
     }
     function toggleDrawingMode() {
-      // Umschalten, ob gezeichnet werden kann
       isDrawingModeActive = !isDrawingModeActive;
       setupCanvasDrawing();
       alert(isDrawingModeActive 
-        ? "Zeichnen-Modus aktiviert! Farbe & Linie kann per Code geändert werden." 
-        : "Zeichnen-Modus deaktiviert!");
+        ? "Zeichenmodus aktiviert. Wähle Farbe/Linienstärke/Erase im Code."
+        : "Zeichenmodus deaktiviert!");
     }
 
-    /* --- Karten hinzufügen & löschen --- */
+    /* ============= 
+       10) KARTENVERWALTUNG
+       ============= */
     function addCard() {
       let newQuestion = prompt("Neue Frage:");
       let newAnswer   = prompt("Neue Antwort:");
@@ -864,7 +886,9 @@
       }
     }
 
-    /* --- Dynamische Kartengröße --- */
+    /* ============= 
+       11) DYNAMISCHE GRÖSSE
+       ============= */
     function updateCardSize() {
       const card = document.getElementById("card");
       const visibleFace = card.classList.contains("flip")
@@ -886,7 +910,9 @@
       updateBottomButtonsWidth();
     });
 
-    /* --- Bilder Drag & Drop --- */
+    /* ============= 
+       12) DRAG & DROP BILDER
+       ============= */
     let dragItem = null;
     let offsetX = 0, offsetY = 0;
     function startDrag(e) {
@@ -902,7 +928,7 @@
         let newLeft = e.clientX - cardRect.left - offsetX;
         let newTop = e.clientY - cardRect.top - offsetY;
         dragItem.style.left = newLeft + "px";
-        dragItem.style.top = newTop + "px";
+        dragItem.style.top  = newTop + "px";
       }
     }
     function endDrag(e) {
@@ -920,7 +946,9 @@
       });
     }
 
-    /* --- Overlays draggable machen --- */
+    /* ============= 
+       13) DRAGGABLE OVERLAYS
+       ============= */
     function makeAllOverlaysDraggable() {
       const overlays = document.querySelectorAll(".overlay");
       overlays.forEach(overlay => {
