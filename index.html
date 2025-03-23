@@ -155,8 +155,7 @@
     }
     .card-front, .card-back {
       position: absolute;
-      top: 0;
-      left: 0;
+      top: 0; left: 0;
       width: 100%;
       min-height: 300px;
       padding: 10px 20px 20px 20px;
@@ -180,8 +179,7 @@
     /* ========= ZEICHNEN: 2 CANVASES (FRONT & BACK) ========= */
     #drawCanvasFront, #drawCanvasBack {
       position: absolute;
-      top: 0;
-      left: 0;
+      top: 0; left: 0;
       z-index: 3;
       pointer-events: none; /* Standardmäßig deaktiviert; im Zeichnenmodus aktivieren */
     }
@@ -265,7 +263,7 @@
     }
     .overlay .toolbar {
       display: flex;
-      flex-wrap: nowrap;  /* Alle Buttons in einer Zeile */
+      flex-wrap: nowrap;
       gap: 5px;
       margin-bottom: 10px;
     }
@@ -292,32 +290,34 @@
     }
     
     /* ========= ZEICHNEN-KONTROLLOVERLAY ========= */
-    /* Nur das Zeichnen-Overlay wurde angepasst – Mindestbreite 800px, Slider geht von 1 bis 50 */
     .draw-toolbar {
       display: flex;
       flex-wrap: nowrap;
       gap: 5px;
       align-items: center;
     }
-    
     /* Zusätzliche Styles für den Range-Slider */
     input[type="range"] {
       -webkit-appearance: none;
       width: 100px;
-      background: transparent;
+      background: #ddd;
+      height: 4px;
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
     }
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      height: 20px;
-      width: 20px;
+      height: 16px;
+      width: 16px;
       border-radius: 50%;
       background: #972D54;
       cursor: pointer;
-      margin-top: -7px;
+      margin-top: -6px; /* Daumen zentrieren */
     }
     input[type="range"]::-moz-range-thumb {
-      height: 20px;
-      width: 20px;
+      height: 16px;
+      width: 16px;
       border-radius: 50%;
       background: #972D54;
       cursor: pointer;
@@ -678,7 +678,10 @@
         let found = false;
         for (let i = 0; i < cards.length; i++) {
           nextIndex = (nextIndex + 1) % cards.length;
-          if (cards[nextIndex].active !== false) { found = true; break; }
+          if (cards[nextIndex].active !== false) {
+            found = true;
+            break;
+          }
         }
         if (!found) {
           alert("Keine aktiven Karten mehr!");
@@ -786,7 +789,7 @@
         canvasBack.onmouseup   = endDrawing;
         canvasBack.onmouseout  = endDrawing;
       } else {
-        canvasBack.style.display = "none";
+        canvasBack.style.display  = "none";
         canvasFront.style.display = "block";
         canvasFront.width  = card.offsetWidth;
         canvasFront.height = card.offsetHeight;
@@ -821,6 +824,7 @@
       return { x: e.clientX - rect.left, y: e.clientY - rect.top };
     }
     
+    let isDrawing = false;
     function startDrawing(e) {
       if (!isDrawingModeActive) return;
       isDrawing = true;
@@ -829,7 +833,6 @@
       let pos = getMousePos(e);
       ctx.moveTo(pos.x, pos.y);
     }
-    
     function drawLine(e) {
       if (!isDrawingModeActive || !isDrawing) return;
       let ctx = getCurrentCanvas().getContext("2d");
@@ -846,11 +849,9 @@
       
       ctx.lineTo(pos.x, pos.y);
       ctx.stroke();
-      
       ctx.beginPath();
       ctx.moveTo(pos.x, pos.y);
     }
-    
     function endDrawing() {
       if (isDrawing && isDrawingModeActive) {
         isDrawing = false;
@@ -864,7 +865,6 @@
         saveCardsToLocalStorage();
       }
     }
-    
     function setDrawingMode(mode) {
       drawingMode = mode;
       if (mode === "erase") {
@@ -874,16 +874,13 @@
         getCurrentCanvas().style.cursor = "crosshair";
       }
     }
-    
     function setDrawingColor(color) {
       currentDrawingColor = color;
       drawingMode = "draw";
       getCurrentCanvas().style.cursor = "crosshair";
     }
-    
-    // Der Slider-Handler – currentLineWidth wird sofort aktualisiert
     function changeLineWidth(val) {
-      currentLineWidth = Number(val);
+      currentLineWidth = parseInt(val, 10);
     }
     
     function clearCanvas() {
@@ -898,19 +895,16 @@
       }
       saveCardsToLocalStorage();
     }
-    
     function openDrawControlsOverlay() {
       isDrawingModeActive = true;
       setupCanvasDrawing();
       document.getElementById("drawControlsOverlay").classList.add("active");
     }
-    
     function closeDrawControls() {
       isDrawingModeActive = false;
       document.getElementById("drawControlsOverlay").classList.remove("active");
       setupCanvasDrawing();
     }
-    
     function saveDrawing() {
       let canvas = getCurrentCanvas();
       let card = document.getElementById("card");
@@ -943,7 +937,6 @@
         saveCardsToLocalStorage();
       }
     }
-    
     function deleteSelectedCard() {
       if (!cards.length) return;
       if (confirm("Diese Karte endgültig löschen?")) {
@@ -959,7 +952,6 @@
         saveCardsToLocalStorage();
       }
     }
-    
     function deleteAllCards() {
       if (confirm("Willst du wirklich ALLE Karten löschen?")) {
         cards = [];
@@ -969,12 +961,10 @@
         alert("Alle Karten wurden gelöscht.");
       }
     }
-    
     function saveCardsToLocalStorage() {
       localStorage.setItem("myJuraCards", JSON.stringify(cards));
       renderCardList();
     }
-    
     function loadCardsFromLocalStorage() {
       let data = localStorage.getItem("myJuraCards");
       if (data) { cards = JSON.parse(data); }
@@ -1001,11 +991,6 @@
       updateCardSize();
       updateBottomButtonsWidth();
     });
-    
-    function updateBottomButtonsWidth() {
-      let cardWidth = document.getElementById("card").offsetWidth;
-      document.getElementById("bottomButtons").style.width = cardWidth + "px";
-    }
     
     /* ===== DRAG & DROP BILDER ===== */
     let dragItem = null;
