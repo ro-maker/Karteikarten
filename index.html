@@ -40,11 +40,12 @@
       margin: 0 auto;
       justify-content: flex-start;
     }
+    /* Änderung: Linke Spalte nun links ausgerichtet */
     .left-panel {
       display: flex;
       flex-direction: column;
       gap: 10px;
-      align-items: center;
+      align-items: flex-start;
       min-width: 80px;
       margin-right: 20px;
     }
@@ -292,10 +293,10 @@
       gap: 5px;
       align-items: center;
     }
-    /* Hier belassen wir den Range-Slider im nativen Browser-Stil,
-       damit dein Design unverändert bleibt. */
+    /* Wir belassen den Range-Slider im nativen Browser-Stil,
+       sodass das ursprüngliche Design erhalten bleibt. */
     
-    /* PATCH: Damit das Zeichnen-Overlay (und der Slider) wirklich ganz vorne liegt */
+    /* PATCH: Damit das Zeichnen-Overlay (und der Slider) ganz vorne liegt */
     #drawControlsOverlay {
       z-index: 9999;
     }
@@ -381,7 +382,6 @@
       <button style="background:#ddffdd;" onclick="setCardColor('#ddffdd')"></button>
       <button style="background:#ddeeff;" onclick="setCardColor('#ddeeff')"></button>
       <button style="background:#ffddee;" onclick="setCardColor('#ffddee')"></button>
-      <!-- Weiß als zusätzliche Option -->
       <button style="background:#ffffff;" onclick="setCardColor('#ffffff')"></button>
     </div>
     <button onclick="closeOverlay('colorOverlay')">Schließen</button>
@@ -455,7 +455,7 @@
   <script>
     document.execCommand("styleWithCSS", false, true);
 
-    /* === Karten-Daten, Verwaltung, Drag & Drop, Dynamische Größe usw. (unverändert) === */
+    /* === Karten-Daten und Verwaltung (unverändert) === */
     let cards = [
       {
         question: "Was ist JavaScript?",
@@ -562,7 +562,7 @@
     function updateBottomButtons() {
       document.getElementById("bottomButtons").style.display = "flex";
     }
-    
+
     function openInlineEditOverlay() {
       let isFlipped = document.getElementById("card").classList.contains("flip");
       editingSide = isFlipped ? "back" : "front";
@@ -846,7 +846,7 @@
       drawingMode = "draw";
       getCurrentCanvas().style.cursor = "crosshair";
     }
-    // Funktion, die nur den aktuellen Wert des Range-Sliders (Linienbreite) setzt
+    // Nur der Wert des Range-Sliders (Linienbreite) wird gesetzt
     function changeLineWidth(val) {
       currentLineWidth = parseInt(val, 10);
     }
