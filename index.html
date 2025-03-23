@@ -11,26 +11,15 @@
         referrerpolicy="no-referrer" />
   <style>
     /* ========= GLOBAL STYLES ========= */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       background-color: #fefefe;
       padding: 20px;
       font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      display: flex; flex-direction: column; align-items: center;
     }
-    header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    header h2 {
-      color: #972D54;
-    }
+    header { text-align: center; margin-bottom: 20px; }
+    header h2 { color: #972D54; }
     
     /* ========= MAIN CONTAINER ========= */
     .main-container {
@@ -67,42 +56,29 @@
       gap: 5px;
     }
     #cardList button {
-      width: 30px;
-      height: 30px;
-      border: none;
-      border-radius: 50%;
+      width: 30px; height: 30px;
+      border: none; border-radius: 50%;
       background-color: #ddd;
       cursor: pointer;
       font-size: 0.8rem;
     }
-    #cardList button.active {
-      background-color: #972D54;
-      color: white;
-    }
-    #cardList button.inactive {
-      opacity: 0.5;
-    }
+    #cardList button.active { background-color: #972D54; color: white; }
+    #cardList button.inactive { opacity: 0.5; }
     /* Löschbuttons */
     #deleteCardButton {
       background-color: #e74c3c;
       color: white;
-      border: none;
-      border-radius: 50%;
-      width: 35px;
-      height: 35px;
+      border: none; border-radius: 50%;
+      width: 35px; height: 35px;
       cursor: pointer;
       font-size: 1.2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
     }
     #deleteAllButton {
       background-color: #333;
       color: white;
-      border: none;
-      border-radius: 6px;
-      width: 70px;
-      height: 35px;
+      border: none; border-radius: 6px;
+      width: 70px; height: 35px;
       cursor: pointer;
       font-size: 0.9rem;
     }
@@ -150,40 +126,25 @@
       position: relative;
       z-index: 1;
     }
-    .card.flip .card-inner {
-      transform: rotateY(180deg);
-    }
+    .card.flip .card-inner { transform: rotateY(180deg); }
     .card-front, .card-back {
-      position: absolute;
-      top: 0;
-      left: 0;
+      position: absolute; top: 0; left: 0;
       width: 100%;
       min-height: 300px;
       padding: 10px 20px 20px 20px;
       border-radius: 8px;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      font-size: 1.2rem;
-      line-height: 30px;
+      white-space: pre-wrap; word-wrap: break-word;
+      font-size: 1.2rem; line-height: 30px;
       backface-visibility: hidden;
     }
-    .card-front {
-      background-color: #fff;
-      z-index: 2;
-    }
-    .card-back {
-      background-color: #f9f9f9;
-      transform: rotateY(180deg);
-      z-index: 1;
-    }
+    .card-front { background-color: #fff; z-index: 2; }
+    .card-back { background-color: #f9f9f9; transform: rotateY(180deg); z-index: 1; }
     
     /* ========= ZEICHNEN: 2 CANVASES (FRONT & BACK) ========= */
     #drawCanvasFront, #drawCanvasBack {
-      position: absolute;
-      top: 0;
-      left: 0;
+      position: absolute; top: 0; left: 0;
       z-index: 3;
-      pointer-events: none; /* Standardmäßig deaktiviert; im Zeichnenmodus wird pointer-events gesetzt */
+      pointer-events: none; /* Standardmäßig deaktiviert; im Zeichnenmodus aktivieren */
     }
     
     /* ========= SIDE BUTTONS ========= */
@@ -194,23 +155,14 @@
       align-items: flex-start;
     }
     .side-buttons-container button {
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 8px;
+      display: flex; align-items: center; justify-content: flex-start; gap: 8px;
       padding: 6px 10px;
-      border: none;
-      border-radius: 4px;
-      background-color: #972D54;
-      color: #fff;
-      cursor: pointer;
-      font-size: 0.85rem;
-      width: 110px;
-      text-align: left;
+      border: none; border-radius: 4px;
+      background-color: #972D54; color: #fff;
+      cursor: pointer; font-size: 0.85rem;
+      width: 110px; text-align: left;
     }
-    .side-buttons-container button:hover {
-      opacity: 0.9;
-    }
+    .side-buttons-container button:hover { opacity: 0.9; }
     
     /* ========= BOTTOM BUTTONS ========= */
     .bottom-buttons {
@@ -221,8 +173,7 @@
     .bottom-buttons button {
       flex: 1;
       padding: 10px;
-      border: none;
-      border-radius: 5px;
+      border: none; border-radius: 5px;
       font-size: 1rem;
       cursor: pointer;
       color: #fff;
@@ -238,8 +189,7 @@
       position: fixed;
       top: 120px;
       left: 120px;
-      width: 450px;
-      max-width: 90%;
+      width: 450px; max-width: 90%;
       background: linear-gradient(135deg, #ffffff 0%, #f3f3f3 100%);
       padding: 15px;
       border-radius: 15px;
@@ -275,10 +225,8 @@
       margin-bottom: 10px;
     }
     .overlay .color-palette button {
-      width: 25px;
-      height: 25px;
-      border: none;
-      border-radius: 3px;
+      width: 25px; height: 25px;
+      border: none; border-radius: 3px;
       cursor: pointer;
     }
     
@@ -292,8 +240,7 @@
     }
     
     /* ========= ZEICHNEN-KONTROLLOVERLAY ========= */
-    /* Hier wurden nur Anpassungen vorgenommen – das Overlay ist breiter (min-width: 800px)
-       und der Slider geht bis 50, um deutlichere Änderungen der Linienbreite anzuzeigen */
+    /* Nur das Zeichnen-Overlay wurde angepasst – Mindestbreite 800px, Slider geht von 1 bis 50 */
     .draw-toolbar {
       display: flex;
       flex-wrap: nowrap;
@@ -761,7 +708,7 @@
         canvasBack.onmouseup   = endDrawing;
         canvasBack.onmouseout  = endDrawing;
       } else {
-        canvasBack.style.display  = "none";
+        canvasBack.style.display = "none";
         canvasFront.style.display = "block";
         canvasFront.width  = card.offsetWidth;
         canvasFront.height = card.offsetHeight;
@@ -809,6 +756,8 @@
       if (!isDrawingModeActive || !isDrawing) return;
       let ctx = getCurrentCanvas().getContext("2d");
       let pos = getMousePos(e);
+      
+      // Verwende currentLineWidth in Echtzeit
       ctx.lineWidth = currentLineWidth;
       ctx.lineCap = "round";
       
@@ -855,8 +804,14 @@
       getCurrentCanvas().style.cursor = "crosshair";
     }
     
+    // Neuer Slider-Handler: aktueller Wert wird als Zahl gesetzt und wenn gerade gezeichnet wird, direkt aktualisiert.
     function changeLineWidth(val) {
-      currentLineWidth = parseInt(val, 10);
+      currentLineWidth = Number(val);
+      // Falls gerade gezeichnet wird, wird der aktuelle Context aktualisiert:
+      if(isDrawing) {
+        let ctx = getCurrentCanvas().getContext("2d");
+        ctx.lineWidth = currentLineWidth;
+      }
     }
     
     function clearCanvas() {
