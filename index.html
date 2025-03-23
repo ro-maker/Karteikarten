@@ -10,7 +10,7 @@
         crossorigin="anonymous" 
         referrerpolicy="no-referrer" />
   <style>
-    /* === GLOBAL STYLES (wie in deinem Originaldesign) === */
+    /* ========= GLOBAL STYLES (unverändert) ========= */
     * {
       margin: 0;
       padding: 0;
@@ -172,7 +172,7 @@
       z-index: 1;
     }
     
-    /* Zwei Canvas-Elemente */
+    /* Zwei Canvas-Elemente (Front & Back) */
     #drawCanvasFront, #drawCanvasBack {
       position: absolute;
       top: 0;
@@ -282,7 +282,7 @@
       background: rgba(255,255,255,0.8);
     }
     
-    /* Zeichnen-Kontrolloverlay – MINDESTBREITE 800px, ansonsten wie bisher */
+    /* Zeichnen-Kontrolloverlay – bleibt wie in deinem Design (min-width: 800px) */
     #drawControlsOverlay {
       min-width: 800px;
     }
@@ -292,8 +292,17 @@
       gap: 5px;
       align-items: center;
     }
-    /* Hier lassen wir den Range-Slider im Standardbrowser-Stil, damit sich der Daumen verschieben lässt */
-    /* (Keine zusätzlichen CSS-Regeln, die den Standard-Look überschreiben) */
+    /* Verwende den nativen Browser-Stil für den Range-Slider, sodass sich der Thumb verschieben lässt */
+    
+    /* PATCH: Damit der Slider wirklich anklickbar ist, fügen wir am Ende noch folgenden Code ein: */
+    #drawControlsOverlay {
+      z-index: 9999;
+    }
+    #drawControlsOverlay .draw-toolbar input[type="range"] {
+      pointer-events: auto;
+      z-index: 99999;
+    }
+    
   </style>
 </head>
 <body>
@@ -327,7 +336,7 @@
               <div id="backAnswer">Antwort wird geladen...</div>
             </div>
           </div>
-          <!-- Zwei Canvas-Elemente: FRONT & BACK -->
+          <!-- Zwei Canvas-Elemente: Front & Back -->
           <canvas id="drawCanvasFront"></canvas>
           <canvas id="drawCanvasBack" style="display:none;"></canvas>
         </div>
@@ -372,7 +381,6 @@
       <button style="background:#ddffdd;" onclick="setCardColor('#ddffdd')"></button>
       <button style="background:#ddeeff;" onclick="setCardColor('#ddeeff')"></button>
       <button style="background:#ffddee;" onclick="setCardColor('#ffddee')"></button>
-      <!-- Weiß als zusätzliche Option -->
       <button style="background:#ffffff;" onclick="setCardColor('#ffffff')"></button>
     </div>
     <button onclick="closeOverlay('colorOverlay')">Schließen</button>
@@ -446,7 +454,7 @@
   <script>
     document.execCommand("styleWithCSS", false, true);
 
-    /* --- Karten-Daten, -Verwaltung, etc. (unverändert) --- */
+    /* === Karten-Daten, Verwaltung, Dynamische Größe, Drag & Drop usw. (unverändert) === */
     let cards = [
       {
         question: "Was ist JavaScript?",
@@ -544,7 +552,10 @@
     }
     function flipCard() {
       document.getElementById("card").classList.toggle("flip");
-      setTimeout(() => { setupCanvasDrawing(); updateCardSize(); }, 300);
+      setTimeout(() => {
+        setupCanvasDrawing();
+        updateCardSize();
+      }, 300);
     }
     function updateBottomButtonsWidth() {
       let cardWidth = document.getElementById("card").offsetWidth;
@@ -553,7 +564,7 @@
     function updateBottomButtons() {
       document.getElementById("bottomButtons").style.display = "flex";
     }
-
+    
     function openInlineEditOverlay() {
       let isFlipped = document.getElementById("card").classList.contains("flip");
       editingSide = isFlipped ? "back" : "front";
@@ -721,7 +732,7 @@
       document.getElementById("patternButton").innerHTML = `<i class="fas fa-th"></i> Muster&nbsp;Boden`;
     }
 
-    /* Zeichnen: zwei Canvas-Elemente (Front & Back) */
+    /* Zeichnen-Funktionen */
     function setupCanvasDrawing() {
       const card = document.getElementById("card");
       let canvasFront = document.getElementById("drawCanvasFront");
@@ -837,7 +848,7 @@
       drawingMode = "draw";
       getCurrentCanvas().style.cursor = "crosshair";
     }
-    // Hier wird der aktuelle Wert des Sliders gesetzt (nur Funktionalität – Design bleibt gleich)
+    // Ändert nur den Wert der Linienbreite (Design bleibt unverändert)
     function changeLineWidth(val) {
       currentLineWidth = parseInt(val, 10);
     }
