@@ -11,15 +11,26 @@
         referrerpolicy="no-referrer" />
   <style>
     /* ========= GLOBAL STYLES ========= */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     body {
       background-color: #fefefe;
       padding: 20px;
       font-family: Arial, sans-serif;
-      display: flex; flex-direction: column; align-items: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-    header { text-align: center; margin-bottom: 20px; }
-    header h2 { color: #972D54; }
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    header h2 {
+      color: #972D54;
+    }
     
     /* ========= MAIN CONTAINER ========= */
     .main-container {
@@ -56,29 +67,42 @@
       gap: 5px;
     }
     #cardList button {
-      width: 30px; height: 30px;
-      border: none; border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      border: none;
+      border-radius: 50%;
       background-color: #ddd;
       cursor: pointer;
       font-size: 0.8rem;
     }
-    #cardList button.active { background-color: #972D54; color: white; }
-    #cardList button.inactive { opacity: 0.5; }
+    #cardList button.active {
+      background-color: #972D54;
+      color: white;
+    }
+    #cardList button.inactive {
+      opacity: 0.5;
+    }
     /* Löschbuttons */
     #deleteCardButton {
       background-color: #e74c3c;
       color: white;
-      border: none; border-radius: 50%;
-      width: 35px; height: 35px;
+      border: none;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
       cursor: pointer;
       font-size: 1.2rem;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     #deleteAllButton {
       background-color: #333;
       color: white;
-      border: none; border-radius: 6px;
-      width: 70px; height: 35px;
+      border: none;
+      border-radius: 6px;
+      width: 70px;
+      height: 35px;
       cursor: pointer;
       font-size: 0.9rem;
     }
@@ -126,23 +150,38 @@
       position: relative;
       z-index: 1;
     }
-    .card.flip .card-inner { transform: rotateY(180deg); }
+    .card.flip .card-inner {
+      transform: rotateY(180deg);
+    }
     .card-front, .card-back {
-      position: absolute; top: 0; left: 0;
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
       min-height: 300px;
       padding: 10px 20px 20px 20px;
       border-radius: 8px;
-      white-space: pre-wrap; word-wrap: break-word;
-      font-size: 1.2rem; line-height: 30px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-size: 1.2rem;
+      line-height: 30px;
       backface-visibility: hidden;
     }
-    .card-front { background-color: #fff; z-index: 2; }
-    .card-back { background-color: #f9f9f9; transform: rotateY(180deg); z-index: 1; }
+    .card-front {
+      background-color: #fff;
+      z-index: 2;
+    }
+    .card-back {
+      background-color: #f9f9f9;
+      transform: rotateY(180deg);
+      z-index: 1;
+    }
     
     /* ========= ZEICHNEN: 2 CANVASES (FRONT & BACK) ========= */
     #drawCanvasFront, #drawCanvasBack {
-      position: absolute; top: 0; left: 0;
+      position: absolute;
+      top: 0;
+      left: 0;
       z-index: 3;
       pointer-events: none; /* Standardmäßig deaktiviert; im Zeichnenmodus aktivieren */
     }
@@ -155,14 +194,23 @@
       align-items: flex-start;
     }
     .side-buttons-container button {
-      display: flex; align-items: center; justify-content: flex-start; gap: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 8px;
       padding: 6px 10px;
-      border: none; border-radius: 4px;
-      background-color: #972D54; color: #fff;
-      cursor: pointer; font-size: 0.85rem;
-      width: 110px; text-align: left;
+      border: none;
+      border-radius: 4px;
+      background-color: #972D54;
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.85rem;
+      width: 110px;
+      text-align: left;
     }
-    .side-buttons-container button:hover { opacity: 0.9; }
+    .side-buttons-container button:hover {
+      opacity: 0.9;
+    }
     
     /* ========= BOTTOM BUTTONS ========= */
     .bottom-buttons {
@@ -173,7 +221,8 @@
     .bottom-buttons button {
       flex: 1;
       padding: 10px;
-      border: none; border-radius: 5px;
+      border: none;
+      border-radius: 5px;
       font-size: 1rem;
       cursor: pointer;
       color: #fff;
@@ -189,7 +238,8 @@
       position: fixed;
       top: 120px;
       left: 120px;
-      width: 450px; max-width: 90%;
+      width: 450px;
+      max-width: 90%;
       background: linear-gradient(135deg, #ffffff 0%, #f3f3f3 100%);
       padding: 15px;
       border-radius: 15px;
@@ -225,8 +275,10 @@
       margin-bottom: 10px;
     }
     .overlay .color-palette button {
-      width: 25px; height: 25px;
-      border: none; border-radius: 3px;
+      width: 25px;
+      height: 25px;
+      border: none;
+      border-radius: 3px;
       cursor: pointer;
     }
     
@@ -246,6 +298,29 @@
       flex-wrap: nowrap;
       gap: 5px;
       align-items: center;
+    }
+    
+    /* Zusätzliche Styles für den Range-Slider */
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100px;
+      background: transparent;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 20px;
+      width: 20px;
+      border-radius: 50%;
+      background: #972D54;
+      cursor: pointer;
+      margin-top: -7px;
+    }
+    input[type="range"]::-moz-range-thumb {
+      height: 20px;
+      width: 20px;
+      border-radius: 50%;
+      background: #972D54;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -497,7 +572,10 @@
     }
     function flipCard() {
       document.getElementById("card").classList.toggle("flip");
-      setTimeout(() => { setupCanvasDrawing(); updateCardSize(); }, 300);
+      setTimeout(() => {
+        setupCanvasDrawing();
+        updateCardSize();
+      }, 300);
     }
     function updateBottomButtonsWidth() {
       let cardWidth = document.getElementById("card").offsetWidth;
@@ -756,8 +834,6 @@
       if (!isDrawingModeActive || !isDrawing) return;
       let ctx = getCurrentCanvas().getContext("2d");
       let pos = getMousePos(e);
-      
-      // Verwende currentLineWidth in Echtzeit
       ctx.lineWidth = currentLineWidth;
       ctx.lineCap = "round";
       
@@ -792,7 +868,8 @@
     function setDrawingMode(mode) {
       drawingMode = mode;
       if (mode === "erase") {
-        getCurrentCanvas().style.cursor = "url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVQoU2NkYGD4z0AEYBxVSFUAAXoYB7gWb5QAAAAASUVORK5CYII=), auto";
+        getCurrentCanvas().style.cursor =
+          "url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVQoU2NkYGD4z0AEYBxVSFUAAXoYB7gWb5QAAAAASUVORK5CYII=), auto";
       } else {
         getCurrentCanvas().style.cursor = "crosshair";
       }
@@ -804,14 +881,9 @@
       getCurrentCanvas().style.cursor = "crosshair";
     }
     
-    // Neuer Slider-Handler: aktueller Wert wird als Zahl gesetzt und wenn gerade gezeichnet wird, direkt aktualisiert.
+    // Der Slider-Handler – currentLineWidth wird sofort aktualisiert
     function changeLineWidth(val) {
       currentLineWidth = Number(val);
-      // Falls gerade gezeichnet wird, wird der aktuelle Context aktualisiert:
-      if(isDrawing) {
-        let ctx = getCurrentCanvas().getContext("2d");
-        ctx.lineWidth = currentLineWidth;
-      }
     }
     
     function clearCanvas() {
