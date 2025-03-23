@@ -292,9 +292,10 @@
       gap: 5px;
       align-items: center;
     }
-    /* Verwende den nativen Browser-Stil für den Range-Slider, sodass sich der Thumb verschieben lässt */
+    /* Hier belassen wir den Range-Slider im nativen Browser-Stil,
+       damit dein Design unverändert bleibt. */
     
-    /* PATCH: Damit der Slider wirklich anklickbar ist, fügen wir am Ende noch folgenden Code ein: */
+    /* PATCH: Damit das Zeichnen-Overlay (und der Slider) wirklich ganz vorne liegt */
     #drawControlsOverlay {
       z-index: 9999;
     }
@@ -302,7 +303,6 @@
       pointer-events: auto;
       z-index: 99999;
     }
-    
   </style>
 </head>
 <body>
@@ -381,6 +381,7 @@
       <button style="background:#ddffdd;" onclick="setCardColor('#ddffdd')"></button>
       <button style="background:#ddeeff;" onclick="setCardColor('#ddeeff')"></button>
       <button style="background:#ffddee;" onclick="setCardColor('#ffddee')"></button>
+      <!-- Weiß als zusätzliche Option -->
       <button style="background:#ffffff;" onclick="setCardColor('#ffffff')"></button>
     </div>
     <button onclick="closeOverlay('colorOverlay')">Schließen</button>
@@ -454,7 +455,7 @@
   <script>
     document.execCommand("styleWithCSS", false, true);
 
-    /* === Karten-Daten, Verwaltung, Dynamische Größe, Drag & Drop usw. (unverändert) === */
+    /* === Karten-Daten, Verwaltung, Drag & Drop, Dynamische Größe usw. (unverändert) === */
     let cards = [
       {
         question: "Was ist JavaScript?",
@@ -552,10 +553,7 @@
     }
     function flipCard() {
       document.getElementById("card").classList.toggle("flip");
-      setTimeout(() => {
-        setupCanvasDrawing();
-        updateCardSize();
-      }, 300);
+      setTimeout(() => { setupCanvasDrawing(); updateCardSize(); }, 300);
     }
     function updateBottomButtonsWidth() {
       let cardWidth = document.getElementById("card").offsetWidth;
@@ -848,7 +846,7 @@
       drawingMode = "draw";
       getCurrentCanvas().style.cursor = "crosshair";
     }
-    // Ändert nur den Wert der Linienbreite (Design bleibt unverändert)
+    // Funktion, die nur den aktuellen Wert des Range-Sliders (Linienbreite) setzt
     function changeLineWidth(val) {
       currentLineWidth = parseInt(val, 10);
     }
