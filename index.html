@@ -10,8 +10,12 @@
         crossorigin="anonymous" 
         referrerpolicy="no-referrer" />
   <style>
-    /* ========= GLOBAL STYLES (unverändert) ========= */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    /* === GLOBAL STYLES (wie in deinem Originaldesign) === */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     body {
       background-color: #fefefe;
       padding: 20px;
@@ -20,8 +24,13 @@
       flex-direction: column;
       align-items: center;
     }
-    header { text-align: center; margin-bottom: 20px; }
-    header h2 { color: #972D54; }
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    header h2 {
+      color: #972D54;
+    }
     
     .main-container {
       display: flex;
@@ -55,21 +64,29 @@
       gap: 5px;
     }
     #cardList button {
-      width: 30px; height: 30px;
+      width: 30px;
+      height: 30px;
       border: none;
       border-radius: 50%;
       background-color: #ddd;
       cursor: pointer;
       font-size: 0.8rem;
     }
-    #cardList button.active { background-color: #972D54; color: white; }
-    #cardList button.inactive { opacity: 0.5; }
+    #cardList button.active {
+      background-color: #972D54;
+      color: white;
+    }
+    #cardList button.inactive {
+      opacity: 0.5;
+    }
+    /* Löschbuttons */
     #deleteCardButton {
       background-color: #e74c3c;
       color: white;
       border: none;
       border-radius: 50%;
-      width: 35px; height: 35px;
+      width: 35px;
+      height: 35px;
       cursor: pointer;
       font-size: 1.2rem;
       display: flex;
@@ -81,7 +98,8 @@
       color: white;
       border: none;
       border-radius: 6px;
-      width: 70px; height: 35px;
+      width: 70px;
+      height: 35px;
       cursor: pointer;
       font-size: 0.9rem;
     }
@@ -127,10 +145,13 @@
       position: relative;
       z-index: 1;
     }
-    .card.flip .card-inner { transform: rotateY(180deg); }
+    .card.flip .card-inner {
+      transform: rotateY(180deg);
+    }
     .card-front, .card-back {
       position: absolute;
-      top: 0; left: 0;
+      top: 0;
+      left: 0;
       width: 100%;
       min-height: 300px;
       padding: 10px 20px 20px 20px;
@@ -141,13 +162,21 @@
       line-height: 30px;
       backface-visibility: hidden;
     }
-    .card-front { background-color: #fff; z-index: 2; }
-    .card-back  { background-color: #f9f9f9; transform: rotateY(180deg); z-index: 1; }
+    .card-front {
+      background-color: #fff;
+      z-index: 2;
+    }
+    .card-back {
+      background-color: #f9f9f9;
+      transform: rotateY(180deg);
+      z-index: 1;
+    }
     
-    /* Zwei Canvas-Elemente (Front & Back) */
+    /* Zwei Canvas-Elemente */
     #drawCanvasFront, #drawCanvasBack {
       position: absolute;
-      top: 0; left: 0;
+      top: 0;
+      left: 0;
       z-index: 3;
       pointer-events: none;
     }
@@ -173,7 +202,9 @@
       width: 110px;
       text-align: left;
     }
-    .side-buttons-container button:hover { opacity: 0.9; }
+    .side-buttons-container button:hover {
+      opacity: 0.9;
+    }
     
     .bottom-buttons {
       display: flex;
@@ -242,7 +273,7 @@
       border-radius: 3px;
       cursor: pointer;
     }
-
+    
     .draggable-text {
       border: 1px dashed #ccc;
       padding: 4px;
@@ -250,8 +281,8 @@
       position: absolute;
       background: rgba(255,255,255,0.8);
     }
-
-    /* Zeichnen-Kontrolloverlay: nur dieses Fenster wurde angepasst */
+    
+    /* Zeichnen-Kontrolloverlay – MINDESTBREITE 800px, ansonsten wie bisher */
     #drawControlsOverlay {
       min-width: 800px;
     }
@@ -261,11 +292,8 @@
       gap: 5px;
       align-items: center;
     }
-    /* Minimaler Stil für den Range-Slider: Verwende hier den Browser-Standard */
-    input[type="range"] {
-      width: 150px;
-      /* Kein -webkit-appearance, damit der Standard genutzt wird */
-    }
+    /* Hier lassen wir den Range-Slider im Standardbrowser-Stil, damit sich der Daumen verschieben lässt */
+    /* (Keine zusätzlichen CSS-Regeln, die den Standard-Look überschreiben) */
   </style>
 </head>
 <body>
@@ -299,7 +327,7 @@
               <div id="backAnswer">Antwort wird geladen...</div>
             </div>
           </div>
-          <!-- Zwei Canvas-Elemente: Front & Back -->
+          <!-- Zwei Canvas-Elemente: FRONT & BACK -->
           <canvas id="drawCanvasFront"></canvas>
           <canvas id="drawCanvasBack" style="display:none;"></canvas>
         </div>
@@ -418,6 +446,7 @@
   <script>
     document.execCommand("styleWithCSS", false, true);
 
+    /* --- Karten-Daten, -Verwaltung, etc. (unverändert) --- */
     let cards = [
       {
         question: "Was ist JavaScript?",
@@ -458,7 +487,7 @@
       document.getElementById("backAnswer").innerHTML = c.answer.replace(/\n/g, "<br>");
       document.getElementById("cardFrontFace").style.backgroundColor = c.color;
       document.getElementById("cardBackFace").style.backgroundColor = c.color;
-
+      
       let backFace = document.getElementById("cardBackFace");
       backFace.style.backgroundImage = "none";
       backFace.style.backgroundSize = "";
@@ -479,7 +508,7 @@
           "radial-gradient(rgba(0,0,0,0.15) 1px, transparent 1px)";
         backFace.style.backgroundSize = "20px 20px";
       }
-
+      
       let cardEl = document.getElementById("card");
       cardEl.style.borderTop = c.problem ? "5px solid red" : "2px solid #ccc";
       if (!preserveFlip) { cardEl.classList.remove("flip"); }
@@ -515,10 +544,7 @@
     }
     function flipCard() {
       document.getElementById("card").classList.toggle("flip");
-      setTimeout(() => {
-        setupCanvasDrawing();
-        updateCardSize();
-      }, 300);
+      setTimeout(() => { setupCanvasDrawing(); updateCardSize(); }, 300);
     }
     function updateBottomButtonsWidth() {
       let cardWidth = document.getElementById("card").offsetWidth;
@@ -695,7 +721,7 @@
       document.getElementById("patternButton").innerHTML = `<i class="fas fa-th"></i> Muster&nbsp;Boden`;
     }
 
-    let isDrawingModeActive = false;
+    /* Zeichnen: zwei Canvas-Elemente (Front & Back) */
     function setupCanvasDrawing() {
       const card = document.getElementById("card");
       let canvasFront = document.getElementById("drawCanvasFront");
@@ -811,6 +837,7 @@
       drawingMode = "draw";
       getCurrentCanvas().style.cursor = "crosshair";
     }
+    // Hier wird der aktuelle Wert des Sliders gesetzt (nur Funktionalität – Design bleibt gleich)
     function changeLineWidth(val) {
       currentLineWidth = parseInt(val, 10);
     }
@@ -847,7 +874,8 @@
       saveCardsToLocalStorage();
       closeDrawControls();
     }
-    
+
+    /* Kartenverwaltung */
     function addCard() {
       let newQuestion = prompt("Neue Frage:");
       let newAnswer = prompt("Neue Antwort:");
@@ -899,7 +927,8 @@
       let data = localStorage.getItem("myJuraCards");
       if (data) { cards = JSON.parse(data); }
     }
-    
+
+    /* Dynamische Kartengröße */
     function updateCardSize() {
       let card = document.getElementById("card");
       let visibleFace = card.classList.contains("flip")
@@ -920,12 +949,12 @@
       updateCardSize();
       updateBottomButtonsWidth();
     });
-    
     function updateBottomButtonsWidth() {
       let cardWidth = document.getElementById("card").offsetWidth;
       document.getElementById("bottomButtons").style.width = cardWidth + "px";
     }
-    
+
+    /* Drag & Drop Bilder */
     let dragItem = null;
     let offsetX = 0, offsetY = 0;
     function startDrag(e) {
@@ -958,7 +987,8 @@
         img.addEventListener("mousedown", startDrag);
       });
     }
-    
+
+    /* Draggable Overlays */
     function makeAllOverlaysDraggable() {
       let overlays = document.querySelectorAll(".overlay");
       overlays.forEach(overlay => {
