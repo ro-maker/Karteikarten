@@ -5,12 +5,9 @@
   <title>Jura-Karteikarten</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <!-- Font Awesome via CDN (Version 6) -->
-  <link rel="stylesheet" 
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
-        crossorigin="anonymous" 
-        referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
-    /* ========= GLOBAL STYLES (unverändert) ========= */
+    /* ========= GLOBAL STYLES ========= */
     * {
       margin: 0;
       padding: 0;
@@ -32,6 +29,7 @@
       color: #972D54;
     }
     
+    /* ========== MAIN CONTAINER ========= */
     .main-container {
       display: flex;
       gap: 20px;
@@ -40,91 +38,79 @@
       margin: 0 auto;
       justify-content: flex-start;
     }
-    /* Änderung: Linke Spalte nun links ausgerichtet */
-    .left-panel {
+    
+    /* ========== LINKE SPALTE ========= */
+    .left-column {
       display: flex;
       flex-direction: column;
+      align-items: center; /* Alle Elemente zentriert in der Spalte */
       gap: 10px;
-      align-items: flex-start;
-      min-width: 80px;
-      margin-right: 20px;
+      position: absolute;
+      left: 20px; /* ganz links */
+      top: 20px;
     }
-    .add-card-button {
+    .plus-button {
       background-color: #28a745;
       color: white;
-      font-size: 32px;
       border: none;
       border-radius: 50%;
       width: 50px;
       height: 50px;
+      font-size: 24px;
       cursor: pointer;
     }
-    #cardList {
+    .number-buttons {
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      margin-top: 10px;
     }
-    #cardList button {
-      width: 30px;
-      height: 30px;
-      border: none;
+    .num-btn {
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
-      background-color: #ddd;
+      background-color: lightgray;
+      border: none;
+      margin: 5px;
+      font-size: 16px;
       cursor: pointer;
-      font-size: 0.8rem;
     }
-    #cardList button.active {
-      background-color: #972D54;
-      color: white;
-    }
-    #cardList button.inactive {
-      opacity: 0.5;
-    }
-    /* Löschbuttons */
-    #deleteCardButton {
-      background-color: #e74c3c;
+    .trash-button {
+      background-color: red;
       color: white;
       border: none;
       border-radius: 50%;
-      width: 35px;
-      height: 35px;
+      width: 50px;
+      height: 50px;
+      font-size: 20px;
+      margin-top: 10px;
       cursor: pointer;
-      font-size: 1.2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
-    #deleteAllButton {
-      background-color: #333;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      width: 70px;
-      height: 35px;
+    .all-button {
+      margin-top: 5px;
+      padding: 5px 10px;
       cursor: pointer;
-      font-size: 0.9rem;
     }
     
+    /* ========== KARTEIKARTEN-BEREICH ========= */
     .card-wrapper {
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
+      align-items: center; /* Karte + untere Buttons zentrieren */
       gap: 10px;
       width: 100%;
       max-width: 900px;
       margin: 0 auto;
       position: relative;
+      left: 50px;  /* leichte Verschiebung nach rechts, sodass es optisch zentriert wirkt */
     }
     .card-and-sides {
       display: flex;
       gap: 20px;
       align-items: flex-start;
-      justify-content: flex-start;
+      justify-content: center; /* Karte + Seitentasten mittig */
       width: 100%;
       max-width: 900px;
-      margin: 0 auto;
     }
-    
     .card {
       position: relative;
       min-width: 600px;
@@ -182,31 +168,26 @@
       pointer-events: none;
     }
     
-    .side-buttons-container {
+    /* ========== RECHTE SEITENTASTEN ========= */
+    .right-buttons {
       display: flex;
       flex-direction: column;
       gap: 5px;
-      align-items: flex-start;
+      position: absolute;
+      right: 40px; /* Etwas nach rechts, um das Layout auszugleichen */
+      top: 150px;
     }
-    .side-buttons-container button {
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 8px;
-      padding: 6px 10px;
-      border: none;
-      border-radius: 4px;
-      background-color: #972D54;
-      color: #fff;
+    .right-buttons button {
+      background-color: maroon;
+      color: white;
+      margin-bottom: 5px;
+      padding: 8px;
       cursor: pointer;
-      font-size: 0.85rem;
-      width: 110px;
-      text-align: left;
-    }
-    .side-buttons-container button:hover {
-      opacity: 0.9;
+      border: none;
+      border-radius: 5px;
     }
     
+    /* ========== UNTERE BUTTONS (BEWERTUNG) ========= */
     .bottom-buttons {
       display: flex;
       gap: 10px;
@@ -226,6 +207,7 @@
     .btn-gut    { background-color: #2ecc71; }
     .btn-einfach { background-color: #1abc9c; }
     
+    /* ========== OVERLAYS ========= */
     .overlay {
       display: none;
       position: fixed;
@@ -245,8 +227,12 @@
       from { opacity: 0; transform: scale(0.8); }
       to { opacity: 1; transform: scale(1); }
     }
-    .overlay.active { display: block; }
-    .overlay h3 { margin-bottom: 10px; }
+    .overlay.active {
+      display: block;
+    }
+    .overlay h3 {
+      margin-bottom: 10px;
+    }
     .overlay button {
       padding: 8px 12px;
       background-color: #972D54;
@@ -283,9 +269,11 @@
       background: rgba(255,255,255,0.8);
     }
     
-    /* Zeichnen-Kontrolloverlay – bleibt wie in deinem Design (min-width: 800px) */
+    /* ========== ZEICHNEN-KONTROLLOVERLAY ========= */
     #drawControlsOverlay {
       min-width: 800px;
+      /* Overlay ganz vorne */
+      z-index: 9999;
     }
     .draw-toolbar {
       display: flex;
@@ -293,17 +281,14 @@
       gap: 5px;
       align-items: center;
     }
-    /* Wir belassen den Range-Slider im nativen Browser-Stil,
-       sodass das ursprüngliche Design erhalten bleibt. */
-    
-    /* PATCH: Damit das Zeichnen-Overlay (und der Slider) ganz vorne liegt */
-    #drawControlsOverlay {
-      z-index: 9999;
-    }
+    /* Range-Slider im nativen Browser-Stil – zusätzlich Patch, damit der Daumen anklickbar ist */
     #drawControlsOverlay .draw-toolbar input[type="range"] {
       pointer-events: auto;
       z-index: 99999;
     }
+    
+    /* ========== OPTIONAL: Zusätzliche Anpassungen im Zeichenmenü (falls benötigt) ========= */
+    /* Hier kannst du weitere Styles ergänzen, falls du das Erscheinungsbild weiter optimieren möchtest. */
   </style>
 </head>
 <body>
@@ -311,55 +296,53 @@
     <h2>Heute: <span id="currentCardIndex">0</span>/<span id="totalCards">0</span></h2>
   </header>
   
-  <div class="main-container">
-    <!-- Linke Spalte -->
-    <div class="left-panel">
-      <button class="add-card-button" onclick="addCard()">+</button>
-      <div id="cardList"></div>
-      <button id="deleteCardButton" onclick="deleteSelectedCard()" title="Nur diese Karte löschen">
-        <i class="fa-solid fa-trash"></i>
-      </button>
-      <button id="deleteAllButton" onclick="deleteAllCards()" title="Alle löschen">Alle</button>
+  <!-- Linke Spalte -->
+  <div class="left-column">
+    <button class="plus-button" onclick="addCard()">+</button>
+    <div class="number-buttons" id="cardList">
+      <!-- Karteikarten-Buttons werden hier per JS eingefügt -->
+    </div>
+    <button class="trash-button" onclick="deleteSelectedCard()" title="Nur diese Karte löschen">🗑</button>
+    <button class="all-button" onclick="deleteAllCards()" title="Alle löschen">Alle</button>
+  </div>
+  
+  <!-- Karteikartenbereich -->
+  <div class="card-wrapper">
+    <div class="card-and-sides">
+      <!-- Karte -->
+      <div class="card" id="card" onclick="maybeFlip(event)">
+        <div class="card-inner">
+          <!-- Vorderseite -->
+          <div class="card-front" id="cardFrontFace" contenteditable="false">
+            <div id="frontQuestion">Frage wird geladen...</div>
+          </div>
+          <!-- Rückseite -->
+          <div class="card-back" id="cardBackFace" contenteditable="false">
+            <div id="backAnswer">Antwort wird geladen...</div>
+          </div>
+        </div>
+        <!-- Zwei Canvas-Elemente: Front & Back -->
+        <canvas id="drawCanvasFront"></canvas>
+        <canvas id="drawCanvasBack" style="display:none;"></canvas>
+      </div>
+      
+      <!-- Rechte Seitentasten -->
+      <div class="side-buttons-container">
+        <button onclick="openInlineEditOverlay();"><i class="fas fa-edit"></i> Bearbeiten</button>
+        <button onclick="openOverlay('imageOverlay');"><i class="fas fa-image"></i> Bild</button>
+        <button onclick="openDrawControlsOverlay();"><i class="fas fa-pencil-alt"></i> Zeichnen</button>
+        <button onclick="openOverlay('colorOverlay');"><i class="fas fa-palette"></i> Farbe</button>
+        <button onclick="toggleProblem();"><i class="fas fa-exclamation-triangle"></i> P</button>
+        <button id="patternButton" onclick="cyclePattern(event)"><i class="fas fa-th"></i> Muster&nbsp;Boden</button>
+      </div>
     </div>
     
-    <!-- Kartenbereich -->
-    <div class="card-wrapper">
-      <div class="card-and-sides">
-        <!-- Karte -->
-        <div class="card" id="card" onclick="maybeFlip(event)">
-          <div class="card-inner">
-            <!-- Vorderseite -->
-            <div class="card-front" id="cardFrontFace" contenteditable="false">
-              <div id="frontQuestion">Frage wird geladen...</div>
-            </div>
-            <!-- Rückseite -->
-            <div class="card-back" id="cardBackFace" contenteditable="false">
-              <div id="backAnswer">Antwort wird geladen...</div>
-            </div>
-          </div>
-          <!-- Zwei Canvas-Elemente: Front & Back -->
-          <canvas id="drawCanvasFront"></canvas>
-          <canvas id="drawCanvasBack" style="display:none;"></canvas>
-        </div>
-    
-        <!-- Seitentasten -->
-        <div class="side-buttons-container">
-          <button onclick="openInlineEditOverlay();"><i class="fas fa-edit"></i> Bearbeiten</button>
-          <button onclick="openOverlay('imageOverlay');"><i class="fas fa-image"></i> Bild</button>
-          <button onclick="openDrawControlsOverlay();"><i class="fas fa-pencil-alt"></i> Zeichnen</button>
-          <button onclick="openOverlay('colorOverlay');"><i class="fas fa-palette"></i> Farbe</button>
-          <button onclick="toggleProblem();"><i class="fas fa-exclamation-triangle"></i> P</button>
-          <button id="patternButton" onclick="cyclePattern(event)"><i class="fas fa-th"></i> Muster&nbsp;Boden</button>
-        </div>
-      </div>
-    
-      <!-- Untere Buttons (Bewertung) -->
-      <div class="bottom-buttons" id="bottomButtons">
-        <button class="btn-falsch" onclick="rateCard('Falsch')">Falsch</button>
-        <button class="btn-muehsam" onclick="rateCard('Mühsam')">Mühsam</button>
-        <button class="btn-gut" onclick="rateCard('Gut')">Gut</button>
-        <button class="btn-einfach" onclick="rateCard('Einfach')">Einfach</button>
-      </div>
+    <!-- Untere Bewertungsbuttons -->
+    <div class="bottom-buttons" id="bottomButtons">
+      <button class="btn-falsch" onclick="rateCard('Falsch')">Falsch</button>
+      <button class="btn-muehsam" onclick="rateCard('Mühsam')">Mühsam</button>
+      <button class="btn-gut" onclick="rateCard('Gut')">Gut</button>
+      <button class="btn-einfach" onclick="rateCard('Einfach')">Einfach</button>
     </div>
   </div>
   
@@ -455,7 +438,7 @@
   <script>
     document.execCommand("styleWithCSS", false, true);
 
-    /* === Karten-Daten und Verwaltung (unverändert) === */
+    /* ========== JAVASCRIPT – ALLES UNVERÄNDERT (nur minimaler Patch in changeLineWidth) ========== */
     let cards = [
       {
         question: "Was ist JavaScript?",
@@ -521,6 +504,7 @@
       let cardEl = document.getElementById("card");
       cardEl.style.borderTop = c.problem ? "5px solid red" : "2px solid #ccc";
       if (!preserveFlip) { cardEl.classList.remove("flip"); }
+      
       updateCardCounter();
       renderCardList();
       updateCardSize();
@@ -553,7 +537,10 @@
     }
     function flipCard() {
       document.getElementById("card").classList.toggle("flip");
-      setTimeout(() => { setupCanvasDrawing(); updateCardSize(); }, 300);
+      setTimeout(() => {
+        setupCanvasDrawing();
+        updateCardSize();
+      }, 300);
     }
     function updateBottomButtonsWidth() {
       let cardWidth = document.getElementById("card").offsetWidth;
@@ -562,7 +549,7 @@
     function updateBottomButtons() {
       document.getElementById("bottomButtons").style.display = "flex";
     }
-
+    
     function openInlineEditOverlay() {
       let isFlipped = document.getElementById("card").classList.contains("flip");
       editingSide = isFlipped ? "back" : "front";
@@ -589,7 +576,9 @@
       saveCardsToLocalStorage();
       updateCardSize();
     }
-    function execCmd(cmd) { document.execCommand(cmd, false, null); }
+    function execCmd(cmd) {
+      document.execCommand(cmd, false, null);
+    }
     function toggleTextColor(color) {
       let current = document.queryCommandValue("foreColor");
       if (current && current.toLowerCase() === color.toLowerCase()) {
@@ -646,7 +635,7 @@
         document.removeEventListener("mouseup", onTextDragEnd);
       }
     }
-
+    
     function rateCard(rating) {
       if (rating === "Einfach") {
         cards[currentIndex].active = false;
@@ -672,10 +661,16 @@
       loadCard(currentIndex, true);
       saveCardsToLocalStorage();
     }
-
-    function openOverlay(id) { document.getElementById(id).classList.add("active"); }
-    function closeOverlay(id) { document.getElementById(id).classList.remove("active"); }
-    function uploadImage() { document.getElementById("hiddenImageUpload").click(); }
+    
+    function openOverlay(id) {
+      document.getElementById(id).classList.add("active");
+    }
+    function closeOverlay(id) {
+      document.getElementById(id).classList.remove("active");
+    }
+    function uploadImage() {
+      document.getElementById("hiddenImageUpload").click();
+    }
     function handleImageUpload(event) {
       const file = event.target.files[0];
       if (file) {
@@ -714,7 +709,7 @@
       saveCardsToLocalStorage();
       closeOverlay("colorOverlay");
     }
-
+    
     function cyclePattern(e) {
       e.stopPropagation();
       let patternOrder = ["lines", "grid", "dotted", "none"];
@@ -729,7 +724,7 @@
     function updatePatternButton() {
       document.getElementById("patternButton").innerHTML = `<i class="fas fa-th"></i> Muster&nbsp;Boden`;
     }
-
+    
     /* Zeichnen-Funktionen */
     function setupCanvasDrawing() {
       const card = document.getElementById("card");
@@ -846,7 +841,6 @@
       drawingMode = "draw";
       getCurrentCanvas().style.cursor = "crosshair";
     }
-    // Nur der Wert des Range-Sliders (Linienbreite) wird gesetzt
     function changeLineWidth(val) {
       currentLineWidth = parseInt(val, 10);
     }
@@ -883,7 +877,7 @@
       saveCardsToLocalStorage();
       closeDrawControls();
     }
-
+    
     /* Kartenverwaltung */
     function addCard() {
       let newQuestion = prompt("Neue Frage:");
@@ -936,7 +930,7 @@
       let data = localStorage.getItem("myJuraCards");
       if (data) { cards = JSON.parse(data); }
     }
-
+    
     /* Dynamische Kartengröße */
     function updateCardSize() {
       let card = document.getElementById("card");
@@ -962,7 +956,7 @@
       let cardWidth = document.getElementById("card").offsetWidth;
       document.getElementById("bottomButtons").style.width = cardWidth + "px";
     }
-
+    
     /* Drag & Drop Bilder */
     let dragItem = null;
     let offsetX = 0, offsetY = 0;
@@ -996,7 +990,7 @@
         img.addEventListener("mousedown", startDrag);
       });
     }
-
+    
     /* Draggable Overlays */
     function makeAllOverlaysDraggable() {
       let overlays = document.querySelectorAll(".overlay");
