@@ -40,17 +40,16 @@
       margin: 0 auto;
       justify-content: flex-start;
     }
-    /* Linke Spalte – bleibt unverändert, nur weiter links positioniert */
+    /* ========== LINKE SPALTE (unverändert, nur weiter links ausgerichtet) ========= */
     .left-panel {
       position: absolute;
-      left: 0;
+      left: 0; 
       top: 20px;
       display: flex;
       flex-direction: column;
       gap: 10px;
       align-items: flex-start;
-      min-width: 80px;
-      /* margin-right entfällt, da absolute Positionierung */
+      width: 80px; /* Feste Breite, damit alle Elemente ganz links ausgerichtet sind */
     }
     .add-card-button {
       background-color: #28a745;
@@ -62,10 +61,12 @@
       height: 50px;
       cursor: pointer;
     }
+    /* Stelle sicher, dass die Nummern-Buttons direkt unter dem Plus-Button liegen */
     #cardList {
       display: flex;
       flex-direction: column;
       gap: 5px;
+      margin-top: 0;
     }
     #cardList button {
       width: 30px;
@@ -108,6 +109,7 @@
       font-size: 0.9rem;
     }
     
+    /* ========= KARTEIKARTEN-BEREICH ========= */
     .card-wrapper {
       display: flex;
       flex-direction: column;
@@ -176,7 +178,7 @@
       z-index: 1;
     }
     
-    /* Zwei Canvas-Elemente (Front & Back) */
+    /* ========= ZWEI CANVAS-ELEMENTE ========= */
     #drawCanvasFront, #drawCanvasBack {
       position: absolute;
       top: 0;
@@ -229,6 +231,7 @@
     .btn-gut    { background-color: #2ecc71; }
     .btn-einfach { background-color: #1abc9c; }
     
+    /* ========= OVERLAYS ========= */
     .overlay {
       display: none;
       position: fixed;
@@ -286,10 +289,10 @@
       background: rgba(255,255,255,0.8);
     }
     
-    /* Zeichnen-Kontrolloverlay – bleibt unverändert (min-width: 800px) */
+    /* ========= ZEICHNEN-KONTROLLOVERLAY ========= */
     #drawControlsOverlay {
       min-width: 800px;
-      z-index: 9999; /* Overlay ganz vorne */
+      z-index: 9999;
     }
     .draw-toolbar {
       display: flex;
@@ -297,7 +300,7 @@
       gap: 5px;
       align-items: center;
     }
-    /* Damit der Range-Slider (Linienbreite) bedienbar ist */
+    /* Damit der Range-Slider bedienbar ist */
     #drawControlsOverlay .draw-toolbar input[type="range"] {
       pointer-events: auto;
       z-index: 99999;
@@ -849,7 +852,7 @@
     // Funktion zum Setzen der Linienbreite per Range-Slider
     function changeLineWidth(val) {
       currentLineWidth = parseInt(val, 10);
-      console.log("Linienbreite:", currentLineWidth);
+      console.log("Linienbreite geändert auf:", currentLineWidth);
     }
     function clearCanvas() {
       let canvas = getCurrentCanvas();
