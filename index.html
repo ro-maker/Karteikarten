@@ -5,7 +5,10 @@
   <title>Jura-Karteikarten</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <!-- Font Awesome via CDN (Version 6) -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" 
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
+        crossorigin="anonymous" 
+        referrerpolicy="no-referrer" />
   <style>
     /* ========= GLOBAL STYLES (unverändert) ========= */
     * {
@@ -30,7 +33,7 @@
     }
     
     /* ========= MAIN CONTAINER ========= */
-    /* Der Container wird zentriert, sodass auch die Karteikarte mittig erscheint */
+    /* Container zentriert den gesamten Inhalt */
     .main-container {
       display: flex;
       gap: 20px;
@@ -42,13 +45,13 @@
     }
     
     /* ========= LINKE SPALTE ========= */
-    /* Statt absoluter Positionierung nun als Flex-Item innerhalb des Containers */
     .left-panel {
       display: flex;
       flex-direction: column;
       gap: 10px;
-      align-items: center;  /* Elemente werden zentriert innerhalb der Spalte */
-      width: 80px;  /* Feste Breite */
+      align-items: center;  /* Elemente werden innerhalb der Spalte zentriert */
+      width: 80px;          /* Feste Breite */
+      margin-right: auto;   /* Schiebt die Spalte ganz nach links im Container */
     }
     .add-card-button {
       background-color: #28a745;
@@ -112,7 +115,7 @@
     .card-wrapper {
       display: flex;
       flex-direction: column;
-      align-items: center;  /* Karte und untere Buttons werden zentriert */
+      align-items: center;  /* Karte und untere Buttons zentriert */
       gap: 10px;
       width: 100%;
       max-width: 900px;
@@ -476,6 +479,7 @@
     let drawingMode = "draw";
     let currentDrawingColor = "#000";
     let currentLineWidth = 3;
+    let eraserLineWidth = 3;
     let isDrawingModeActive = false;
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -808,7 +812,8 @@
       if (!isDrawingModeActive || !isDrawing) return;
       let ctx = getCurrentCanvas().getContext("2d");
       let pos = getMousePos(e);
-      ctx.lineWidth = currentLineWidth;
+      // Abhängig vom Modus: Für Stift currentLineWidth, für Radierer eraserLineWidth
+      ctx.lineWidth = (drawingMode === "draw") ? currentLineWidth : eraserLineWidth;
       ctx.lineCap = "round";
       if (drawingMode === "draw") {
         ctx.globalCompositeOperation = "source-over";
@@ -837,7 +842,8 @@
     function setDrawingMode(mode) {
       drawingMode = mode;
       if (mode === "erase") {
-        getCurrentCanvas().style.cursor = "url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVQoU2NkYGD4z0AEYBxVSFUAAXoYB7gWb5QAAAAASUVORK5CYII=), auto";
+        getCurrentCanvas().style.cursor =
+          "url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVQoU2NkYGD4z0AEYBxVSFUAAXoYB7gWb5QAAAAASUVORK5CYII=), auto";
       } else {
         getCurrentCanvas().style.cursor = "crosshair";
       }
@@ -847,10 +853,16 @@
       drawingMode = "draw";
       getCurrentCanvas().style.cursor = "crosshair";
     }
-    // Funktion, die den Wert des Range-Sliders (Linienbreite) setzt
+    // Funktion, die den Wert des Range-Sliders (Linienbreite) setzt,
+    // wobei je nach Modus (Stift oder Radierer) der jeweilige Wert übernommen wird.
     function changeLineWidth(val) {
-      currentLineWidth = parseInt(val, 10);
-      console.log("Linienbreite geändert auf:", currentLineWidth);
+      if(drawingMode === "draw") {
+        currentLineWidth = parseInt(val, 10);
+        console.log("Stift-Linienbreite:", currentLineWidth);
+      } else if(drawingMode === "erase") {
+        eraserLineWidth = parseInt(val, 10);
+        console.log("Radierer-Linienbreite:", eraserLineWidth);
+      }
     }
     function clearCanvas() {
       let canvas = getCurrentCanvas();
