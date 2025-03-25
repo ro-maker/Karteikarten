@@ -29,7 +29,7 @@
       color: #972D54;
     }
     
-    /* ========== MAIN CONTAINER ========= */
+    /* ========= MAIN CONTAINER ========= */
     .main-container {
       display: flex;
       gap: 20px;
@@ -39,14 +39,14 @@
       justify-content: flex-start;
     }
     
-    /* ========== LINKE SPALTE ========= */
+    /* ========= LINKE SPALTE ========= */
     .left-column {
       display: flex;
       flex-direction: column;
-      align-items: center; /* Alle Elemente zentriert in der Spalte */
+      align-items: center; /* Plus und Zahlen zentriert */
       gap: 10px;
       position: absolute;
-      left: 20px; /* ganz links */
+      left: 20px;
       top: 20px;
     }
     .plus-button {
@@ -91,17 +91,18 @@
       cursor: pointer;
     }
     
-    /* ========== KARTEIKARTEN-BEREICH ========= */
+    /* ========= KARTEIKARTEN-BEREICH ========= */
     .card-wrapper {
       display: flex;
       flex-direction: column;
-      align-items: center; /* Karte + untere Buttons zentrieren */
+      align-items: center; /* Karte + untere Buttons zentriert */
       gap: 10px;
       width: 100%;
       max-width: 900px;
       margin: 0 auto;
       position: relative;
-      left: 50px;  /* leichte Verschiebung nach rechts, sodass es optisch zentriert wirkt */
+      /* Leichte Verschiebung nach rechts, um optisch zu zentrieren */
+      left: 50px;
     }
     .card-and-sides {
       display: flex;
@@ -159,7 +160,7 @@
       z-index: 1;
     }
     
-    /* Zwei Canvas-Elemente (Front & Back) */
+    /* ========= CANVAS ========= */
     #drawCanvasFront, #drawCanvasBack {
       position: absolute;
       top: 0;
@@ -168,13 +169,13 @@
       pointer-events: none;
     }
     
-    /* ========== RECHTE SEITENTASTEN ========= */
+    /* ========= RECHTE SEITENTASTEN ========= */
     .right-buttons {
       display: flex;
       flex-direction: column;
       gap: 5px;
       position: absolute;
-      right: 40px; /* Etwas nach rechts, um das Layout auszugleichen */
+      right: 40px; /* Leicht nach rechts */
       top: 150px;
     }
     .right-buttons button {
@@ -187,7 +188,7 @@
       border-radius: 5px;
     }
     
-    /* ========== UNTERE BUTTONS (BEWERTUNG) ========= */
+    /* ========= UNTERE BUTTONS (BEWERTUNG) ========= */
     .bottom-buttons {
       display: flex;
       gap: 10px;
@@ -207,7 +208,7 @@
     .btn-gut    { background-color: #2ecc71; }
     .btn-einfach { background-color: #1abc9c; }
     
-    /* ========== OVERLAYS ========= */
+    /* ========= OVERLAYS ========= */
     .overlay {
       display: none;
       position: fixed;
@@ -227,9 +228,7 @@
       from { opacity: 0; transform: scale(0.8); }
       to { opacity: 1; transform: scale(1); }
     }
-    .overlay.active {
-      display: block;
-    }
+    .overlay.active { display: block; }
     .overlay h3 {
       margin-bottom: 10px;
     }
@@ -269,11 +268,10 @@
       background: rgba(255,255,255,0.8);
     }
     
-    /* ========== ZEICHNEN-KONTROLLOVERLAY ========= */
+    /* ========= ZEICHNEN-KONTROLLOVERLAY ========= */
     #drawControlsOverlay {
       min-width: 800px;
-      /* Overlay ganz vorne */
-      z-index: 9999;
+      z-index: 9999; /* Overlay ganz vorne */
     }
     .draw-toolbar {
       display: flex;
@@ -281,14 +279,12 @@
       gap: 5px;
       align-items: center;
     }
-    /* Range-Slider im nativen Browser-Stil – zusätzlich Patch, damit der Daumen anklickbar ist */
+    /* Hier nutzen wir den nativen Browser-Stil für den Range-Slider –
+       und sorgen per Patch dafür, dass der Daumen anklickbar ist */
     #drawControlsOverlay .draw-toolbar input[type="range"] {
       pointer-events: auto;
       z-index: 99999;
     }
-    
-    /* ========== OPTIONAL: Zusätzliche Anpassungen im Zeichenmenü (falls benötigt) ========= */
-    /* Hier kannst du weitere Styles ergänzen, falls du das Erscheinungsbild weiter optimieren möchtest. */
   </style>
 </head>
 <body>
@@ -300,7 +296,7 @@
   <div class="left-column">
     <button class="plus-button" onclick="addCard()">+</button>
     <div class="number-buttons" id="cardList">
-      <!-- Karteikarten-Buttons werden hier per JS eingefügt -->
+      <!-- Karteikarten-Buttons werden per JavaScript erzeugt -->
     </div>
     <button class="trash-button" onclick="deleteSelectedCard()" title="Nur diese Karte löschen">🗑</button>
     <button class="all-button" onclick="deleteAllCards()" title="Alle löschen">Alle</button>
@@ -438,7 +434,8 @@
   <script>
     document.execCommand("styleWithCSS", false, true);
 
-    /* ========== JAVASCRIPT – ALLES UNVERÄNDERT (nur minimaler Patch in changeLineWidth) ========== */
+    /* ================= JAVASCRIPT-FUNKTIONEN ================= */
+    
     let cards = [
       {
         question: "Was ist JavaScript?",
@@ -487,17 +484,14 @@
       backFace.style.lineHeight = "30px";
       backFace.style.paddingTop = "10px";
       if (c.pattern === "lines") {
-        backFace.style.backgroundImage =
-          "repeating-linear-gradient(to bottom, transparent, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px)";
+        backFace.style.backgroundImage = "repeating-linear-gradient(to bottom, transparent, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px)";
         backFace.style.backgroundPosition = "0 10px";
         backFace.style.paddingTop = "10px";
       } else if (c.pattern === "grid") {
-        backFace.style.backgroundImage =
-          "linear-gradient(0deg, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px), linear-gradient(90deg, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px)";
+        backFace.style.backgroundImage = "linear-gradient(0deg, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px), linear-gradient(90deg, transparent 29px, rgba(0,0,0,0.15) 29px, rgba(0,0,0,0.15) 30px)";
         backFace.style.backgroundSize = "30px 30px";
       } else if (c.pattern === "dotted") {
-        backFace.style.backgroundImage =
-          "radial-gradient(rgba(0,0,0,0.15) 1px, transparent 1px)";
+        backFace.style.backgroundImage = "radial-gradient(rgba(0,0,0,0.15) 1px, transparent 1px)";
         backFace.style.backgroundSize = "20px 20px";
       }
       
@@ -549,7 +543,7 @@
     function updateBottomButtons() {
       document.getElementById("bottomButtons").style.display = "flex";
     }
-    
+
     function openInlineEditOverlay() {
       let isFlipped = document.getElementById("card").classList.contains("flip");
       editingSide = isFlipped ? "back" : "front";
@@ -635,7 +629,7 @@
         document.removeEventListener("mouseup", onTextDragEnd);
       }
     }
-    
+
     function rateCard(rating) {
       if (rating === "Einfach") {
         cards[currentIndex].active = false;
@@ -830,8 +824,7 @@
     function setDrawingMode(mode) {
       drawingMode = mode;
       if (mode === "erase") {
-        getCurrentCanvas().style.cursor =
-          "url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVQoU2NkYGD4z0AEYBxVSFUAAXoYB7gWb5QAAAAASUVORK5CYII=), auto";
+        getCurrentCanvas().style.cursor = "url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVQoU2NkYGD4z0AEYBxVSFUAAXoYB7gWb5QAAAAASUVORK5CYII=), auto";
       } else {
         getCurrentCanvas().style.cursor = "crosshair";
       }
@@ -841,8 +834,10 @@
       drawingMode = "draw";
       getCurrentCanvas().style.cursor = "crosshair";
     }
+    // Der Range-Slider ändert den Wert der Linienbreite:
     function changeLineWidth(val) {
       currentLineWidth = parseInt(val, 10);
+      console.log("Linienbreite:", currentLineWidth);
     }
     function clearCanvas() {
       let canvas = getCurrentCanvas();
