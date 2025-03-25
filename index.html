@@ -5,10 +5,7 @@
   <title>Jura-Karteikarten</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <!-- Font Awesome via CDN (Version 6) -->
-  <link rel="stylesheet" 
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
-        crossorigin="anonymous" 
-        referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
     /* ========= GLOBAL STYLES (unverändert) ========= */
     * {
@@ -32,24 +29,26 @@
       color: #972D54;
     }
     
+    /* ========= MAIN CONTAINER ========= */
+    /* Der Container wird zentriert, sodass auch die Karteikarte mittig erscheint */
     .main-container {
       display: flex;
       gap: 20px;
       width: 100%;
       max-width: 1400px;
       margin: 0 auto;
-      justify-content: flex-start;
+      justify-content: center;
+      align-items: flex-start;
     }
-    /* ========== LINKE SPALTE (unverändert, nur weiter links ausgerichtet) ========= */
+    
+    /* ========= LINKE SPALTE ========= */
+    /* Statt absoluter Positionierung nun als Flex-Item innerhalb des Containers */
     .left-panel {
-      position: absolute;
-      left: 0; 
-      top: 20px;
       display: flex;
       flex-direction: column;
       gap: 10px;
-      align-items: flex-start;
-      width: 80px; /* Feste Breite, damit alle Elemente ganz links ausgerichtet sind */
+      align-items: center;  /* Elemente werden zentriert innerhalb der Spalte */
+      width: 80px;  /* Feste Breite */
     }
     .add-card-button {
       background-color: #28a745;
@@ -61,7 +60,7 @@
       height: 50px;
       cursor: pointer;
     }
-    /* Stelle sicher, dass die Nummern-Buttons direkt unter dem Plus-Button liegen */
+    /* Nummern-Buttons – direkt unter dem Plus-Button */
     #cardList {
       display: flex;
       flex-direction: column;
@@ -113,7 +112,7 @@
     .card-wrapper {
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
+      align-items: center;  /* Karte und untere Buttons werden zentriert */
       gap: 10px;
       width: 100%;
       max-width: 900px;
@@ -124,7 +123,7 @@
       display: flex;
       gap: 20px;
       align-items: flex-start;
-      justify-content: flex-start;
+      justify-content: center;  /* Karte und Seitentasten zentriert */
       width: 100%;
       max-width: 900px;
       margin: 0 auto;
@@ -292,7 +291,7 @@
     /* ========= ZEICHNEN-KONTROLLOVERLAY ========= */
     #drawControlsOverlay {
       min-width: 800px;
-      z-index: 9999;
+      z-index: 9999; /* Overlay ganz vorne */
     }
     .draw-toolbar {
       display: flex;
@@ -300,7 +299,7 @@
       gap: 5px;
       align-items: center;
     }
-    /* Damit der Range-Slider bedienbar ist */
+    /* Damit der Range-Slider (Linienbreite) bedienbar ist */
     #drawControlsOverlay .draw-toolbar input[type="range"] {
       pointer-events: auto;
       z-index: 99999;
@@ -457,7 +456,7 @@
     document.execCommand("styleWithCSS", false, true);
 
     /* ================= JAVASCRIPT-FUNKTIONEN (unverändert, nur minimal angepasst) ================= */
-    
+
     let cards = [
       {
         question: "Was ist JavaScript?",
@@ -838,8 +837,7 @@
     function setDrawingMode(mode) {
       drawingMode = mode;
       if (mode === "erase") {
-        getCurrentCanvas().style.cursor =
-          "url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVQoU2NkYGD4z0AEYBxVSFUAAXoYB7gWb5QAAAAASUVORK5CYII=), auto";
+        getCurrentCanvas().style.cursor = "url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVQoU2NkYGD4z0AEYBxVSFUAAXoYB7gWb5QAAAAASUVORK5CYII=), auto";
       } else {
         getCurrentCanvas().style.cursor = "crosshair";
       }
@@ -849,7 +847,7 @@
       drawingMode = "draw";
       getCurrentCanvas().style.cursor = "crosshair";
     }
-    // Funktion zum Setzen der Linienbreite per Range-Slider
+    // Funktion, die den Wert des Range-Sliders (Linienbreite) setzt
     function changeLineWidth(val) {
       currentLineWidth = parseInt(val, 10);
       console.log("Linienbreite geändert auf:", currentLineWidth);
