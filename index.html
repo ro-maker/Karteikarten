@@ -33,7 +33,6 @@
     }
     
     /* ========= MAIN CONTAINER ========= */
-    /* Wir zentrieren den gesamten Inhalt horizontal */
     .main-container {
       display: flex;
       gap: 20px;
@@ -45,14 +44,13 @@
     }
     
     /* ========= LINKE SPALTE ========= */
-    /* Die linke Spalte wird als Flex-Item dargestellt, nicht absolut positioniert */
     .left-panel {
       display: flex;
       flex-direction: column;
       gap: 10px;
       align-items: center;
       width: 80px;
-      margin-right: auto; /* Schiebt die Spalte ganz nach links im Container */
+      margin-right: auto; 
     }
     .add-card-button {
       background-color: #28a745;
@@ -64,7 +62,6 @@
       height: 50px;
       cursor: pointer;
     }
-    /* Nummern-Buttons direkt unter dem Plus-Button */
     #cardList {
       display: flex;
       flex-direction: column;
@@ -87,7 +84,6 @@
     #cardList button.inactive {
       opacity: 0.5;
     }
-    /* Löschbuttons */
     #deleteCardButton {
       background-color: #e74c3c;
       color: white;
@@ -121,19 +117,16 @@
       max-width: 900px;
       margin: 0 auto;
       position: relative;
-      /* Damit der gesamte Bereich linksbündig beginnt */
-      align-items: flex-start;
+      align-items: flex-start; 
     }
-    /* Neuer Container, in dem Karte + Seitentasten und die unteren Buttons liegen */
     .card-and-bottom {
       display: flex;
       flex-direction: column;
       gap: 10px;
+      align-items: flex-start;
       width: 100%;
       max-width: 900px;
       margin: 0 auto;
-      /* Die unteren Buttons beginnen jetzt dort, wo die Karte beginnt (linksbündig) */
-      align-items: flex-start;
     }
     .card-and-sides {
       display: flex;
@@ -171,8 +164,7 @@
     }
     .card-front, .card-back {
       position: absolute;
-      top: 0;
-      left: 0;
+      top: 0; left: 0;
       width: 100%;
       min-height: 300px;
       padding: 10px 20px 20px 20px;
@@ -193,7 +185,6 @@
       z-index: 1;
     }
     
-    /* ========= ZWEI CANVAS-ELEMENTE ========= */
     #drawCanvasFront, #drawCanvasBack {
       position: absolute;
       top: 0;
@@ -230,8 +221,7 @@
     .bottom-buttons {
       display: flex;
       gap: 10px;
-      transition: width 0.3s;
-      /* Kein zusätzliches margin, damit sie linksbündig mit der Karte beginnen */
+      align-self: flex-start; /* Wichtig: linksbündig unter der Karte */
     }
     .bottom-buttons button {
       flex: 1;
@@ -247,7 +237,7 @@
     .btn-gut    { background-color: #2ecc71; }
     .btn-einfach { background-color: #1abc9c; }
     
-    /* ========= OVERLAYS ========= */
+    /* Overlays etc. bleiben unverändert */
     .overlay {
       display: none;
       position: fixed;
@@ -305,7 +295,6 @@
       background: rgba(255,255,255,0.8);
     }
     
-    /* ========= ZEICHNEN-KONTROLLOVERLAY ========= */
     #drawControlsOverlay {
       min-width: 800px;
       z-index: 9999;
@@ -338,7 +327,7 @@
       <button id="deleteAllButton" onclick="deleteAllCards()" title="Alle löschen">Alle</button>
     </div>
     
-    <!-- Kartenbereich inklusive Karte & untere Buttons -->
+    <!-- Kartenbereich + untere Buttons -->
     <div class="card-wrapper">
       <div class="card-and-bottom">
         <div class="card-and-sides">
@@ -354,10 +343,11 @@
                 <div id="backAnswer">Antwort wird geladen...</div>
               </div>
             </div>
-            <!-- Zwei Canvas-Elemente -->
+            <!-- Canvas-Elemente -->
             <canvas id="drawCanvasFront"></canvas>
             <canvas id="drawCanvasBack" style="display:none;"></canvas>
           </div>
+          
           <!-- Seitentasten -->
           <div class="side-buttons-container">
             <button onclick="openInlineEditOverlay();"><i class="fas fa-edit"></i> Bearbeiten</button>
@@ -368,7 +358,8 @@
             <button id="patternButton" onclick="cyclePattern(event)"><i class="fas fa-th"></i> Muster&nbsp;Boden</button>
           </div>
         </div>
-        <!-- Untere Bewertungsbuttons, linksbündig unter der Karte -->
+        
+        <!-- Untere Buttons, linksbündig an der Karte -->
         <div class="bottom-buttons" id="bottomButtons">
           <button class="btn-falsch" onclick="rateCard('Falsch')">Falsch</button>
           <button class="btn-muehsam" onclick="rateCard('Mühsam')">Mühsam</button>
@@ -379,7 +370,7 @@
     </div>
   </div>
   
-  <!-- Overlays -->
+  <!-- Overlays (unverändert) -->
   <div id="imageOverlay" class="overlay">
     <h3>Bild hinzufügen</h3>
     <input type="file" id="fileInput" accept="image/*">
@@ -496,7 +487,9 @@
       if (cards.length > 0) loadCard(currentIndex);
       renderCardList();
       updateCardSize();
-      updateBottomButtonsWidth();
+      /* WICHTIG: Wir entfernen das erzwungene Setzen der Breite 
+         in updateBottomButtonsWidth() – so starten die Buttons 
+         genau dort, wo die Karte beginnt. */
       setupCanvasDrawing();
       makeAllOverlaysDraggable();
       updateBottomButtons();
@@ -534,14 +527,15 @@
       
       let cardEl = document.getElementById("card");
       cardEl.style.borderTop = c.problem ? "5px solid red" : "2px solid #ccc";
-      if (!preserveFlip) { cardEl.classList.remove("flip"); }
+      if (!preserveFlip) {
+        cardEl.classList.remove("flip");
+      }
       
       updateCardCounter();
       renderCardList();
       updateCardSize();
       updatePatternButton();
       updateBottomButtons();
-      updateBottomButtonsWidth();
       makeImagesEditable();
       setupCanvasDrawing();
     }
@@ -570,10 +564,9 @@
       document.getElementById("card").classList.toggle("flip");
       setTimeout(() => { setupCanvasDrawing(); updateCardSize(); }, 300);
     }
-    function updateBottomButtonsWidth() {
-      let cardWidth = document.getElementById("card").offsetWidth;
-      document.getElementById("bottomButtons").style.width = cardWidth + "px";
-    }
+    /* KEIN updateBottomButtonsWidth() mehr, 
+       das style.width = cardWidth + "px" setzt. */
+
     function updateBottomButtons() {
       document.getElementById("bottomButtons").style.display = "flex";
     }
@@ -604,7 +597,9 @@
       saveCardsToLocalStorage();
       updateCardSize();
     }
-    function execCmd(cmd) { document.execCommand(cmd, false, null); }
+    function execCmd(cmd) {
+      document.execCommand(cmd, false, null);
+    }
     function toggleTextColor(color) {
       let current = document.queryCommandValue("foreColor");
       if (current && current.toLowerCase() === color.toLowerCase()) {
@@ -669,7 +664,10 @@
         let found = false;
         for (let i = 0; i < cards.length; i++) {
           nextIndex = (nextIndex + 1) % cards.length;
-          if (cards[nextIndex].active !== false) { found = true; break; }
+          if (cards[nextIndex].active !== false) {
+            found = true;
+            break;
+          }
         }
         if (!found) {
           alert("Keine aktiven Karten mehr!");
@@ -688,9 +686,15 @@
       saveCardsToLocalStorage();
     }
 
-    function openOverlay(id) { document.getElementById(id).classList.add("active"); }
-    function closeOverlay(id) { document.getElementById(id).classList.remove("active"); }
-    function uploadImage() { document.getElementById("hiddenImageUpload").click(); }
+    function openOverlay(id) {
+      document.getElementById(id).classList.add("active");
+    }
+    function closeOverlay(id) {
+      document.getElementById(id).classList.remove("active");
+    }
+    function uploadImage() {
+      document.getElementById("hiddenImageUpload").click();
+    }
     function handleImageUpload(event) {
       const file = event.target.files[0];
       if (file) {
@@ -712,7 +716,9 @@
       let action = prompt("Gib 'resize' ein, um die Größe anzupassen oder 'crop' zum Zuschneiden:", "resize");
       if (action === "resize") {
         let newWidth = prompt("Neue Breite (z.B. 50% oder 300px):", "50%");
-        if (newWidth) { img.style.width = newWidth; }
+        if (newWidth) {
+          img.style.width = newWidth;
+        }
       } else if (action === "crop") {
         let top = prompt("Zuschneiden: Abstand von oben (z.B. 10px):", "10px");
         let right = prompt("Zuschneiden: Abstand von rechts (z.B. 10px):", "10px");
@@ -821,7 +827,7 @@
       if (!isDrawingModeActive || !isDrawing) return;
       let ctx = getCurrentCanvas().getContext("2d");
       let pos = getMousePos(e);
-      // Je nach Modus wird currentLineWidth oder eraserLineWidth verwendet
+      // Abhängig vom Modus (draw/erase) wird currentLineWidth oder eraserLineWidth genutzt
       ctx.lineWidth = (drawingMode === "draw") ? currentLineWidth : eraserLineWidth;
       ctx.lineCap = "round";
       if (drawingMode === "draw") {
@@ -851,7 +857,8 @@
     function setDrawingMode(mode) {
       drawingMode = mode;
       if (mode === "erase") {
-        getCurrentCanvas().style.cursor = "url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVQoU2NkYGD4z0AEYBxVSFUAAXoYB7gWb5QAAAAASUVORK5CYII=), auto";
+        getCurrentCanvas().style.cursor =
+          "url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVQoU2NkYGD4z0AEYBxVSFUAAXoYB7gWb5QAAAAASUVORK5CYII=), auto";
       } else {
         getCurrentCanvas().style.cursor = "crosshair";
       }
@@ -861,14 +868,11 @@
       drawingMode = "draw";
       getCurrentCanvas().style.cursor = "crosshair";
     }
-    // Funktion, die den Wert des Range-Sliders setzt – abhängig vom Modus
     function changeLineWidth(val) {
       if (drawingMode === "draw") {
         currentLineWidth = parseInt(val, 10);
-        console.log("Stift-Linienbreite:", currentLineWidth);
       } else if (drawingMode === "erase") {
         eraserLineWidth = parseInt(val, 10);
-        console.log("Radierer-Linienbreite:", eraserLineWidth);
       }
     }
     function clearCanvas() {
@@ -977,12 +981,8 @@
     }
     window.addEventListener("resize", () => {
       updateCardSize();
-      updateBottomButtonsWidth();
+      /* Wir setzen die Breite der Buttons nicht mehr erzwungen. */
     });
-    function updateBottomButtonsWidth() {
-      let cardWidth = document.getElementById("card").offsetWidth;
-      document.getElementById("bottomButtons").style.width = cardWidth + "px";
-    }
     
     /* Drag & Drop Bilder */
     let dragItem = null;
