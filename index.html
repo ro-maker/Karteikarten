@@ -121,7 +121,7 @@
       position: relative;
       align-items: flex-start;
     }
-    /* Neuer Container für Karte und untere Buttons – relativ positioniert */
+    /* Container für Karte und untere Buttons */
     .card-and-bottom {
       display: flex;
       flex-direction: column;
@@ -129,7 +129,7 @@
       width: 100%;
       max-width: 900px;
       margin: 0 auto;
-      position: relative; /* WICHTIG: Damit wir absolute Positionierung für die unteren Buttons nutzen können */
+      /* Die unteren Buttons werden im normalen Fluss positioniert */
     }
     .card-and-sides {
       display: flex;
@@ -167,7 +167,8 @@
     }
     .card-front, .card-back {
       position: absolute;
-      top: 0; left: 0;
+      top: 0; 
+      left: 0;
       width: 100%;
       min-height: 300px;
       padding: 10px 20px 20px 20px;
@@ -224,12 +225,9 @@
     
     /* ========= UNTERE BUTTONS ========= */
     .bottom-buttons {
-      position: absolute; /* Absolut positioniert innerhalb von .card-and-bottom */
-      bottom: 0;
-      left: 0;
       display: flex;
       gap: 10px;
-      width: 100%;
+      align-self: flex-start; /* Beginnt linksbündig – also dort, wo die Karte anfängt */
     }
     .bottom-buttons button {
       flex: 1;
@@ -352,7 +350,7 @@
                 <div id="backAnswer">Antwort wird geladen...</div>
               </div>
             </div>
-            <!-- Zwei Canvas-Elemente -->
+            <!-- Canvas-Elemente -->
             <canvas id="drawCanvasFront"></canvas>
             <canvas id="drawCanvasBack" style="display:none;"></canvas>
           </div>
@@ -366,8 +364,13 @@
             <button id="patternButton" onclick="cyclePattern(event)"><i class="fas fa-th"></i> Muster&nbsp;Boden</button>
           </div>
         </div>
-        <!-- Untere Bewertungsbuttons: absolut positioniert, linksbündig und mit derselben Breite wie die Karte -->
-        <div class="bottom-buttons" id="bottomButtons"></div>
+        <!-- Untere Bewertungsbuttons: erscheinen nun direkt unter der Karte, linksbündig und in gleicher Breite -->
+        <div class="bottom-buttons" id="bottomButtons">
+          <button class="btn-falsch" onclick="rateCard('Falsch')">Falsch</button>
+          <button class="btn-muehsam" onclick="rateCard('Mühsam')">Mühsam</button>
+          <button class="btn-gut" onclick="rateCard('Gut')">Gut</button>
+          <button class="btn-einfach" onclick="rateCard('Einfach')">Einfach</button>
+        </div>
       </div>
     </div>
   </div>
