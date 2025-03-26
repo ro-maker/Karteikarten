@@ -33,7 +33,7 @@
     }
     
     /* ========= MAIN CONTAINER ========= */
-    /* Container zentriert den gesamten Inhalt */
+    /* Wir zentrieren den gesamten Inhalt horizontal */
     .main-container {
       display: flex;
       gap: 20px;
@@ -45,13 +45,14 @@
     }
     
     /* ========= LINKE SPALTE ========= */
+    /* Die linke Spalte wird als Flex-Item dargestellt, nicht absolut positioniert */
     .left-panel {
       display: flex;
       flex-direction: column;
       gap: 10px;
-      align-items: center;  /* Elemente werden innerhalb der Spalte zentriert */
-      width: 80px;          /* Feste Breite */
-      margin-right: auto;   /* Schiebt die Spalte ganz nach links im Container */
+      align-items: center;
+      width: 80px;
+      margin-right: auto; /* Schiebt die Spalte ganz nach links im Container */
     }
     .add-card-button {
       background-color: #28a745;
@@ -63,7 +64,7 @@
       height: 50px;
       cursor: pointer;
     }
-    /* Nummern-Buttons – direkt unter dem Plus-Button */
+    /* Nummern-Buttons direkt unter dem Plus-Button */
     #cardList {
       display: flex;
       flex-direction: column;
@@ -115,18 +116,30 @@
     .card-wrapper {
       display: flex;
       flex-direction: column;
-      align-items: center;  /* Karte und untere Buttons zentriert */
       gap: 10px;
       width: 100%;
       max-width: 900px;
       margin: 0 auto;
       position: relative;
+      /* Damit der gesamte Bereich linksbündig beginnt */
+      align-items: flex-start;
+    }
+    /* Neuer Container, in dem Karte + Seitentasten und die unteren Buttons liegen */
+    .card-and-bottom {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      /* Die unteren Buttons beginnen jetzt dort, wo die Karte beginnt (linksbündig) */
+      align-items: flex-start;
     }
     .card-and-sides {
       display: flex;
       gap: 20px;
       align-items: flex-start;
-      justify-content: center;  /* Karte und Seitentasten zentriert */
+      justify-content: center;
       width: 100%;
       max-width: 900px;
       margin: 0 auto;
@@ -218,6 +231,7 @@
       display: flex;
       gap: 10px;
       transition: width 0.3s;
+      /* Kein zusätzliches margin, damit sie linksbündig mit der Karte beginnen */
     }
     .bottom-buttons button {
       flex: 1;
@@ -294,7 +308,7 @@
     /* ========= ZEICHNEN-KONTROLLOVERLAY ========= */
     #drawControlsOverlay {
       min-width: 800px;
-      z-index: 9999; /* Overlay ganz vorne */
+      z-index: 9999;
     }
     .draw-toolbar {
       display: flex;
@@ -302,7 +316,6 @@
       gap: 5px;
       align-items: center;
     }
-    /* Damit der Range-Slider (Linienbreite) bedienbar ist */
     #drawControlsOverlay .draw-toolbar input[type="range"] {
       pointer-events: auto;
       z-index: 99999;
@@ -325,49 +338,48 @@
       <button id="deleteAllButton" onclick="deleteAllCards()" title="Alle löschen">Alle</button>
     </div>
     
-    <!-- Kartenbereich -->
+    <!-- Kartenbereich inklusive Karte & untere Buttons -->
     <div class="card-wrapper">
-      <div class="card-and-sides">
-        <!-- Karte -->
-        <div class="card" id="card" onclick="maybeFlip(event)">
-          <div class="card-inner">
-            <!-- Vorderseite -->
-            <div class="card-front" id="cardFrontFace" contenteditable="false">
-              <div id="frontQuestion">Frage wird geladen...</div>
+      <div class="card-and-bottom">
+        <div class="card-and-sides">
+          <!-- Karte -->
+          <div class="card" id="card" onclick="maybeFlip(event)">
+            <div class="card-inner">
+              <!-- Vorderseite -->
+              <div class="card-front" id="cardFrontFace" contenteditable="false">
+                <div id="frontQuestion">Frage wird geladen...</div>
+              </div>
+              <!-- Rückseite -->
+              <div class="card-back" id="cardBackFace" contenteditable="false">
+                <div id="backAnswer">Antwort wird geladen...</div>
+              </div>
             </div>
-            <!-- Rückseite -->
-            <div class="card-back" id="cardBackFace" contenteditable="false">
-              <div id="backAnswer">Antwort wird geladen...</div>
-            </div>
+            <!-- Zwei Canvas-Elemente -->
+            <canvas id="drawCanvasFront"></canvas>
+            <canvas id="drawCanvasBack" style="display:none;"></canvas>
           </div>
-          <!-- Zwei Canvas-Elemente: Front & Back -->
-          <canvas id="drawCanvasFront"></canvas>
-          <canvas id="drawCanvasBack" style="display:none;"></canvas>
+          <!-- Seitentasten -->
+          <div class="side-buttons-container">
+            <button onclick="openInlineEditOverlay();"><i class="fas fa-edit"></i> Bearbeiten</button>
+            <button onclick="openOverlay('imageOverlay');"><i class="fas fa-image"></i> Bild</button>
+            <button onclick="openDrawControlsOverlay();"><i class="fas fa-pencil-alt"></i> Zeichnen</button>
+            <button onclick="openOverlay('colorOverlay');"><i class="fas fa-palette"></i> Farbe</button>
+            <button onclick="toggleProblem();"><i class="fas fa-exclamation-triangle"></i> P</button>
+            <button id="patternButton" onclick="cyclePattern(event)"><i class="fas fa-th"></i> Muster&nbsp;Boden</button>
+          </div>
         </div>
-    
-        <!-- Seitentasten -->
-        <div class="side-buttons-container">
-          <button onclick="openInlineEditOverlay();"><i class="fas fa-edit"></i> Bearbeiten</button>
-          <button onclick="openOverlay('imageOverlay');"><i class="fas fa-image"></i> Bild</button>
-          <button onclick="openDrawControlsOverlay();"><i class="fas fa-pencil-alt"></i> Zeichnen</button>
-          <button onclick="openOverlay('colorOverlay');"><i class="fas fa-palette"></i> Farbe</button>
-          <button onclick="toggleProblem();"><i class="fas fa-exclamation-triangle"></i> P</button>
-          <button id="patternButton" onclick="cyclePattern(event)"><i class="fas fa-th"></i> Muster&nbsp;Boden</button>
+        <!-- Untere Bewertungsbuttons, linksbündig unter der Karte -->
+        <div class="bottom-buttons" id="bottomButtons">
+          <button class="btn-falsch" onclick="rateCard('Falsch')">Falsch</button>
+          <button class="btn-muehsam" onclick="rateCard('Mühsam')">Mühsam</button>
+          <button class="btn-gut" onclick="rateCard('Gut')">Gut</button>
+          <button class="btn-einfach" onclick="rateCard('Einfach')">Einfach</button>
         </div>
-      </div>
-    
-      <!-- Untere Bewertungsbuttons -->
-      <div class="bottom-buttons" id="bottomButtons">
-        <button class="btn-falsch" onclick="rateCard('Falsch')">Falsch</button>
-        <button class="btn-muehsam" onclick="rateCard('Mühsam')">Mühsam</button>
-        <button class="btn-gut" onclick="rateCard('Gut')">Gut</button>
-        <button class="btn-einfach" onclick="rateCard('Einfach')">Einfach</button>
       </div>
     </div>
   </div>
   
   <!-- Overlays -->
-  <!-- Bild-Overlay -->
   <div id="imageOverlay" class="overlay">
     <h3>Bild hinzufügen</h3>
     <input type="file" id="fileInput" accept="image/*">
@@ -375,7 +387,6 @@
     <button onclick="closeOverlay('imageOverlay')">Abbrechen</button>
   </div>
   
-  <!-- Farb-Overlay -->
   <div id="colorOverlay" class="overlay">
     <h3>Karteikartenfarbe ändern</h3>
     <div class="color-palette">
@@ -390,7 +401,6 @@
     <button onclick="closeOverlay('colorOverlay')">Schließen</button>
   </div>
   
-  <!-- Bearbeiten-Overlay -->
   <div id="inlineEditOverlay" class="overlay">
     <h3>Text formatieren</h3>
     <div class="toolbar">
@@ -431,7 +441,6 @@
     <button onclick="closeInlineEditOverlay()">Schließen</button>
   </div>
   
-  <!-- Zeichnen-Kontrolloverlay -->
   <div id="drawControlsOverlay" class="overlay" style="min-width: 800px;">
     <h3>Zeichnen</h3>
     <div class="draw-toolbar">
@@ -458,8 +467,8 @@
   <script>
     document.execCommand("styleWithCSS", false, true);
 
-    /* ================= JAVASCRIPT-FUNKTIONEN (unverändert, nur minimal angepasst) ================= */
-
+    /* ================= JAVASCRIPT-FUNKTIONEN ================= */
+    
     let cards = [
       {
         question: "Was ist JavaScript?",
@@ -812,7 +821,7 @@
       if (!isDrawingModeActive || !isDrawing) return;
       let ctx = getCurrentCanvas().getContext("2d");
       let pos = getMousePos(e);
-      // Abhängig vom Modus: Für Stift currentLineWidth, für Radierer eraserLineWidth
+      // Je nach Modus wird currentLineWidth oder eraserLineWidth verwendet
       ctx.lineWidth = (drawingMode === "draw") ? currentLineWidth : eraserLineWidth;
       ctx.lineCap = "round";
       if (drawingMode === "draw") {
@@ -842,8 +851,7 @@
     function setDrawingMode(mode) {
       drawingMode = mode;
       if (mode === "erase") {
-        getCurrentCanvas().style.cursor =
-          "url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVQoU2NkYGD4z0AEYBxVSFUAAXoYB7gWb5QAAAAASUVORK5CYII=), auto";
+        getCurrentCanvas().style.cursor = "url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVQoU2NkYGD4z0AEYBxVSFUAAXoYB7gWb5QAAAAASUVORK5CYII=), auto";
       } else {
         getCurrentCanvas().style.cursor = "crosshair";
       }
@@ -853,13 +861,12 @@
       drawingMode = "draw";
       getCurrentCanvas().style.cursor = "crosshair";
     }
-    // Funktion, die den Wert des Range-Sliders (Linienbreite) setzt,
-    // wobei je nach Modus (Stift oder Radierer) der jeweilige Wert übernommen wird.
+    // Funktion, die den Wert des Range-Sliders setzt – abhängig vom Modus
     function changeLineWidth(val) {
-      if(drawingMode === "draw") {
+      if (drawingMode === "draw") {
         currentLineWidth = parseInt(val, 10);
         console.log("Stift-Linienbreite:", currentLineWidth);
-      } else if(drawingMode === "erase") {
+      } else if (drawingMode === "erase") {
         eraserLineWidth = parseInt(val, 10);
         console.log("Radierer-Linienbreite:", eraserLineWidth);
       }
