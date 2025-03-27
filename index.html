@@ -10,7 +10,7 @@
         crossorigin="anonymous" 
         referrerpolicy="no-referrer" />
   <style>
-    /* ========== GLOBAL STYLES ========== */
+    /* ========== GLOBAL STYLES (unverändert) ========== */
     * {
       margin: 0;
       padding: 0;
@@ -211,11 +211,11 @@
     .side-buttons-container button:hover {
       opacity: 0.9;
     }
-    /* ========== UNTERE BUTTONS ========== */
+    /* ========== UNTERE BUTTONS (Bewertung) ========== */
     .bottom-buttons {
       display: flex;
       gap: 10px;
-      /* Die Breite wird via JavaScript exakt der Kartenbreite zugewiesen */
+      /* Hier bleibt alles unverändert – die Breite wird per JavaScript gesetzt */
     }
     .bottom-buttons button {
       flex: 1;
@@ -443,6 +443,7 @@
     document.execCommand("styleWithCSS", false, true);
 
     /* ================= JAVASCRIPT-FUNKTIONEN ================= */
+
     let cards = [
       {
         question: "Was ist JavaScript?",
@@ -853,6 +854,8 @@
       getCurrentCanvas().style.cursor = "crosshair";
     }
     function changeLineWidth(val) {
+      // Debug-Ausgabe (optional, kannst du entfernen)
+      console.log("Neue Linienbreite:", val, "Modus:", drawingMode);
       if (drawingMode === "draw") {
         currentLineWidth = parseInt(val, 10);
       } else if (drawingMode === "erase") {
@@ -1038,4 +1041,3 @@
   </script>
 </body>
 </html>
-
