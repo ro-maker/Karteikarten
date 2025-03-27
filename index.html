@@ -2,85 +2,442 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Lernkarten-App</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+  <title>Jura-Karteikarten</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <!-- Font Awesome via CDN -->
+  <link rel="stylesheet" 
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
+        crossorigin="anonymous" 
+        referrerpolicy="no-referrer" />
   <style>
-    /* Basis-Stile – bitte anpassen, wie du möchtest */
-    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
-    #card { position: relative; margin: 0 auto; border: 2px solid #ccc; transition: all 0.3s; overflow: hidden; }
-    #card.flip { transform: rotateY(180deg); }
-    #cardFrontFace, #cardBackFace { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; padding: 10px; box-sizing: border-box; }
-    #cardBackFace { transform: rotateY(180deg); }
-    .overlay { position: absolute; background: rgba(255,255,255,0.95); padding: 10px; border: 1px solid #ccc; }
-    .draggable-text { position: absolute; cursor: move; border: 1px dashed #aaa; padding: 2px; }
-    #bottomButtons { margin-top: 10px; display: flex; gap: 5px; }
-    /* Zusätzliche Stile für Bearbeitung */
-    #inlineEditOverlay input, 
-    #inlineEditOverlay select { margin-right: 5px; }
-    .palette-color { display: inline-block; width: 20px; height: 20px; margin-right: 5px; cursor: pointer; border: 1px solid #ccc; }
+    /* ========== GLOBAL STYLES ========== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background-color: #fefefe;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    header h2 {
+      color: #972D54;
+    }
+    /* ========== MAIN CONTAINER ========== */
+    .main-container {
+      display: flex;
+      gap: 20px;
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    /* ========== LINKE SPALTE ========== */
+    .left-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+      width: 80px;
+      margin-right: auto; 
+    }
+    .add-card-button {
+      background-color: #28a745;
+      color: white;
+      font-size: 32px;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+    }
+    #cardList {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-top: 0;
+    }
+    #cardList button {
+      width: 30px;
+      height: 30px;
+      border: none;
+      border-radius: 50%;
+      background-color: #ddd;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    #cardList button.active {
+      background-color: #972D54;
+      color: white;
+    }
+    #cardList button.inactive {
+      opacity: 0.5;
+    }
+    #deleteCardButton {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #deleteAllButton {
+      background-color: #333;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      width: 70px;
+      height: 35px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    /* ========== KARTEIKARTEN-BEREICH ========== */
+    .card-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      position: relative;
+      align-items: flex-start;
+    }
+    .card-and-bottom {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .card-and-sides {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      justify-content: center;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .card {
+      position: relative;
+      min-width: 600px;
+      max-width: 90vw;
+      min-height: 300px;
+      max-height: 90vh;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      overflow: hidden;
+      cursor: text;
+      transition: border-top 0.3s;
+      background-color: #fff;
+    }
+    .card-inner {
+      width: 100%;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+      position: relative;
+      z-index: 1;
+    }
+    .card.flip .card-inner {
+      transform: rotateY(180deg);
+    }
+    .card-front, .card-back {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      min-height: 300px;
+      padding: 10px 20px 20px 20px;
+      border-radius: 8px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-size: 1.2rem;
+      line-height: 30px;
+      backface-visibility: hidden;
+    }
+    .card-front {
+      background-color: #fff;
+      z-index: 2;
+    }
+    .card-back {
+      background-color: #f9f9f9;
+      transform: rotateY(180deg);
+      z-index: 1;
+    }
+    /* ========== ZWEI CANVAS-ELEMENTE ========== */
+    #drawCanvasFront, #drawCanvasBack {
+      position: absolute;
+      top: 0; left: 0;
+      z-index: 3;
+      pointer-events: none;
+    }
+    /* ========== SEITENTASTEN ========== */
+    .side-buttons-container {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      align-items: flex-start;
+    }
+    .side-buttons-container button {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 8px;
+      padding: 6px 10px;
+      border: none;
+      border-radius: 4px;
+      background-color: #972D54;
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.85rem;
+      width: 110px;
+      text-align: left;
+    }
+    .side-buttons-container button:hover {
+      opacity: 0.9;
+    }
+    /* ========== UNTERE BUTTONS ========== */
+    .bottom-buttons {
+      display: flex;
+      gap: 10px;
+      /* Die Breite wird via JavaScript gesetzt */
+    }
+    .bottom-buttons button {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+      color: #fff;
+    }
+    .btn-falsch { background-color: #e74c3c; }
+    .btn-muehsam { background-color: #f39c12; color: #000; }
+    .btn-gut    { background-color: #2ecc71; }
+    .btn-einfach { background-color: #1abc9c; }
+    /* ========== OVERLAYS (unverändert) ========== */
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 120px;
+      left: 120px;
+      width: 450px;
+      max-width: 90%;
+      background: linear-gradient(135deg, #ffffff 0%, #f3f3f3 100%);
+      padding: 15px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      z-index: 1000;
+      cursor: move;
+      animation: fadeIn 0.3s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .overlay.active { display: block; }
+    .overlay h3 { margin-bottom: 10px; }
+    .overlay button {
+      padding: 8px 12px;
+      background-color: #972D54;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      margin-right: 5px;
+    }
+    .overlay .toolbar {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+    .overlay .color-palette {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+    .overlay .color-palette button {
+      width: 25px;
+      height: 25px;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .draggable-text {
+      border: 1px dashed #ccc;
+      padding: 4px;
+      cursor: move;
+      position: absolute;
+      background: rgba(255,255,255,0.8);
+    }
+    /* ========== ZEICHNEN-KONTROLLOVERLAY ========== */
+    #drawControlsOverlay {
+      min-width: 800px;
+      z-index: 9999;
+    }
+    .draw-toolbar {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 5px;
+      align-items: center;
+    }
+    #drawControlsOverlay .draw-toolbar input[type="range"] {
+      pointer-events: auto;
+      z-index: 99999;
+    }
   </style>
 </head>
 <body>
-
-  <!-- Karte -->
-  <div id="card">
-    <div id="cardFrontFace">
-      <div id="frontQuestion"></div>
+  <header>
+    <h2>Heute: <span id="currentCardIndex">0</span>/<span id="totalCards">0</span></h2>
+  </header>
+  <div class="main-container">
+    <!-- Linke Spalte -->
+    <div class="left-panel">
+      <button class="add-card-button" onclick="addCard()">+</button>
+      <div id="cardList"></div>
+      <button id="deleteCardButton" onclick="deleteSelectedCard()" title="Nur diese Karte löschen">
+        <i class="fa-solid fa-trash"></i>
+      </button>
+      <button id="deleteAllButton" onclick="deleteAllCards()" title="Alle löschen">Alle</button>
     </div>
-    <div id="cardBackFace">
-      <div id="backAnswer"></div>
+    <!-- Kartenbereich -->
+    <div class="card-wrapper">
+      <div class="card-and-bottom">
+        <div class="card-and-sides">
+          <!-- Karte -->
+          <div class="card" id="card" onclick="maybeFlip(event)">
+            <div class="card-inner">
+              <!-- Vorderseite -->
+              <div class="card-front" id="cardFrontFace" contenteditable="false">
+                <div id="frontQuestion">Frage wird geladen...</div>
+              </div>
+              <!-- Rückseite -->
+              <div class="card-back" id="cardBackFace" contenteditable="false">
+                <div id="backAnswer">Antwort wird geladen...</div>
+              </div>
+            </div>
+            <!-- Canvas-Ebenen -->
+            <canvas id="drawCanvasFront"></canvas>
+            <canvas id="drawCanvasBack" style="display:none;"></canvas>
+          </div>
+          <!-- Seitentasten -->
+          <div class="side-buttons-container">
+            <button onclick="openInlineEditOverlay();"><i class="fas fa-edit"></i> Bearbeiten</button>
+            <button onclick="openOverlay('imageOverlay');"><i class="fas fa-image"></i> Bild</button>
+            <button onclick="openDrawControlsOverlay();"><i class="fas fa-pencil-alt"></i> Zeichnen</button>
+            <button onclick="openOverlay('colorOverlay');"><i class="fas fa-palette"></i> Farbe</button>
+            <button onclick="toggleProblem();"><i class="fas fa-exclamation-triangle"></i> P</button>
+            <button id="patternButton" onclick="cyclePattern(event)"><i class="fas fa-th"></i> Muster&nbsp;Boden</button>
+          </div>
+        </div>
+        <!-- Untere Bewertungsbuttons -->
+        <div class="bottom-buttons" id="bottomButtons">
+          <button class="btn-falsch" onclick="rateCard('Falsch')">Falsch</button>
+          <button class="btn-muehsam" onclick="rateCard('Mühsam')">Mühsam</button>
+          <button class="btn-gut" onclick="rateCard('Gut')">Gut</button>
+          <button class="btn-einfach" onclick="rateCard('Einfach')">Einfach</button>
+        </div>
+      </div>
     </div>
-    <!-- Canvases zum Zeichnen -->
-    <canvas id="drawCanvasFront" style="position:absolute; top:0; left:0;"></canvas>
-    <canvas id="drawCanvasBack" style="position:absolute; top:0; left:0;"></canvas>
   </div>
-
-  <!-- Untere Buttons -->
-  <div id="bottomButtons">
-    <button onclick="openDrawControlsOverlay()"><i class="fas fa-pen"></i> Zeichnen</button>
-    <button onclick="openInlineEditOverlay()"><i class="fas fa-edit"></i> Bearbeiten</button>
-    <button onclick="addCard()"><i class="fas fa-plus"></i> Karte hinzufügen</button>
-    <button onclick="deleteSelectedCard()"><i class="fas fa-trash"></i> Karte löschen</button>
-    <button onclick="toggleProblem()"><i class="fas fa-exclamation"></i> Problem</button>
+  <!-- Overlays -->
+  <div id="imageOverlay" class="overlay">
+    <h3>Bild hinzufügen</h3>
+    <input type="file" id="fileInput" accept="image/*">
+    <button onclick="uploadImage()">Hochladen</button>
+    <button onclick="closeOverlay('imageOverlay')">Abbrechen</button>
   </div>
-
-  <!-- Draw Controls Overlay (Zeichenfenster) -->
-  <div id="drawControlsOverlay" class="overlay" style="display:none; top:50px; left:50px;">
-    <button onclick="setDrawingMode('erase'); getCurrentCanvas().style.cursor='url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVQoU2NkYGD4z0AEYBxVSFUAAXoYB7gWb5QAAAAASUVORK5CYII=), auto';">
-      <i class="fas fa-eraser"></i> Radierer
-    </button>
-    <button onclick="setDrawingMode('draw'); getCurrentCanvas().style.cursor='crosshair';">
-      <i class="fas fa-pen"></i> Stift
-    </button>
-    <button onclick="saveDrawing()"><i class="fas fa-save"></i> Speichern</button>
-    <button onclick="closeDrawControls()"><i class="fas fa-times"></i> Schließen</button>
-    <!-- Linienbreite Input -->
-    <label for="lineWidthInput">Linienbreite:</label>
-    <input type="number" id="lineWidthInput" value="3" min="1" style="width:50px;">
-  </div>
-
-  <!-- Inline Edit Overlay (Bearbeitungsfenster) -->
-  <div id="inlineEditOverlay" class="overlay" style="display:none; top:100px; left:100px;">
-    <button id="addTextButton"><i class="fas fa-plus"></i> Text hinzufügen</button>
-    <label for="fontSizeInput">Schriftgröße:</label>
-    <input type="text" id="fontSizeInput" placeholder="z.B. 16px">
-    <label for="fontNameInput">Schriftart:</label>
-    <select id="fontNameInput">
-      <option value="Arial">Arial</option>
-      <option value="Times New Roman">Times New Roman</option>
-      <option value="Courier New">Courier New</option>
-    </select>
-    <!-- Farbpalette -->
-    <div id="colorPalette">
-      <span class="palette-color" data-color="#000000" style="background:#000000;"></span>
-      <span class="palette-color" data-color="#ff0000" style="background:#ff0000;"></span>
-      <span class="palette-color" data-color="#00ff00" style="background:#00ff00;"></span>
-      <span class="palette-color" data-color="#0000ff" style="background:#0000ff;"></span>
+  <div id="colorOverlay" class="overlay">
+    <h3>Karteikartenfarbe ändern</h3>
+    <div class="color-palette">
+      <button style="background:#ffffff;" onclick="setCardColor('#ffffff')"></button>
+      <button style="background:#ffdddd;" onclick="setCardColor('#ffdddd')"></button>
+      <button style="background:#fff4dd;" onclick="setCardColor('#fff4dd')"></button>
+      <button style="background:#ddffdd;" onclick="setCardColor('#ddffdd')"></button>
+      <button style="background:#ddeeff;" onclick="setCardColor('#ddeeff')"></button>
+      <button style="background:#ffddee;" onclick="setCardColor('#ffddee')"></button>
+      <button style="background:#ffffff;" onclick="setCardColor('#ffffff')"></button>
     </div>
-    <button onclick="closeInlineEditOverlay()"><i class="fas fa-check"></i> Fertig</button>
+    <button onclick="closeOverlay('colorOverlay')">Schließen</button>
+  </div>
+  <div id="inlineEditOverlay" class="overlay">
+    <h3>Text formatieren</h3>
+    <div class="toolbar">
+      <button onclick="execCmd('bold')"><i class="fas fa-bold"></i> B</button>
+      <button onclick="execCmd('italic')"><i class="fas fa-italic"></i> I</button>
+      <button onclick="execCmd('underline')"><i class="fas fa-underline"></i> U</button>
+    </div>
+    <div class="color-palette">
+      <button style="background:white;" onclick="toggleTextColor('white')"></button>
+      <button style="background: yellow;" onclick="toggleTextColor('yellow')"></button>
+      <button style="background: lightblue;" onclick="toggleTextColor('lightblue')"></button>
+      <button style="background: red;" onclick="toggleTextColor('red')"></button>
+      <button style="background: lightgreen;" onclick="toggleTextColor('lightgreen')"></button>
+      <button style="background: orange;" onclick="toggleTextColor('orange')"></button>
+      <button style="background: #39FF14;" onclick="toggleTextColor('#39FF14')"></button>
+      <button style="background: #FF073A;" onclick="toggleTextColor('#FF073A')"></button>
+      <button style="background: #0FF0FC;" onclick="toggleTextColor('#0FF0FC')"></button>
+    </div>
+    <div class="toolbar">
+      <select onchange="toggleFontSize(this.value)">
+        <option value="">Schriftgröße</option>
+        <option value="12px">12px</option>
+        <option value="14px">14px</option>
+        <option value="18px">18px</option>
+        <option value="24px">24px</option>
+        <option value="32px">32px</option>
+      </select>
+      <select onchange="toggleFontName(this.value)">
+        <option value="">Schriftart</option>
+        <option value="Arial">Arial</option>
+        <option value="Times New Roman">Times New Roman</option>
+        <option value="Courier New">Courier New</option>
+        <option value="Georgia">Georgia</option>
+        <option value="Verdana">Verdana</option>
+      </select>
+      <button onclick="addDraggableText()">Text hinzufügen</button>
+    </div>
+    <button onclick="closeInlineEditOverlay()">Schließen</button>
+  </div>
+  <div id="drawControlsOverlay" class="overlay" style="min-width: 800px;">
+    <h3>Zeichnen</h3>
+    <div class="draw-toolbar">
+      <button onclick="setDrawingColor('black')"><i class="fas fa-tint"></i> Schwarz</button>
+      <button onclick="setDrawingColor('red')"><i class="fas fa-tint"></i> Rot</button>
+      <button onclick="setDrawingColor('green')"><i class="fas fa-tint"></i> Grün</button>
+      <button onclick="setDrawingColor('blue')"><i class="fas fa-tint"></i> Blau</button>
+      <label style="font-size:0.85rem;">Linienbreite:
+        <input type="range" min="1" max="50" value="3" 
+               oninput="changeLineWidth(this.value)" onchange="changeLineWidth(this.value)">
+      </label>
+      <button onclick="setDrawingMode('erase'); getCurrentCanvas().style.cursor='url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVQoU2NkYGD4z0AEYBxVSFUAAXoYB7gWb5QAAAAASUVORK5CYII=), auto';">
+        <i class="fas fa-eraser"></i> Radierer
+      </button>
+      <button onclick="setDrawingMode('draw'); getCurrentCanvas().style.cursor='crosshair';">
+        <i class="fas fa-pen"></i> Stift
+      </button>
+      <button onclick="saveDrawing()"><i class="fas fa-save"></i> Speichern</button>
+      <button onclick="closeDrawControls()"><i class="fas fa-times"></i> Schließen</button>
+    </div>
   </div>
 
-  <!-- Unsichtbares File-Upload Element -->
   <input type="file" id="hiddenImageUpload" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
 
   <script>
@@ -119,44 +476,6 @@
       makeAllOverlaysDraggable();
       updateBottomButtons();
       updateBottomButtonsWidth();
-
-      // Linienbreiten-Input im Zeichnen-Fenster
-      let lineWidthInput = document.getElementById("lineWidthInput");
-      if(lineWidthInput){
-        lineWidthInput.addEventListener("change", function(e){
-          changeLineWidth(e.target.value);
-        });
-      }
-
-      // "Text hinzufügen"-Button im Bearbeitungsfenster
-      let addTextButton = document.getElementById("addTextButton");
-      if(addTextButton){
-        addTextButton.addEventListener("click", addDraggableText);
-      }
-
-      // Schriftgröße ändern
-      let fontSizeInput = document.getElementById("fontSizeInput");
-      if(fontSizeInput){
-        fontSizeInput.addEventListener("change", function(e){
-          toggleFontSize(e.target.value);
-        });
-      }
-
-      // Schriftart ändern
-      let fontNameInput = document.getElementById("fontNameInput");
-      if(fontNameInput){
-        fontNameInput.addEventListener("change", function(e){
-          toggleFontName(e.target.value);
-        });
-      }
-
-      // Farbpalette
-      let paletteColors = document.querySelectorAll(".palette-color");
-      paletteColors.forEach(function(el){
-        el.addEventListener("click", function(){
-          toggleTextColor(el.getAttribute("data-color"));
-        });
-      });
     });
 
     function loadCard(index, preserveFlip = false) {
@@ -208,17 +527,15 @@
     }
     function renderCardList() {
       const listDiv = document.getElementById("cardList");
-      if(listDiv){
-        listDiv.innerHTML = "";
-        cards.forEach((c, i) => {
-          const btn = document.createElement("button");
-          btn.textContent = i + 1;
-          btn.onclick = () => { loadCard(i); };
-          if (i === currentIndex) btn.classList.add("active");
-          if (c.active === false) btn.classList.add("inactive");
-          listDiv.appendChild(btn);
-        });
-      }
+      listDiv.innerHTML = "";
+      cards.forEach((c, i) => {
+        const btn = document.createElement("button");
+        btn.textContent = i + 1;
+        btn.onclick = () => { loadCard(i); };
+        if (i === currentIndex) btn.classList.add("active");
+        if (c.active === false) btn.classList.add("inactive");
+        listDiv.appendChild(btn);
+      });
     }
     function maybeFlip(e) {
       if (isDrawingModeActive || isEditing) return;
@@ -233,7 +550,7 @@
       }, 300);
     }
     function updatePatternButton() {
-      document.getElementById("patternButton").innerHTML = `<i class="fas fa-th"></i> Muster&nbsp;Boden`;
+      document.getElementById("patternButton").innerHTML = <i class="fas fa-th"></i> Muster&nbsp;Boden;
     }
     function toggleProblem() {
       cards[currentIndex].problem = !cards[currentIndex].problem;
@@ -338,7 +655,6 @@
         document.removeEventListener("mouseup", onTextDragEnd);
       }
     }
-
     /* Bewertung */
     function rateCard(rating) {
       if (rating === "Einfach") {
@@ -383,9 +699,9 @@
         reader.onload = function(e) {
           const isFlipped = document.getElementById("card").classList.contains("flip");
           if (!isFlipped) {
-            cards[currentIndex].question += `<br><img src="${e.target.result}" class="editable-image" style="max-width:100%; cursor:move;" ondblclick="resizeImage(this)"><br>`;
+            cards[currentIndex].question += <br><img src="${e.target.result}" class="editable-image" style="max-width:100%; cursor:move;" ondblclick="resizeImage(this)"><br>;
           } else {
-            cards[currentIndex].answer += `<br><img src="${e.target.result}" class="editable-image" style="max-width:100%; cursor:move;" ondblclick="resizeImage(this)"><br>`;
+            cards[currentIndex].answer += <br><img src="${e.target.result}" class="editable-image" style="max-width:100%; cursor:move;" ondblclick="resizeImage(this)"><br>;
           }
           loadCard(currentIndex, true);
           saveCardsToLocalStorage();
@@ -406,7 +722,7 @@
         let bottom = prompt("Zuschneiden: Abstand von unten (z.B. 10px):", "10px");
         let left = prompt("Zuschneiden: Abstand von links (z.B. 10px):", "10px");
         if (top && right && bottom && left) {
-          img.style.clipPath = `inset(${top} ${right} ${bottom} ${left})`;
+          img.style.clipPath = inset(${top} ${right} ${bottom} ${left});
         }
       }
     }
