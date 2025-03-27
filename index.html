@@ -10,7 +10,7 @@
         crossorigin="anonymous" 
         referrerpolicy="no-referrer" />
   <style>
-    /* ========== GLOBAL STYLES (unverändert) ========== */
+    /* ========== GLOBAL STYLES ========== */
     * {
       margin: 0;
       padding: 0;
@@ -211,11 +211,11 @@
     .side-buttons-container button:hover {
       opacity: 0.9;
     }
-    /* ========== UNTERE BUTTONS (Bewertung) – unverändert ========== */
+    /* ========== UNTERE BUTTONS ========== */
     .bottom-buttons {
       display: flex;
       gap: 10px;
-      /* Die Breite wird per JavaScript exakt der Kartenbreite zugewiesen */
+      /* Die Breite wird via JavaScript gesetzt */
     }
     .bottom-buttons button {
       flex: 1;
@@ -279,14 +279,12 @@
       border-radius: 3px;
       cursor: pointer;
     }
-    /* Neuer draggabler Textbereich – mit user-select zum Markieren */
     .draggable-text {
       border: 1px dashed #ccc;
       padding: 4px;
       cursor: move;
       position: absolute;
       background: rgba(255,255,255,0.8);
-      user-select: text;
     }
     /* ========== ZEICHNEN-KONTROLLOVERLAY ========== */
     #drawControlsOverlay {
@@ -349,7 +347,7 @@
             <button id="patternButton" onclick="cyclePattern(event)"><i class="fas fa-th"></i> Muster&nbsp;Boden</button>
           </div>
         </div>
-        <!-- Untere Bewertungsbuttons – bleiben unverändert -->
+        <!-- Untere Bewertungsbuttons -->
         <div class="bottom-buttons" id="bottomButtons">
           <button class="btn-falsch" onclick="rateCard('Falsch')">Falsch</button>
           <button class="btn-muehsam" onclick="rateCard('Mühsam')">Mühsam</button>
@@ -439,7 +437,9 @@
       <button onclick="closeDrawControls()"><i class="fas fa-times"></i> Schließen</button>
     </div>
   </div>
+
   <input type="file" id="hiddenImageUpload" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
+
   <script>
     document.execCommand("styleWithCSS", false, true);
 
@@ -557,16 +557,18 @@
       loadCard(currentIndex, true);
       saveCardsToLocalStorage();
     }
+
     /* Untere Buttons an Kartenbreite anpassen */
     function updateBottomButtonsWidth() {
       let cardEl = document.getElementById("card");
       let bottom = document.getElementById("bottomButtons");
       bottom.style.width = cardEl.offsetWidth + "px";
-      bottom.style.marginLeft = "0px";
+      bottom.style.marginLeft = cardEl.offsetLeft + "px";
     }
     function updateBottomButtons() {
       document.getElementById("bottomButtons").style.display = "flex";
     }
+
     /* Inline Edit Overlay */
     function openInlineEditOverlay() {
       let isFlipped = document.getElementById("card").classList.contains("flip");
@@ -625,10 +627,8 @@
       newText.style.top = "20px";
       newText.style.left = "20px";
       newText.style.fontSize = "16px";
-      newText.style.userSelect = "text";
       document.getElementById("card").appendChild(newText);
       makeTextDraggable(newText);
-      newText.focus();
     }
     function makeTextDraggable(elem) {
       let dragText = null, textOffsetX = 0, textOffsetY = 0;
@@ -655,6 +655,7 @@
         document.removeEventListener("mouseup", onTextDragEnd);
       }
     }
+
     /* Bewertung */
     function rateCard(rating) {
       if (rating === "Einfach") {
@@ -681,6 +682,7 @@
       loadCard(currentIndex, true);
       saveCardsToLocalStorage();
     }
+
     /* Overlays */
     function openOverlay(id) {
       document.getElementById(id).classList.add("active");
@@ -712,7 +714,9 @@
       let action = prompt("Gib 'resize' ein, um die Größe anzupassen oder 'crop' zum Zuschneiden:", "resize");
       if (action === "resize") {
         let newWidth = prompt("Neue Breite (z.B. 50% oder 300px):", "50%");
-        if (newWidth) { img.style.width = newWidth; }
+        if (newWidth) {
+          img.style.width = newWidth;
+        }
       } else if (action === "crop") {
         let top = prompt("Zuschneiden: Abstand von oben (z.B. 10px):", "10px");
         let right = prompt("Zuschneiden: Abstand von rechts (z.B. 10px):", "10px");
@@ -729,6 +733,7 @@
       saveCardsToLocalStorage();
       closeOverlay("colorOverlay");
     }
+
     /* Muster-Button */
     function cyclePattern(e) {
       e.stopPropagation();
@@ -741,6 +746,7 @@
       saveCardsToLocalStorage();
       return false;
     }
+
     /* Zeichnen-Funktionen */
     function setupCanvasDrawing() {
       const card = document.getElementById("card");
@@ -780,6 +786,7 @@
         canvasFront.style.top = "0";
         canvasFront.style.left = "0";
         canvasFront.style.pointerEvents = isDrawingModeActive ? "auto" : "none";
+
         if (cards[currentIndex].canvasDataFront) {
           let img = new Image();
           img.onload = () => {
@@ -861,7 +868,6 @@
       getCurrentCanvas().style.cursor = "crosshair";
     }
     function changeLineWidth(val) {
-      console.log("Neue Linienbreite:", val, "Modus:", drawingMode);
       if (drawingMode === "draw") {
         currentLineWidth = parseInt(val, 10);
       } else if (drawingMode === "erase") {
@@ -901,6 +907,7 @@
       saveCardsToLocalStorage();
       closeDrawControls();
     }
+
     /* Kartenverwaltung */
     function addCard() {
       let newQuestion = prompt("Neue Frage:");
@@ -955,6 +962,7 @@
         cards = JSON.parse(data);
       }
     }
+
     /* Dynamische Kartengröße */
     function updateCardSize() {
       let card = document.getElementById("card");
@@ -980,8 +988,9 @@
       let cardEl = document.getElementById("card");
       let bottom = document.getElementById("bottomButtons");
       bottom.style.width = cardEl.offsetWidth + "px";
-      bottom.style.marginLeft = "0px";
+      bottom.style.marginLeft = cardEl.offsetLeft + "px";
     }
+
     /* Drag & Drop Bilder */
     let dragItem = null;
     let offsetX = 0, offsetY = 0;
@@ -1015,6 +1024,7 @@
         img.addEventListener("mousedown", startDrag);
       });
     }
+
     /* Draggable Overlays */
     function makeAllOverlaysDraggable() {
       let overlays = document.querySelectorAll(".overlay");
