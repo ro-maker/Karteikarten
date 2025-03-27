@@ -10,7 +10,7 @@
         crossorigin="anonymous" 
         referrerpolicy="no-referrer" />
   <style>
-    /* ========== GLOBAL STYLES (unverändert) ========== */
+    /* ========== GLOBAL STYLES ========== */
     * {
       margin: 0;
       padding: 0;
@@ -215,7 +215,7 @@
     .bottom-buttons {
       display: flex;
       gap: 10px;
-      /* Hier bleibt alles unverändert – die Breite wird per JavaScript gesetzt */
+      /* Die Breite wird via JavaScript gesetzt – unverändert */
     }
     .bottom-buttons button {
       flex: 1;
@@ -279,7 +279,7 @@
       border-radius: 3px;
       cursor: pointer;
     }
-    /* Neuer draggabler Textbereich – mit user-select, damit Text markiert werden kann */
+    /* Neuer draggabler Textbereich – mit user-select zum Markieren */
     .draggable-text {
       border: 1px dashed #ccc;
       padding: 4px;
@@ -349,7 +349,7 @@
             <button id="patternButton" onclick="cyclePattern(event)"><i class="fas fa-th"></i> Muster&nbsp;Boden</button>
           </div>
         </div>
-        <!-- Untere Bewertungsbuttons – unverändert -->
+        <!-- Untere Bewertungsbuttons – bleiben unverändert -->
         <div class="bottom-buttons" id="bottomButtons">
           <button class="btn-falsch" onclick="rateCard('Falsch')">Falsch</button>
           <button class="btn-muehsam" onclick="rateCard('Mühsam')">Mühsam</button>
@@ -484,7 +484,7 @@
       document.getElementById("frontQuestion").innerHTML = c.question.replace(/\n/g, "<br>");
       document.getElementById("backAnswer").innerHTML = c.answer.replace(/\n/g, "<br>");
       document.getElementById("cardFrontFace").style.backgroundColor = c.color;
-      document.getElementById("cardBackFace").style.backgroundColor = c.color;
+      document.getElementById("cardBackFace").style.backgroundColor  = c.color;
 
       let backFace = document.getElementById("cardBackFace");
       backFace.style.backgroundImage = "none";
@@ -624,8 +624,11 @@
       newText.style.top = "20px";
       newText.style.left = "20px";
       newText.style.fontSize = "16px";
+      // Damit der Text auswählbar und fokussierbar ist:
+      newText.style.userSelect = "text";
       document.getElementById("card").appendChild(newText);
       makeTextDraggable(newText);
+      newText.focus();
     }
     function makeTextDraggable(elem) {
       let dragText = null, textOffsetX = 0, textOffsetY = 0;
@@ -744,6 +747,7 @@
       let canvasFront = document.getElementById("drawCanvasFront");
       let canvasBack  = document.getElementById("drawCanvasBack");
       let isFlipped = card.classList.contains("flip");
+
       if (isFlipped) {
         canvasFront.style.display = "none";
         canvasBack.style.display  = "block";
@@ -752,6 +756,7 @@
         canvasBack.style.top = "0";
         canvasBack.style.left = "0";
         canvasBack.style.pointerEvents = isDrawingModeActive ? "auto" : "none";
+
         if (cards[currentIndex].canvasDataBack) {
           let img = new Image();
           img.onload = () => {
@@ -775,6 +780,7 @@
         canvasFront.style.top = "0";
         canvasFront.style.left = "0";
         canvasFront.style.pointerEvents = isDrawingModeActive ? "auto" : "none";
+
         if (cards[currentIndex].canvasDataFront) {
           let img = new Image();
           img.onload = () => {
@@ -854,7 +860,6 @@
       getCurrentCanvas().style.cursor = "crosshair";
     }
     function changeLineWidth(val) {
-      // Debug-Ausgabe (optional, kannst du entfernen)
       console.log("Neue Linienbreite:", val, "Modus:", drawingMode);
       if (drawingMode === "draw") {
         currentLineWidth = parseInt(val, 10);
