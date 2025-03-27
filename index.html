@@ -550,7 +550,7 @@
       }, 300);
     }
     function updatePatternButton() {
-      document.getElementById("patternButton").innerHTML = <i class="fas fa-th"></i> Muster&nbsp;Boden;
+      document.getElementById("patternButton").innerHTML = `<i class="fas fa-th"></i> Muster&nbsp;Boden`;
     }
     function toggleProblem() {
       cards[currentIndex].problem = !cards[currentIndex].problem;
@@ -655,6 +655,7 @@
         document.removeEventListener("mouseup", onTextDragEnd);
       }
     }
+
     /* Bewertung */
     function rateCard(rating) {
       if (rating === "Einfach") {
@@ -699,9 +700,9 @@
         reader.onload = function(e) {
           const isFlipped = document.getElementById("card").classList.contains("flip");
           if (!isFlipped) {
-            cards[currentIndex].question += <br><img src="${e.target.result}" class="editable-image" style="max-width:100%; cursor:move;" ondblclick="resizeImage(this)"><br>;
+            cards[currentIndex].question += `<br><img src="${e.target.result}" class="editable-image" style="max-width:100%; cursor:move;" ondblclick="resizeImage(this)"><br>`;
           } else {
-            cards[currentIndex].answer += <br><img src="${e.target.result}" class="editable-image" style="max-width:100%; cursor:move;" ondblclick="resizeImage(this)"><br>;
+            cards[currentIndex].answer += `<br><img src="${e.target.result}" class="editable-image" style="max-width:100%; cursor:move;" ondblclick="resizeImage(this)"><br>`;
           }
           loadCard(currentIndex, true);
           saveCardsToLocalStorage();
@@ -722,7 +723,7 @@
         let bottom = prompt("Zuschneiden: Abstand von unten (z.B. 10px):", "10px");
         let left = prompt("Zuschneiden: Abstand von links (z.B. 10px):", "10px");
         if (top && right && bottom && left) {
-          img.style.clipPath = inset(${top} ${right} ${bottom} ${left});
+          img.style.clipPath = `inset(${top} ${right} ${bottom} ${left})`;
         }
       }
     }
