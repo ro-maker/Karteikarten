@@ -10,7 +10,7 @@
         crossorigin="anonymous" 
         referrerpolicy="no-referrer" />
   <style>
-    /* ========== GLOBAL STYLES ========== */
+    /* ========== GLOBAL STYLES (unverändert) ========== */
     * {
       margin: 0;
       padding: 0;
@@ -211,11 +211,11 @@
     .side-buttons-container button:hover {
       opacity: 0.9;
     }
-    /* ========== UNTERE BUTTONS (Bewertung) ========== */
+    /* ========== UNTERE BUTTONS (Bewertung) – unverändert ========== */
     .bottom-buttons {
       display: flex;
       gap: 10px;
-      /* Die Breite wird via JavaScript gesetzt – unverändert */
+      /* Die Breite wird per JavaScript exakt der Kartenbreite zugewiesen */
     }
     .bottom-buttons button {
       flex: 1;
@@ -426,7 +426,8 @@
       <button onclick="setDrawingColor('green')"><i class="fas fa-tint"></i> Grün</button>
       <button onclick="setDrawingColor('blue')"><i class="fas fa-tint"></i> Blau</button>
       <label style="font-size:0.85rem;">Linienbreite:
-        <input type="range" min="1" max="50" value="3" oninput="changeLineWidth(this.value)" onchange="changeLineWidth(this.value)">
+        <input type="range" min="1" max="50" value="3" 
+               oninput="changeLineWidth(this.value)" onchange="changeLineWidth(this.value)">
       </label>
       <button onclick="setDrawingMode('erase'); getCurrentCanvas().style.cursor='url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVQoU2NkYGD4z0AEYBxVSFUAAXoYB7gWb5QAAAAASUVORK5CYII=), auto';">
         <i class="fas fa-eraser"></i> Radierer
@@ -624,7 +625,6 @@
       newText.style.top = "20px";
       newText.style.left = "20px";
       newText.style.fontSize = "16px";
-      // Damit der Text auswählbar und fokussierbar ist:
       newText.style.userSelect = "text";
       document.getElementById("card").appendChild(newText);
       makeTextDraggable(newText);
@@ -780,7 +780,6 @@
         canvasFront.style.top = "0";
         canvasFront.style.left = "0";
         canvasFront.style.pointerEvents = isDrawingModeActive ? "auto" : "none";
-
         if (cards[currentIndex].canvasDataFront) {
           let img = new Image();
           img.onload = () => {
@@ -800,7 +799,9 @@
     }
     function getCurrentCanvas() {
       let card = document.getElementById("card");
-      return document.getElementById(card.classList.contains("flip") ? "drawCanvasBack" : "drawCanvasFront");
+      return document.getElementById(
+        card.classList.contains("flip") ? "drawCanvasBack" : "drawCanvasFront"
+      );
     }
     function getMousePos(e) {
       let canvas = getCurrentCanvas();
