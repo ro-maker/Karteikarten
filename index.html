@@ -4,16 +4,16 @@
   <meta charset="UTF-8">
   <title>Jura-Karteikarten</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <!-- Font Awesome via CDN (Version 6) -->
+  <!-- Font Awesome via CDN -->
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
         crossorigin="anonymous"
         referrerpolicy="no-referrer" />
   <style>
-    /* =============== GLOBAL STYLES (unverändert) =============== */
+    /* ========== GLOBAL STYLES ========== */
     * {
-      margin: 0; 
-      padding: 0; 
+      margin: 0;
+      padding: 0;
       box-sizing: border-box;
     }
     body {
@@ -32,7 +32,7 @@
       color: #972D54;
     }
 
-    /* =============== MAIN CONTAINER =============== */
+    /* ========== MAIN CONTAINER ========== */
     .main-container {
       display: flex;
       gap: 20px;
@@ -43,14 +43,14 @@
       align-items: flex-start;
     }
 
-    /* =============== LINKE SPALTE =============== */
+    /* ========== LINKE SPALTE ========== */
     .left-panel {
       display: flex;
       flex-direction: column;
       gap: 10px;
       align-items: center;
       width: 80px;
-      margin-right: auto;
+      margin-right: auto; 
     }
     .add-card-button {
       background-color: #28a745;
@@ -69,7 +69,7 @@
       margin-top: 0;
     }
     #cardList button {
-      width: 30px; 
+      width: 30px;
       height: 30px;
       border: none;
       border-radius: 50%;
@@ -108,7 +108,7 @@
       font-size: 0.9rem;
     }
 
-    /* =============== KARTEIKARTEN-BEREICH =============== */
+    /* ========== KARTEIKARTEN-BEREICH ========== */
     .card-wrapper {
       display: flex;
       flex-direction: column;
@@ -117,7 +117,7 @@
       max-width: 900px;
       margin: 0 auto;
       position: relative;
-      align-items: flex-start; 
+      align-items: flex-start;
     }
     .card-and-bottom {
       display: flex;
@@ -184,7 +184,7 @@
       z-index: 1;
     }
 
-    /* =============== ZWEI CANVAS-ELEMENTE =============== */
+    /* Zwei Canvas-Ebenen (Front & Back) */
     #drawCanvasFront, #drawCanvasBack {
       position: absolute;
       top: 0; 
@@ -193,6 +193,7 @@
       pointer-events: none;
     }
 
+    /* Seitentasten */
     .side-buttons-container {
       display: flex;
       flex-direction: column;
@@ -218,11 +219,11 @@
       opacity: 0.9;
     }
 
-    /* =============== UNTERE BUTTONS =============== */
+    /* ========== UNTERE BUTTONS ========== */
     .bottom-buttons {
       display: flex;
       gap: 10px;
-      align-self: flex-start; /* Sie starten linksbündig dort, wo die Karte beginnt */
+      align-self: flex-start; /* Sie starten genau dort, wo die Karte beginnt */
     }
     .bottom-buttons button {
       flex: 1;
@@ -238,7 +239,7 @@
     .btn-gut    { background-color: #2ecc71; }
     .btn-einfach { background-color: #1abc9c; }
 
-    /* =============== OVERLAYS (unverändert) =============== */
+    /* Overlays (unverändert) */
     .overlay {
       display: none;
       position: fixed;
@@ -296,10 +297,10 @@
       background: rgba(255,255,255,0.8);
     }
 
-    /* =============== ZEICHNEN-KONTROLLOVERLAY =============== */
+    /* Zeichnen-Overlay */
     #drawControlsOverlay {
       min-width: 800px;
-      z-index: 9999; 
+      z-index: 9999;
     }
     .draw-toolbar {
       display: flex;
@@ -361,9 +362,8 @@
           </div>
         </div>
 
-        <!-- Untere Buttons (Bewertung) - 
-             Genau dort anfangen, wo die Karte anfängt, 
-             + Breite der Karteikarte -->
+        <!-- Untere Buttons (genau dort anfangen, wo die Karte beginnt, 
+             und dieselbe Breite wie die Karte) -->
         <div class="bottom-buttons" id="bottomButtons">
           <button class="btn-falsch" onclick="rateCard('Falsch')">Falsch</button>
           <button class="btn-muehsam" onclick="rateCard('Mühsam')">Mühsam</button>
@@ -374,7 +374,7 @@
     </div>
   </div>
 
-  <!-- Overlays (unverändert) -->
+  <!-- Overlays (Bild, Farbe, Inline-Edit, Zeichnen) -->
   <div id="imageOverlay" class="overlay">
     <h3>Bild hinzufügen</h3>
     <input type="file" id="fileInput" accept="image/*">
@@ -460,7 +460,7 @@
   <input type="file" id="hiddenImageUpload" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
 
   <script>
-    /* =============== JavaScript unverändert + 2 Korrekturen =============== */
+    /* ================= DEIN JAVASCRIPT ================= */
 
     document.execCommand("styleWithCSS", false, true);
 
@@ -478,13 +478,13 @@
     ];
     let currentIndex = 0;
     let isEditing = false;
-    let editingSide = null; 
+    let editingSide = null;
     let isDrawing = false;
-    let drawingMode = "draw"; 
-    let currentDrawingColor = "#000"; 
-    let currentLineWidth = 3; 
-    let eraserLineWidth = 3; 
-    let isDrawingModeActive = false; 
+    let drawingMode = "draw";
+    let currentDrawingColor = "#000";
+    let currentLineWidth = 3;
+    let eraserLineWidth = 3;
+    let isDrawingModeActive = false;
 
     document.addEventListener("DOMContentLoaded", () => {
       loadCardsFromLocalStorage();
@@ -497,7 +497,7 @@
       updateBottomButtonsWidth();
     });
 
-    /* =============== Karte laden =============== */
+    /* ========== Karte laden, Flip, Muster, Problem, etc. ========== */
     function loadCard(index, preserveFlip = false) {
       if (!cards[index]) return;
       currentIndex = index;
@@ -569,12 +569,20 @@
     function flipCard() {
       document.getElementById("card").classList.toggle("flip");
       setTimeout(() => {
-        setupCanvasDrawing(); 
+        setupCanvasDrawing();
         updateCardSize();
       }, 300);
     }
+    function updatePatternButton() {
+      document.getElementById("patternButton").innerHTML = `<i class="fas fa-th"></i> Muster&nbsp;Boden`;
+    }
+    function toggleProblem() {
+      cards[currentIndex].problem = !cards[currentIndex].problem;
+      loadCard(currentIndex, true);
+      saveCardsToLocalStorage();
+    }
 
-    /* =============== Untere Buttons anpassen =============== */
+    /* ========== Untere Buttons an Kartenbreite anpassen ========== */
     function updateBottomButtonsWidth() {
       let cardWidth = document.getElementById("card").offsetWidth;
       document.getElementById("bottomButtons").style.width = cardWidth + "px";
@@ -583,7 +591,7 @@
       document.getElementById("bottomButtons").style.display = "flex";
     }
 
-    /* =============== Inline Edit Overlay (unverändert) =============== */
+    /* ========== Inline Edit Overlay ========== */
     function openInlineEditOverlay() {
       let isFlipped = document.getElementById("card").classList.contains("flip");
       editingSide = isFlipped ? "back" : "front";
@@ -670,7 +678,7 @@
       }
     }
 
-    /* =============== Bewertung & Problem (unverändert) =============== */
+    /* ========== Bewertung ========== */
     function rateCard(rating) {
       if (rating === "Einfach") {
         cards[currentIndex].active = false;
@@ -700,7 +708,7 @@
       saveCardsToLocalStorage();
     }
 
-    /* =============== Overlays (Bild, Farbe) (unverändert) =============== */
+    /* ========== Overlays (Bild, Farbe) ========== */
     function openOverlay(id) {
       document.getElementById(id).classList.add("active");
     }
@@ -751,7 +759,7 @@
       closeOverlay("colorOverlay");
     }
 
-    /* =============== Muster (kein Flip) (unverändert) =============== */
+    /* ========== Muster-Button (kein Flip) ========== */
     function cyclePattern(e) {
       e.stopPropagation();
       let patternOrder = ["lines", "grid", "dotted", "none"];
@@ -763,11 +771,8 @@
       saveCardsToLocalStorage();
       return false;
     }
-    function updatePatternButton() {
-      document.getElementById("patternButton").innerHTML = `<i class="fas fa-th"></i> Muster&nbsp;Boden`;
-    }
 
-    /* =============== Zeichnen (Linienbreite für Stift + Radierer) =============== */
+    /* ========== Zeichnen-Funktionen (Slider für Stift + Radierer) ========== */
     function setupCanvasDrawing() {
       const card = document.getElementById("card");
       let canvasFront = document.getElementById("drawCanvasFront");
@@ -779,7 +784,7 @@
         canvasBack.style.display  = "block";
         canvasBack.width  = card.offsetWidth;
         canvasBack.height = card.offsetHeight;
-        canvasBack.style.top  = "0";
+        canvasBack.style.top = "0";
         canvasBack.style.left = "0";
         canvasBack.style.pointerEvents = isDrawingModeActive ? "auto" : "none";
 
@@ -805,7 +810,7 @@
         canvasFront.style.display = "block";
         canvasFront.width  = card.offsetWidth;
         canvasFront.height = card.offsetHeight;
-        canvasFront.style.top  = "0";
+        canvasFront.style.top = "0";
         canvasFront.style.left = "0";
         canvasFront.style.pointerEvents = isDrawingModeActive ? "auto" : "none";
 
@@ -836,10 +841,7 @@
     function getMousePos(e) {
       let canvas = getCurrentCanvas();
       let rect = canvas.getBoundingClientRect();
-      return {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
-      };
+      return { x: e.clientX - rect.left, y: e.clientY - rect.top };
     }
     function startDrawing(e) {
       if (!isDrawingModeActive) return;
@@ -854,7 +856,7 @@
       let ctx = getCurrentCanvas().getContext("2d");
       let pos = getMousePos(e);
 
-      /* Hier unterscheiden wir nach Modus "draw" oder "erase" */
+      /* Je nach Modus: "draw" => currentLineWidth, "erase" => eraserLineWidth */
       ctx.lineWidth = (drawingMode === "draw") ? currentLineWidth : eraserLineWidth;
       ctx.lineCap = "round";
 
@@ -864,6 +866,7 @@
       } else {
         ctx.globalCompositeOperation = "destination-out";
       }
+
       ctx.lineTo(pos.x, pos.y);
       ctx.stroke();
       ctx.beginPath();
@@ -896,7 +899,6 @@
       drawingMode = "draw";
       getCurrentCanvas().style.cursor = "crosshair";
     }
-    /* Wichtig: changeLineWidth aktualisiert currentLineWidth oder eraserLineWidth je nach Modus */
     function changeLineWidth(val) {
       if (drawingMode === "draw") {
         currentLineWidth = parseInt(val, 10);
@@ -938,7 +940,7 @@
       closeDrawControls();
     }
 
-    /* =============== Karten hinzufügen & löschen (unverändert) =============== */
+    /* ========== Kartenverwaltung (unverändert) ========== */
     function addCard() {
       let newQuestion = prompt("Neue Frage:");
       let newAnswer   = prompt("Neue Antwort:");
@@ -993,7 +995,7 @@
       }
     }
 
-    /* =============== Dynamische Kartengröße (unverändert) =============== */
+    /* ========== Dynamische Kartengröße (unverändert) ========== */
     function updateCardSize() {
       let card = document.getElementById("card");
       let visibleFace = card.classList.contains("flip")
@@ -1015,7 +1017,7 @@
       updateBottomButtonsWidth();
     });
 
-    /* =============== Drag & Drop Bilder (unverändert) =============== */
+    /* ========== Bilder Drag & Drop (unverändert) ========== */
     let dragItem = null;
     let offsetX = 0, offsetY = 0;
     function startDrag(e) {
@@ -1049,7 +1051,7 @@
       });
     }
 
-    /* =============== Draggable Overlays (unverändert) =============== */
+    /* ========== Draggable Overlays (unverändert) ========== */
     function makeAllOverlaysDraggable() {
       let overlays = document.querySelectorAll(".overlay");
       overlays.forEach(overlay => {
@@ -1071,7 +1073,7 @@
     function onOverlayDrag(e) {
       if (!overlayDragTarget) return;
       overlayDragTarget.style.left = (e.clientX - overlayDragOffsetX) + "px";
-      overlayDragTarget.style.top = (e.clientY - overlayDragOffsetY) + "px";
+      overlayDragTarget.style.top  = (e.clientY - overlayDragOffsetY) + "px";
     }
     function endOverlayDrag(e) {
       overlayDragTarget = null;
