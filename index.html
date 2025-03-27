@@ -10,7 +10,7 @@
         crossorigin="anonymous" 
         referrerpolicy="no-referrer" />
   <style>
-    /* ========== GLOBAL STYLES ========== */
+    /* ========== GLOBAL STYLES (unverändert) ========== */
     * {
       margin: 0;
       padding: 0;
@@ -31,7 +31,6 @@
     header h2 {
       color: #972D54;
     }
-
     /* ========== MAIN CONTAINER ========== */
     .main-container {
       display: flex;
@@ -42,7 +41,6 @@
       justify-content: center;
       align-items: flex-start;
     }
-
     /* ========== LINKE SPALTE ========== */
     .left-panel {
       display: flex;
@@ -107,7 +105,6 @@
       cursor: pointer;
       font-size: 0.9rem;
     }
-
     /* ========== KARTEIKARTEN-BEREICH ========== */
     .card-wrapper {
       display: flex;
@@ -162,8 +159,7 @@
     }
     .card-front, .card-back {
       position: absolute;
-      top: 0; 
-      left: 0;
+      top: 0; left: 0;
       width: 100%;
       min-height: 300px;
       padding: 10px 20px 20px 20px;
@@ -183,16 +179,13 @@
       transform: rotateY(180deg);
       z-index: 1;
     }
-
     /* ========== ZWEI CANVAS-ELEMENTE ========== */
     #drawCanvasFront, #drawCanvasBack {
       position: absolute;
-      top: 0; 
-      left: 0;
+      top: 0; left: 0;
       z-index: 3;
       pointer-events: none;
     }
-
     /* ========== SEITENTASTEN ========== */
     .side-buttons-container {
       display: flex;
@@ -218,7 +211,6 @@
     .side-buttons-container button:hover {
       opacity: 0.9;
     }
-
     /* ========== UNTERE BUTTONS ========== */
     .bottom-buttons {
       display: flex;
@@ -238,7 +230,6 @@
     .btn-muehsam { background-color: #f39c12; color: #000; }
     .btn-gut    { background-color: #2ecc71; }
     .btn-einfach { background-color: #1abc9c; }
-
     /* ========== OVERLAYS (unverändert) ========== */
     .overlay {
       display: none;
@@ -288,8 +279,7 @@
       border-radius: 3px;
       cursor: pointer;
     }
-
-    /* Neuer draggabler Textbereich – zusätzlich user-select erlauben */
+    /* Neuer draggbarer Textbereich – mit user-select zum Markieren */
     .draggable-text {
       border: 1px dashed #ccc;
       padding: 4px;
@@ -298,7 +288,6 @@
       background: rgba(255,255,255,0.8);
       user-select: text;
     }
-
     /* ========== ZEICHNEN-KONTROLLOVERLAY ========== */
     #drawControlsOverlay {
       min-width: 800px;
@@ -360,7 +349,7 @@
             <button id="patternButton" onclick="cyclePattern(event)"><i class="fas fa-th"></i> Muster&nbsp;Boden</button>
           </div>
         </div>
-        <!-- Untere Buttons (Bewertung) – sollen genau dort anfangen, wo die Karte startet und dieselbe Breite haben -->
+        <!-- Untere Buttons (Bewertung) – exakt in Kartenbreite -->
         <div class="bottom-buttons" id="bottomButtons">
           <button class="btn-falsch" onclick="rateCard('Falsch')">Falsch</button>
           <button class="btn-muehsam" onclick="rateCard('Mühsam')">Mühsam</button>
@@ -450,7 +439,6 @@
     </div>
   </div>
   <input type="file" id="hiddenImageUpload" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
-
   <script>
     document.execCommand("styleWithCSS", false, true);
 
@@ -494,13 +482,13 @@
       currentIndex = index;
       let c = cards[index];
       document.getElementById("frontQuestion").innerHTML = c.question.replace(/\n/g, "<br>");
-      document.getElementById("backAnswer").innerHTML   = c.answer.replace(/\n/g, "<br>");
+      document.getElementById("backAnswer").innerHTML = c.answer.replace(/\n/g, "<br>");
       document.getElementById("cardFrontFace").style.backgroundColor = c.color;
-      document.getElementById("cardBackFace").style.backgroundColor  = c.color;
+      document.getElementById("cardBackFace").style.backgroundColor = c.color;
 
       let backFace = document.getElementById("cardBackFace");
       backFace.style.backgroundImage = "none";
-      backFace.style.backgroundSize  = "";
+      backFace.style.backgroundSize = "";
       backFace.style.backgroundPosition = "";
       backFace.style.lineHeight = "30px";
       backFace.style.paddingTop = "10px";
@@ -569,12 +557,11 @@
       saveCardsToLocalStorage();
     }
 
-    /* Untere Buttons an Kartenbreite anpassen */
+    /* Untere Buttons exakt an Kartenbreite anpassen */
     function updateBottomButtonsWidth() {
       let cardEl = document.getElementById("card");
       let bottom = document.getElementById("bottomButtons");
       bottom.style.width = cardEl.offsetWidth + "px";
-      // Setze den marginLeft ggf. auf 0, damit es genau an der Karte startet
       bottom.style.marginLeft = "0px";
     }
     function updateBottomButtons() {
@@ -757,7 +744,7 @@
       return false;
     }
 
-    /* Zeichnen-Funktionen */
+    /* Zeichnen-Funktionen – Slider für Linienbreite (sowohl im Draw- als auch im Erase-Modus) */
     function setupCanvasDrawing() {
       const card = document.getElementById("card");
       let canvasFront = document.getElementById("drawCanvasFront");
@@ -873,7 +860,6 @@
       getCurrentCanvas().style.cursor = "crosshair";
     }
     function changeLineWidth(val) {
-      // Slider reagiert jetzt sowohl im "draw"- als auch im "erase"-Modus
       if (drawingMode === "draw") {
         currentLineWidth = parseInt(val, 10);
       } else if (drawingMode === "erase") {
@@ -964,9 +950,7 @@
     }
     function loadCardsFromLocalStorage() {
       let data = localStorage.getItem("myJuraCards");
-      if (data) {
-        cards = JSON.parse(data);
-      }
+      if (data) { cards = JSON.parse(data); }
     }
 
     /* Dynamische Kartengröße */
