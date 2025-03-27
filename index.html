@@ -10,7 +10,7 @@
         crossorigin="anonymous" 
         referrerpolicy="no-referrer" />
   <style>
-    /* ========== GLOBAL STYLES (unverändert) ========== */
+    /* ========== GLOBAL STYLES ========== */
     * {
       margin: 0;
       padding: 0;
@@ -279,7 +279,7 @@
       border-radius: 3px;
       cursor: pointer;
     }
-    /* Neuer draggbarer Textbereich – mit user-select zum Markieren */
+    /* Neuer draggabler Textbereich – mit user-select, damit Text markiert werden kann */
     .draggable-text {
       border: 1px dashed #ccc;
       padding: 4px;
@@ -335,7 +335,7 @@
                 <div id="backAnswer">Antwort wird geladen...</div>
               </div>
             </div>
-            <!-- Canvas (Front & Back) -->
+            <!-- Canvas-Ebenen -->
             <canvas id="drawCanvasFront"></canvas>
             <canvas id="drawCanvasBack" style="display:none;"></canvas>
           </div>
@@ -349,7 +349,7 @@
             <button id="patternButton" onclick="cyclePattern(event)"><i class="fas fa-th"></i> Muster&nbsp;Boden</button>
           </div>
         </div>
-        <!-- Untere Buttons (Bewertung) – exakt in Kartenbreite -->
+        <!-- Untere Bewertungsbuttons – unverändert -->
         <div class="bottom-buttons" id="bottomButtons">
           <button class="btn-falsch" onclick="rateCard('Falsch')">Falsch</button>
           <button class="btn-muehsam" onclick="rateCard('Mühsam')">Mühsam</button>
@@ -443,7 +443,6 @@
     document.execCommand("styleWithCSS", false, true);
 
     /* ================= JAVASCRIPT-FUNKTIONEN ================= */
-
     let cards = [
       {
         question: "Was ist JavaScript?",
@@ -556,8 +555,7 @@
       loadCard(currentIndex, true);
       saveCardsToLocalStorage();
     }
-
-    /* Untere Buttons exakt an Kartenbreite anpassen */
+    /* Untere Buttons an Kartenbreite anpassen */
     function updateBottomButtonsWidth() {
       let cardEl = document.getElementById("card");
       let bottom = document.getElementById("bottomButtons");
@@ -567,7 +565,6 @@
     function updateBottomButtons() {
       document.getElementById("bottomButtons").style.display = "flex";
     }
-
     /* Inline Edit Overlay */
     function openInlineEditOverlay() {
       let isFlipped = document.getElementById("card").classList.contains("flip");
@@ -654,7 +651,6 @@
         document.removeEventListener("mouseup", onTextDragEnd);
       }
     }
-
     /* Bewertung */
     function rateCard(rating) {
       if (rating === "Einfach") {
@@ -681,7 +677,6 @@
       loadCard(currentIndex, true);
       saveCardsToLocalStorage();
     }
-
     /* Overlays */
     function openOverlay(id) {
       document.getElementById(id).classList.add("active");
@@ -730,7 +725,6 @@
       saveCardsToLocalStorage();
       closeOverlay("colorOverlay");
     }
-
     /* Muster-Button */
     function cyclePattern(e) {
       e.stopPropagation();
@@ -743,8 +737,7 @@
       saveCardsToLocalStorage();
       return false;
     }
-
-    /* Zeichnen-Funktionen – Slider für Linienbreite (sowohl im Draw- als auch im Erase-Modus) */
+    /* Zeichnen-Funktionen */
     function setupCanvasDrawing() {
       const card = document.getElementById("card");
       let canvasFront = document.getElementById("drawCanvasFront");
@@ -899,7 +892,6 @@
       saveCardsToLocalStorage();
       closeDrawControls();
     }
-
     /* Kartenverwaltung */
     function addCard() {
       let newQuestion = prompt("Neue Frage:");
@@ -950,9 +942,10 @@
     }
     function loadCardsFromLocalStorage() {
       let data = localStorage.getItem("myJuraCards");
-      if (data) { cards = JSON.parse(data); }
+      if (data) {
+        cards = JSON.parse(data);
+      }
     }
-
     /* Dynamische Kartengröße */
     function updateCardSize() {
       let card = document.getElementById("card");
@@ -980,7 +973,6 @@
       bottom.style.width = cardEl.offsetWidth + "px";
       bottom.style.marginLeft = "0px";
     }
-
     /* Drag & Drop Bilder */
     let dragItem = null;
     let offsetX = 0, offsetY = 0;
@@ -1014,7 +1006,6 @@
         img.addEventListener("mousedown", startDrag);
       });
     }
-
     /* Draggable Overlays */
     function makeAllOverlaysDraggable() {
       let overlays = document.querySelectorAll(".overlay");
@@ -1047,3 +1038,4 @@
   </script>
 </body>
 </html>
+
