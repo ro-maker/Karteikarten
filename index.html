@@ -118,18 +118,16 @@
       width: 100%;
       max-width: 900px;
       margin: 0 auto;
-      position: relative;
+      /* Damit die Inhalte linksbündig stehen */
       align-items: flex-start;
     }
-    /* Container für Karte und untere Buttons */
+    /* Neuer Container, der Karte und untere Buttons umfasst.
+       Durch display: inline-block passt er sich der Breite der Karte an. */
     .card-and-bottom {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+      display: inline-block;
       width: 100%;
       max-width: 900px;
       margin: 0 auto;
-      /* Die unteren Buttons werden im normalen Fluss positioniert */
     }
     .card-and-sides {
       display: flex;
@@ -227,7 +225,8 @@
     .bottom-buttons {
       display: flex;
       gap: 10px;
-      align-self: flex-start; /* Beginnt linksbündig – also dort, wo die Karte anfängt */
+      /* Die unteren Buttons erhalten exakt die Breite der Karte */
+      width: 100%;
     }
     .bottom-buttons button {
       flex: 1;
@@ -334,7 +333,7 @@
       <button id="deleteAllButton" onclick="deleteAllCards()" title="Alle löschen">Alle</button>
     </div>
     
-    <!-- Kartenbereich + untere Buttons -->
+    <!-- Kartenbereich und untere Buttons -->
     <div class="card-wrapper">
       <div class="card-and-bottom">
         <div class="card-and-sides">
@@ -364,7 +363,7 @@
             <button id="patternButton" onclick="cyclePattern(event)"><i class="fas fa-th"></i> Muster&nbsp;Boden</button>
           </div>
         </div>
-        <!-- Untere Bewertungsbuttons: erscheinen nun direkt unter der Karte, linksbündig und in gleicher Breite -->
+        <!-- Untere Bewertungsbuttons: direkt unter der Karte, exakt dieselbe Breite -->
         <div class="bottom-buttons" id="bottomButtons">
           <button class="btn-falsch" onclick="rateCard('Falsch')">Falsch</button>
           <button class="btn-muehsam" onclick="rateCard('Mühsam')">Mühsam</button>
