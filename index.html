@@ -211,11 +211,11 @@
     .side-buttons-container button:hover {
       opacity: 0.9;
     }
-    /* ========== UNTERE BUTTONS ========== */
+    /* ========== UNTERE BUTTONS (Bewertung) ========== */
     .bottom-buttons {
       display: flex;
       gap: 10px;
-      /* Die Breite wird via JavaScript exakt der Kartenbreite zugewiesen */
+      /* Bleibt unverändert, wir justieren nur im JS die Position */
     }
     .bottom-buttons button {
       flex: 1;
@@ -279,7 +279,7 @@
       border-radius: 3px;
       cursor: pointer;
     }
-    /* Neuer draggabler Textbereich – mit user-select zum Markieren */
+    /* Draggabler Textbereich */
     .draggable-text {
       border: 1px dashed #ccc;
       padding: 4px;
@@ -287,6 +287,7 @@
       position: absolute;
       background: rgba(255,255,255,0.8);
       user-select: text;
+      z-index: 9999; /* Damit er vor dem Canvas sichtbar ist */
     }
     /* ========== ZEICHNEN-KONTROLLOVERLAY ========== */
     #drawControlsOverlay {
@@ -299,6 +300,7 @@
       gap: 5px;
       align-items: center;
     }
+    /* Damit man den Slider benutzen kann */
     #drawControlsOverlay .draw-toolbar input[type="range"] {
       pointer-events: auto;
       z-index: 99999;
@@ -349,7 +351,7 @@
             <button id="patternButton" onclick="cyclePattern(event)"><i class="fas fa-th"></i> Muster&nbsp;Boden</button>
           </div>
         </div>
-        <!-- Untere Bewertungsbuttons – bleiben unverändert -->
+        <!-- Untere Bewertungsbuttons -->
         <div class="bottom-buttons" id="bottomButtons">
           <button class="btn-falsch" onclick="rateCard('Falsch')">Falsch</button>
           <button class="btn-muehsam" onclick="rateCard('Mühsam')">Mühsam</button>
@@ -426,7 +428,9 @@
       <button onclick="setDrawingColor('green')"><i class="fas fa-tint"></i> Grün</button>
       <button onclick="setDrawingColor('blue')"><i class="fas fa-tint"></i> Blau</button>
       <label style="font-size:0.85rem;">Linienbreite:
-        <input type="range" min="1" max="50" value="3" oninput="changeLineWidth(this.value)" onchange="changeLineWidth(this.value)">
+        <!-- Der Slider kann jetzt benutzt werden -->
+        <input type="range" min="1" max="50" value="3" 
+               oninput="changeLineWidth(this.value)" onchange="changeLineWidth(this.value)">
       </label>
       <button onclick="setDrawingMode('erase'); getCurrentCanvas().style.cursor='url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVQoU2NkYGD4z0AEYBxVSFUAAXoYB7gWb5QAAAAASUVORK5CYII=), auto';">
         <i class="fas fa-eraser"></i> Radierer
@@ -484,13 +488,13 @@
       currentIndex = index;
       let c = cards[index];
       document.getElementById("frontQuestion").innerHTML = c.question.replace(/\n/g, "<br>");
-      document.getElementById("backAnswer").innerHTML = c.answer.replace(/\n/g, "<br>");
+      document.getElementById("backAnswer").innerHTML   = c.answer.replace(/\n/g, "<br>");
       document.getElementById("cardFrontFace").style.backgroundColor = c.color;
       document.getElementById("cardBackFace").style.backgroundColor  = c.color;
 
       let backFace = document.getElementById("cardBackFace");
       backFace.style.backgroundImage = "none";
-      backFace.style.backgroundSize = "";
+      backFace.style.backgroundSize  = "";
       backFace.style.backgroundPosition = "";
       backFace.style.lineHeight = "30px";
       backFace.style.paddingTop = "10px";
@@ -511,7 +515,9 @@
 
       let cardEl = document.getElementById("card");
       cardEl.style.borderTop = c.problem ? "5px solid red" : "2px solid #ccc";
-      if (!preserveFlip) { cardEl.classList.remove("flip"); }
+      if (!preserveFlip) {
+        cardEl.classList.remove("flip");
+      }
 
       updateCardCounter();
       renderCardList();
@@ -562,8 +568,10 @@
     function updateBottomButtonsWidth() {
       let cardEl = document.getElementById("card");
       let bottom = document.getElementById("bottomButtons");
+      // Gleiche Breite wie die Karte ...
       bottom.style.width = cardEl.offsetWidth + "px";
-      bottom.style.marginLeft = "0px";
+      // ... und linksbündig mit der Karte
+      bottom.style.marginLeft = cardEl.offsetLeft + "px";
     }
     function updateBottomButtons() {
       document.getElementById("bottomButtons").style.display = "flex";
@@ -623,11 +631,12 @@
       newText.contentEditable = "true";
       newText.textContent = "Neuer Text";
       newText.classList.add("draggable-text");
-      newText.style.top = "20px";
-      newText.style.left = "20px";
+      // Damit man es auf jeden Fall sieht (weiter unten, weiter rechts)
+      newText.style.top = "80px";
+      newText.style.left = "80px";
       newText.style.fontSize = "16px";
       newText.style.userSelect = "text";
-      // Bei Doppelklick soll der Text gelöscht werden
+      // Bei Doppelklick wieder entfernen
       newText.addEventListener("dblclick", () => {
         newText.remove();
       });
@@ -649,9 +658,9 @@
         if (dragText) {
           let cardRect = document.getElementById("card").getBoundingClientRect();
           let newLeft = e.clientX - cardRect.left - textOffsetX;
-          let newTop = e.clientY - cardRect.top - textOffsetY;
+          let newTop  = e.clientY - cardRect.top  - textOffsetY;
           dragText.style.left = newLeft + "px";
-          dragText.style.top = newTop + "px";
+          dragText.style.top  = newTop + "px";
         }
       }
       function onTextDragEnd(e) {
@@ -668,7 +677,10 @@
         let found = false;
         for (let i = 0; i < cards.length; i++) {
           nextIndex = (nextIndex + 1) % cards.length;
-          if (cards[nextIndex].active !== false) { found = true; break; }
+          if (cards[nextIndex].active !== false) {
+            found = true;
+            break;
+          }
         }
         if (!found) {
           alert("Keine aktiven Karten mehr!");
@@ -717,7 +729,9 @@
       let action = prompt("Gib 'resize' ein, um die Größe anzupassen oder 'crop' zum Zuschneiden:", "resize");
       if (action === "resize") {
         let newWidth = prompt("Neue Breite (z.B. 50% oder 300px):", "50%");
-        if (newWidth) { img.style.width = newWidth; }
+        if (newWidth) {
+          img.style.width = newWidth;
+        }
       } else if (action === "crop") {
         let top = prompt("Zuschneiden: Abstand von oben (z.B. 10px):", "10px");
         let right = prompt("Zuschneiden: Abstand von rechts (z.B. 10px):", "10px");
@@ -909,7 +923,7 @@
     /* Kartenverwaltung */
     function addCard() {
       let newQuestion = prompt("Neue Frage:");
-      let newAnswer = prompt("Neue Antwort:");
+      let newAnswer   = prompt("Neue Antwort:");
       if (newQuestion && newAnswer) {
         cards.splice(currentIndex + 1, 0, {
           question: newQuestion,
@@ -981,12 +995,6 @@
       updateCardSize();
       updateBottomButtonsWidth();
     });
-    function updateBottomButtonsWidth() {
-      let cardEl = document.getElementById("card");
-      let bottom = document.getElementById("bottomButtons");
-      bottom.style.width = cardEl.offsetWidth + "px";
-      bottom.style.marginLeft = "0px";
-    }
     /* Drag & Drop Bilder */
     let dragItem = null;
     let offsetX = 0, offsetY = 0;
@@ -1001,9 +1009,9 @@
       if (dragItem) {
         let cardRect = document.getElementById("card").getBoundingClientRect();
         let newLeft = e.clientX - cardRect.left - offsetX;
-        let newTop = e.clientY - cardRect.top - offsetY;
+        let newTop  = e.clientY - cardRect.top  - offsetY;
         dragItem.style.left = newLeft + "px";
-        dragItem.style.top = newTop + "px";
+        dragItem.style.top  = newTop + "px";
       }
     }
     function endDrag(e) {
@@ -1042,7 +1050,7 @@
     function onOverlayDrag(e) {
       if (!overlayDragTarget) return;
       overlayDragTarget.style.left = (e.clientX - overlayDragOffsetX) + "px";
-      overlayDragTarget.style.top = (e.clientY - overlayDragOffsetY) + "px";
+      overlayDragTarget.style.top  = (e.clientY - overlayDragOffsetY) + "px";
     }
     function endOverlayDrag(e) {
       overlayDragTarget = null;
