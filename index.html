@@ -215,7 +215,7 @@
     .bottom-buttons {
       display: flex;
       gap: 10px;
-      /* Bleibt unverändert, wir justieren nur im JS die Position */
+      /* Gleiche Breite wie die Karte */
     }
     .bottom-buttons button {
       flex: 1;
@@ -287,7 +287,23 @@
       position: absolute;
       background: rgba(255,255,255,0.8);
       user-select: text;
-      z-index: 9999; /* Damit er vor dem Canvas sichtbar ist */
+      z-index: 9999; /* Damit es vor dem Canvas sichtbar bleibt */
+    }
+    /* Kleiner X-Button am Textfeld */
+    .draggable-text .close-btn {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: red;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      font-size: 12px;
+      line-height: 18px;
+      text-align: center;
     }
     /* ========== ZEICHNEN-KONTROLLOVERLAY ========== */
     #drawControlsOverlay {
@@ -300,7 +316,6 @@
       gap: 5px;
       align-items: center;
     }
-    /* Damit man den Slider benutzen kann */
     #drawControlsOverlay .draw-toolbar input[type="range"] {
       pointer-events: auto;
       z-index: 99999;
@@ -428,8 +443,7 @@
       <button onclick="setDrawingColor('green')"><i class="fas fa-tint"></i> Grün</button>
       <button onclick="setDrawingColor('blue')"><i class="fas fa-tint"></i> Blau</button>
       <label style="font-size:0.85rem;">Linienbreite:
-        <!-- Der Slider kann jetzt benutzt werden -->
-        <input type="range" min="1" max="50" value="3" 
+        <input type="range" min="1" max="50" value="3"
                oninput="changeLineWidth(this.value)" onchange="changeLineWidth(this.value)">
       </label>
       <button onclick="setDrawingMode('erase'); getCurrentCanvas().style.cursor='url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVQoU2NkYGD4z0AEYBxVSFUAAXoYB7gWb5QAAAAASUVORK5CYII=), auto';">
@@ -447,8 +461,6 @@
 
   <script>
     document.execCommand("styleWithCSS", false, true);
-
-    /* ================= JAVASCRIPT-FUNKTIONEN ================= */
 
     let cards = [
       {
@@ -564,18 +576,18 @@
       loadCard(currentIndex, true);
       saveCardsToLocalStorage();
     }
+
     /* Untere Buttons an Kartenbreite anpassen */
     function updateBottomButtonsWidth() {
       let cardEl = document.getElementById("card");
       let bottom = document.getElementById("bottomButtons");
-      // Gleiche Breite wie die Karte ...
       bottom.style.width = cardEl.offsetWidth + "px";
-      // ... und linksbündig mit der Karte
       bottom.style.marginLeft = cardEl.offsetLeft + "px";
     }
     function updateBottomButtons() {
       document.getElementById("bottomButtons").style.display = "flex";
     }
+
     /* Inline Edit Overlay */
     function openInlineEditOverlay() {
       let isFlipped = document.getElementById("card").classList.contains("flip");
@@ -626,27 +638,44 @@
       if (!font) return;
       document.execCommand("fontName", false, font);
     }
+
+    /* Hier wird das Textfeld erstellt, abhängig davon, ob wir auf der Vorder- oder Rückseite sind. */
     function addDraggableText() {
+      // Herausfinden, ob wir auf der Vorder- oder Rückseite sind
+      const isFlipped = document.getElementById("card").classList.contains("flip");
+      const parentFace = isFlipped
+        ? document.getElementById("cardBackFace")
+        : document.getElementById("cardFrontFace");
+
+      // Neues DIV
       const newText = document.createElement("div");
       newText.contentEditable = "true";
-      newText.textContent = "Neuer Text";
       newText.classList.add("draggable-text");
-      // Damit man es auf jeden Fall sieht (weiter unten, weiter rechts)
-      newText.style.top = "80px";
-      newText.style.left = "80px";
+      newText.style.top = "60px";
+      newText.style.left = "60px";
       newText.style.fontSize = "16px";
       newText.style.userSelect = "text";
-      // Bei Doppelklick wieder entfernen
-      newText.addEventListener("dblclick", () => {
-        newText.remove();
-      });
-      document.getElementById("card").appendChild(newText);
+      newText.textContent = "Neuer Text";
+
+      // X-Button hinzufügen
+      const closeBtn = document.createElement("button");
+      closeBtn.classList.add("close-btn");
+      closeBtn.innerText = "x";
+      closeBtn.onclick = () => newText.remove();
+      newText.appendChild(closeBtn);
+
+      // Einfügen in die richtige Seite
+      parentFace.appendChild(newText);
+
+      // Draggable machen
       makeTextDraggable(newText);
       newText.focus();
     }
     function makeTextDraggable(elem) {
       let dragText = null, textOffsetX = 0, textOffsetY = 0;
       elem.addEventListener("mousedown", (e) => {
+        // Falls man den Lösch-Button klickt, nicht verschieben
+        if (e.target.classList.contains("close-btn")) return;
         dragText = elem;
         textOffsetX = e.clientX - elem.getBoundingClientRect().left;
         textOffsetY = e.clientY - elem.getBoundingClientRect().top;
@@ -659,16 +688,18 @@
           let cardRect = document.getElementById("card").getBoundingClientRect();
           let newLeft = e.clientX - cardRect.left - textOffsetX;
           let newTop  = e.clientY - cardRect.top  - textOffsetY;
+          // Beschränken, damit der Text nicht komplett rausfällt?
           dragText.style.left = newLeft + "px";
           dragText.style.top  = newTop + "px";
         }
       }
-      function onTextDragEnd(e) {
+      function onTextDragEnd() {
         dragText = null;
         document.removeEventListener("mousemove", onTextDrag);
         document.removeEventListener("mouseup", onTextDragEnd);
       }
     }
+
     /* Bewertung */
     function rateCard(rating) {
       if (rating === "Einfach") {
@@ -693,11 +724,7 @@
       loadCard(currentIndex);
       saveCardsToLocalStorage();
     }
-    function toggleProblem() {
-      cards[currentIndex].problem = !cards[currentIndex].problem;
-      loadCard(currentIndex, true);
-      saveCardsToLocalStorage();
-    }
+
     /* Overlays */
     function openOverlay(id) {
       document.getElementById(id).classList.add("active");
@@ -748,7 +775,6 @@
       saveCardsToLocalStorage();
       closeOverlay("colorOverlay");
     }
-    /* Muster-Button */
     function cyclePattern(e) {
       e.stopPropagation();
       let patternOrder = ["lines", "grid", "dotted", "none"];
@@ -760,12 +786,13 @@
       saveCardsToLocalStorage();
       return false;
     }
+
     /* Zeichnen-Funktionen */
     function setupCanvasDrawing() {
       const card = document.getElementById("card");
       let canvasFront = document.getElementById("drawCanvasFront");
       let canvasBack  = document.getElementById("drawCanvasBack");
-      let isFlipped = card.classList.contains("flip");
+      let isFlipped   = card.classList.contains("flip");
 
       if (isFlipped) {
         canvasFront.style.display = "none";
@@ -824,7 +851,7 @@
     }
     function getMousePos(e) {
       let canvas = getCurrentCanvas();
-      let rect = canvas.getBoundingClientRect();
+      let rect   = canvas.getBoundingClientRect();
       return { x: e.clientX - rect.left, y: e.clientY - rect.top };
     }
     function startDrawing(e) {
@@ -841,6 +868,7 @@
       let pos = getMousePos(e);
       ctx.lineWidth = (drawingMode === "draw") ? currentLineWidth : eraserLineWidth;
       ctx.lineCap = "round";
+
       if (drawingMode === "draw") {
         ctx.globalCompositeOperation = "source-over";
         ctx.strokeStyle = currentDrawingColor;
@@ -856,7 +884,7 @@
       if (isDrawing && isDrawingModeActive) {
         isDrawing = false;
         let canvas = getCurrentCanvas();
-        let card = document.getElementById("card");
+        let card   = document.getElementById("card");
         if (card.classList.contains("flip")) {
           cards[currentIndex].canvasDataBack = canvas.toDataURL("image/png");
         } else {
@@ -889,9 +917,9 @@
     }
     function clearCanvas() {
       let canvas = getCurrentCanvas();
-      let ctx = canvas.getContext("2d");
+      let ctx    = canvas.getContext("2d");
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      let card = document.getElementById("card");
+      let card   = document.getElementById("card");
       if (card.classList.contains("flip")) {
         cards[currentIndex].canvasDataBack = "";
       } else {
@@ -911,7 +939,7 @@
     }
     function saveDrawing() {
       let canvas = getCurrentCanvas();
-      let card = document.getElementById("card");
+      let card   = document.getElementById("card");
       if (card.classList.contains("flip")) {
         cards[currentIndex].canvasDataBack = canvas.toDataURL("image/png");
       } else {
@@ -920,6 +948,7 @@
       saveCardsToLocalStorage();
       closeDrawControls();
     }
+
     /* Kartenverwaltung */
     function addCard() {
       let newQuestion = prompt("Neue Frage:");
@@ -995,6 +1024,7 @@
       updateCardSize();
       updateBottomButtonsWidth();
     });
+
     /* Drag & Drop Bilder */
     let dragItem = null;
     let offsetX = 0, offsetY = 0;
@@ -1014,7 +1044,7 @@
         dragItem.style.top  = newTop + "px";
       }
     }
-    function endDrag(e) {
+    function endDrag() {
       dragItem = null;
       document.removeEventListener("mousemove", onDrag);
       document.removeEventListener("mouseup", endDrag);
@@ -1028,6 +1058,7 @@
         img.addEventListener("mousedown", startDrag);
       });
     }
+
     /* Draggable Overlays */
     function makeAllOverlaysDraggable() {
       let overlays = document.querySelectorAll(".overlay");
@@ -1052,7 +1083,7 @@
       overlayDragTarget.style.left = (e.clientX - overlayDragOffsetX) + "px";
       overlayDragTarget.style.top  = (e.clientY - overlayDragOffsetY) + "px";
     }
-    function endOverlayDrag(e) {
+    function endOverlayDrag() {
       overlayDragTarget = null;
       document.removeEventListener("mousemove", onOverlayDrag);
       document.removeEventListener("mouseup", endOverlayDrag);
