@@ -211,7 +211,7 @@
     .side-buttons-container button:hover {
       opacity: 0.9;
     }
-    /* Neuer Button für "Text hinzufügen" */
+    /* Neuer Button für "Text hinzufügen" (rechts) */
     .side-buttons-container button.text-add {
       background-color: #007bff;
     }
@@ -292,7 +292,7 @@
       user-select: text;
       z-index: 9999;
     }
-    /* Kleiner X-Button am Textfeld – nur solange das Overlay offen ist */
+    /* Kleiner X-Button am Textfeld – erscheint nur solange der Fokus besteht */
     .draggable-text .close-btn {
       position: absolute;
       top: -8px;
@@ -313,7 +313,6 @@
     .shape-comment  { border-radius: 20px; }
     .shape-circle   { border-radius: 50%; }
     .shape-rectangle { border-radius: 0; }
-    /* Dreieck: feste Größe, Clip-Path */
     .shape-triangle {
       width: 120px;
       height: 100px;
@@ -521,8 +520,7 @@
         <i class="fas fa-eraser"></i> Radierer
       </button>
       <button onclick="setDrawingMode('draw'); getCurrentCanvas().style.cursor='crosshair';">
-        <i class="fas fa-pen"></i> Stift
-      </button>
+        <i class="fas fa-pen"></i> Stift</button>
       <button onclick="saveDrawing()"><i class="fas fa-save"></i> Speichern</button>
       <button onclick="closeDrawControls()"><i class="fas fa-times"></i> Schließen</button>
     </div>
@@ -546,10 +544,10 @@
       }
     ];
     let currentIndex = 0;
-    let isEditing = false;       // Bearbeitungsmodus (Inline-Overlay)
-    let editingSide = null;      // "front" oder "back"
-    let isDrawing = false;       
-    let drawingMode = "draw";    // "draw" oder "erase"
+    let isEditing = false;
+    let editingSide = null;
+    let isDrawing = false;
+    let drawingMode = "draw";
     let currentDrawingColor = "#000";
     let currentLineWidth = 3;
     let eraserLineWidth = 3;
@@ -575,7 +573,6 @@
       document.getElementById("cardFrontFace").style.backgroundColor = c.color;
       document.getElementById("cardBackFace").style.backgroundColor  = c.color;
 
-      // Hintergrundmuster
       let backFace = document.getElementById("cardBackFace");
       backFace.style.backgroundImage = "none";
       backFace.style.backgroundSize  = "";
@@ -628,8 +625,6 @@
         listDiv.appendChild(btn);
       });
     }
-
-    /* Flip nur, wenn wir nicht zeichnen / bearbeiten */
     function maybeFlip(e) {
       if (isDrawingModeActive || isEditing) return;
       if (e.target.closest(".side-buttons-container") || e.target.closest(".overlay")) return;
@@ -650,8 +645,6 @@
       loadCard(currentIndex, true);
       saveCardsToLocalStorage();
     }
-
-    /* Untere Buttons an Kartenbreite anpassen */
     function updateBottomButtonsWidth() {
       let cardEl = document.getElementById("card");
       let bottom = document.getElementById("bottomButtons");
@@ -661,8 +654,6 @@
     function updateBottomButtons() {
       document.getElementById("bottomButtons").style.display = "flex";
     }
-
-    /* Inline Edit Overlay */
     function openInlineEditOverlay() {
       let isFlipped = document.getElementById("card").classList.contains("flip");
       editingSide = isFlipped ? "back" : "front";
@@ -686,7 +677,6 @@
       } else {
         cards[currentIndex].answer = document.getElementById("backAnswer").innerHTML;
       }
-      // Entferne alle Close-Buttons aus Textfeldern
       document.querySelectorAll(".draggable-text .close-btn").forEach(btn => btn.remove());
       saveCardsToLocalStorage();
       updateCardSize();
@@ -714,57 +704,60 @@
       if (!font) return;
       document.execCommand("fontName", false, font);
     }
-
-    /* Text hinzufügen (Overlay) */
+    /* Text hinzufügen über Overlay (neuer Button rechts) */
     function addCustomText() {
       const isFlipped = document.getElementById("card").classList.contains("flip");
-      const parentFace = isFlipped 
-            ? document.getElementById("cardBackFace") 
-            : document.getElementById("cardFrontFace");
+      const parentFace = isFlipped ? document.getElementById("cardBackFace") : document.getElementById("cardFrontFace");
       const bgColor = document.getElementById("textBgColor").value;
       const opacityVal = document.getElementById("textOpacity").value; // 0-100
-      const shape = document.getElementById("textShape").value; // "standard", "comment", "circle", "rectangle", "triangle"
+      const shape = document.getElementById("textShape").value; // standard, comment, circle, rectangle, triangle
 
       const newText = document.createElement("div");
       newText.contentEditable = "true";
       newText.classList.add("draggable-text", "shape-" + shape);
-
-      // Hintergrundfarbe + Transparenz
       newText.style.backgroundColor = hexToRgba(bgColor, opacityVal);
-
-      // Bei Dreieck feste Größe
+      // Für Dreieck setzen wir eine feste Größe, ansonsten flexibel
       if (shape === "triangle") {
         newText.style.width = "120px";
         newText.style.height = "100px";
-        // Text zentrieren
         newText.style.display = "flex";
         newText.style.alignItems = "center";
         newText.style.justifyContent = "center";
-        newText.style.textAlign = "center";
       }
-
       newText.style.top = "60px";
       newText.style.left = "60px";
       newText.style.fontSize = "16px";
       newText.style.userSelect = "text";
       newText.textContent = "Neuer Text";
 
-      // X-Button (nur solange das Overlay offen ist und wir nicht im Inline-Edit sind)
-      if (!isEditing && document.getElementById("textAddOverlay").classList.contains("active")) {
-        const closeBtn = document.createElement("button");
-        closeBtn.classList.add("close-btn");
-        closeBtn.innerText = "×";
-        closeBtn.onclick = (e) => {
-          e.stopPropagation();
-          newText.remove();
-        };
-        newText.appendChild(closeBtn);
-      }
-
-      // Verhindert Flip beim Klicken
-      newText.addEventListener("mousedown", (e) => { e.stopPropagation(); });
-      newText.addEventListener("click", (e) => { e.stopPropagation(); });
-
+      // X-Button: Wird beim Fokussieren eingeblendet, beim Blur wieder entfernt
+      newText.addEventListener("focus", function() {
+        // Füge X-Button hinzu, falls noch nicht vorhanden
+        if (!newText.querySelector(".close-btn")) {
+          const closeBtn = document.createElement("button");
+          closeBtn.classList.add("close-btn");
+          closeBtn.innerText = "×";
+          closeBtn.onclick = (e) => {
+            e.stopPropagation();
+            newText.remove();
+          };
+          newText.appendChild(closeBtn);
+        }
+      });
+      newText.addEventListener("blur", function() {
+        // Entferne den X-Button beim Verlassen
+        const btn = newText.querySelector(".close-btn");
+        if (btn) btn.remove();
+      });
+      
+      // Verhindert Flip beim Klicken ins Textfeld
+      newText.addEventListener("mousedown", function(e) {
+        e.stopPropagation();
+      });
+      newText.addEventListener("click", function(e) {
+        e.stopPropagation();
+      });
+      
       parentFace.appendChild(newText);
       makeTextDraggable(newText);
       newText.focus();
@@ -780,8 +773,31 @@
     function updateTransparencyLabel(val) {
       document.getElementById("transparencyLabel").textContent = val + "%";
     }
-
-    /* Drag & Drop für Text */
+    /* Text hinzufügen im Inline-Edit Overlay (bleibt unverändert) */
+    function addDraggableText() {
+      const isFlipped = document.getElementById("card").classList.contains("flip");
+      const parentFace = isFlipped ? document.getElementById("cardBackFace") : document.getElementById("cardFrontFace");
+      const newText = document.createElement("div");
+      newText.contentEditable = "true";
+      newText.classList.add("draggable-text", "shape-standard");
+      newText.style.backgroundColor = getComputedStyle(document.getElementById("card")).backgroundColor;
+      newText.style.top = "80px";
+      newText.style.left = "80px";
+      newText.style.fontSize = "16px";
+      newText.style.userSelect = "text";
+      newText.textContent = "Neuer Text";
+      const closeBtn = document.createElement("button");
+      closeBtn.classList.add("close-btn");
+      closeBtn.innerText = "×";
+      closeBtn.onclick = (e) => {
+        e.stopPropagation();
+        newText.remove();
+      };
+      newText.appendChild(closeBtn);
+      parentFace.appendChild(newText);
+      makeTextDraggable(newText);
+      newText.focus();
+    }
     function makeTextDraggable(elem) {
       let dragText = null, textOffsetX = 0, textOffsetY = 0;
       elem.addEventListener("mousedown", (e) => {
@@ -808,7 +824,6 @@
         document.removeEventListener("mouseup", onTextDragEnd);
       }
     }
-
     /* Bewertung */
     function rateCard(rating) {
       if (rating === "Einfach") {
@@ -838,7 +853,6 @@
       loadCard(currentIndex, true);
       saveCardsToLocalStorage();
     }
-
     /* Overlays */
     function openOverlay(id) {
       document.getElementById(id).classList.add("active");
@@ -901,7 +915,6 @@
       saveCardsToLocalStorage();
       return false;
     }
-
     /* Zeichnen-Funktionen */
     function setupCanvasDrawing() {
       const card = document.getElementById("card");
@@ -1062,7 +1075,6 @@
       saveCardsToLocalStorage();
       closeDrawControls();
     }
-
     /* Kartenverwaltung */
     function addCard() {
       let newQuestion = prompt("Neue Frage:");
@@ -1138,8 +1150,13 @@
       updateCardSize();
       updateBottomButtonsWidth();
     });
-
-    /* Drag & Drop Bilder */
+    function updateBottomButtonsWidth() {
+      let cardEl = document.getElementById("card");
+      let bottom = document.getElementById("bottomButtons");
+      bottom.style.width = cardEl.offsetWidth + "px";
+      bottom.style.marginLeft = cardEl.offsetLeft + "px";
+    }
+    /* Drag & Drop Bilder / Textfelder */
     let dragItem = null;
     let offsetX = 0, offsetY = 0;
     function startDrag(e) {
@@ -1172,7 +1189,6 @@
         img.addEventListener("mousedown", startDrag);
       });
     }
-
     /* Draggable Overlays */
     function makeAllOverlaysDraggable() {
       let overlays = document.querySelectorAll(".overlay");
