@@ -211,6 +211,10 @@
     .side-buttons-container button:hover {
       opacity: 0.9;
     }
+    /* Neuer Button – statt "Text extra" nun "Text hinzufügen" */
+    .side-buttons-container button.text-add {
+      background-color: #007bff;
+    }
     /* ========== UNTERE BUTTONS (Bewertung) ========== */
     .bottom-buttons {
       display: flex;
@@ -285,7 +289,7 @@
       padding: 4px;
       cursor: move;
       position: absolute;
-      background: inherit;
+      /* Hintergrund wird später via JS (entspricht der Kartenfarbe, evtl. mit Transparenz) */
       user-select: text;
       z-index: 9999;
     }
@@ -305,6 +309,19 @@
       line-height: 18px;
       text-align: center;
     }
+    /* Zusätzliche Klassen für Formen */
+    .shape-standard {
+      /* Standard: keine besondere Form */
+    }
+    .shape-comment {
+      border-radius: 20px;
+    }
+    .shape-circle {
+      border-radius: 50%;
+    }
+    .shape-rectangle {
+      border-radius: 0;
+    }
     /* ========== ZEICHNEN-KONTROLLOVERLAY ========== */
     #drawControlsOverlay {
       min-width: 800px;
@@ -319,6 +336,28 @@
     #drawControlsOverlay .draw-toolbar input[type="range"] {
       pointer-events: auto;
       z-index: 99999;
+    }
+    /* Neues Overlay für reines Text hinzufügen mit Anpassungsoptionen */
+    #textAddOverlay {
+      display: none;
+      position: fixed;
+      top: 150px;
+      left: 150px;
+      width: 350px;
+      max-width: 90%;
+      background: linear-gradient(135deg, #ffffff 0%, #f3f3f3 100%);
+      padding: 15px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      z-index: 1100;
+      cursor: move;
+      animation: fadeIn 0.3s ease-out;
+    }
+    #textAddOverlay.active {
+      display: block;
+    }
+    #textAddOverlay h3 {
+      margin-bottom: 10px;
     }
   </style>
 </head>
@@ -364,9 +403,9 @@
             <button onclick="openOverlay('colorOverlay');"><i class="fas fa-palette"></i> Farbe</button>
             <button onclick="toggleProblem();"><i class="fas fa-exclamation-triangle"></i> P</button>
             <button id="patternButton" onclick="cyclePattern(event)"><i class="fas fa-th"></i> Muster&nbsp;Boden</button>
-            <!-- Neuer Button nur für reines Text hinzufügen -->
+            <!-- Neuer Button für reines Text hinzufügen -->
             <button class="text-add" onclick="openOverlay('textAddOverlay');">
-              <i class="fas fa-comment-dots"></i> Text extra
+              <i class="fas fa-comment-dots"></i> Text hinzufügen
             </button>
           </div>
         </div>
@@ -400,6 +439,7 @@
     </div>
     <button onclick="closeOverlay('colorOverlay')">Schließen</button>
   </div>
+  <!-- Inline Edit Overlay (ohne "Text hinzufügen"-Button) -->
   <div id="inlineEditOverlay" class="overlay">
     <h3>Text formatieren</h3>
     <div class="toolbar">
@@ -435,15 +475,18 @@
         <option value="Georgia">Georgia</option>
         <option value="Verdana">Verdana</option>
       </select>
-      <button onclick="addDraggableText()">Text hinzufügen</button>
+      <!-- Hier wurde der Button "Text hinzufügen" entfernt, da wir nun den extra Button rechts verwenden -->
     </div>
     <button onclick="closeInlineEditOverlay()">Schließen</button>
   </div>
-  <!-- Neues Overlay für reines Text hinzufügen mit Optionen (zusätzliche Anpassung) -->
+  <!-- Neues Overlay für reines Text hinzufügen mit Optionen -->
   <div id="textAddOverlay" class="overlay">
     <h3>Text hinzufügen – Optionen</h3>
     <label for="textBgColor">Hintergrundfarbe:</label>
     <input type="color" id="textBgColor" value="#ffffff">
+    <br><br>
+    <label for="textOpacity">Transparenz (0-100):</label>
+    <input type="number" id="textOpacity" value="100" min="0" max="100">
     <br><br>
     <label for="textShape">Form:</label>
     <select id="textShape">
@@ -471,8 +514,7 @@
         <i class="fas fa-eraser"></i> Radierer
       </button>
       <button onclick="setDrawingMode('draw'); getCurrentCanvas().style.cursor='crosshair';">
-        <i class="fas fa-pen"></i> Stift
-      </button>
+        <i class="fas fa-pen"></i> Stift</button>
       <button onclick="saveDrawing()"><i class="fas fa-save"></i> Speichern</button>
       <button onclick="closeDrawControls()"><i class="fas fa-times"></i> Schließen</button>
     </div>
@@ -659,24 +701,26 @@
       if (!font) return;
       document.execCommand("fontName", false, font);
     }
-    /* Text hinzufügen über das separate Overlay (TextAddOverlay) */
+    /* Text hinzufügen über das separate Overlay (neuer Button rechts) */
     function addCustomText() {
       const isFlipped = document.getElementById("card").classList.contains("flip");
       const parentFace = isFlipped 
             ? document.getElementById("cardBackFace") 
             : document.getElementById("cardFrontFace");
       const bgColor = document.getElementById("textBgColor").value;
+      const opacity = document.getElementById("textOpacity").value; // Wert zwischen 0 und 100
       const shape = document.getElementById("textShape").value; // "standard", "comment", "circle", "rectangle"
       const newText = document.createElement("div");
       newText.contentEditable = "true";
       newText.classList.add("draggable-text", "shape-" + shape);
-      newText.style.backgroundColor = bgColor;
+      // Setze Hintergrundfarbe inkl. Transparenz
+      newText.style.backgroundColor = hexToRgba(bgColor, opacity);
       newText.style.top = "60px";
       newText.style.left = "60px";
       newText.style.fontSize = "16px";
       newText.style.userSelect = "text";
       newText.textContent = "Neuer Text";
-      // Füge einen Close-Button hinzu – der X-Button soll im Bearbeitungsmodus erscheinen
+      // Füge einen Close-Button hinzu – der X-Button erscheint nur im Bearbeitungsmodus
       if (isEditing) {
         const closeBtn = document.createElement("button");
         closeBtn.classList.add("close-btn");
@@ -694,7 +738,7 @@
       newText.focus();
       closeOverlay("textAddOverlay");
     }
-    /* Text hinzufügen im Inline-Edit Overlay (wie bisher) */
+    /* Text hinzufügen im Inline-Edit Overlay (wie bisher) – bleibt unverändert */
     function addDraggableText() {
       const isFlipped = document.getElementById("card").classList.contains("flip");
       const parentFace = isFlipped 
@@ -709,7 +753,6 @@
       newText.style.fontSize = "16px";
       newText.style.userSelect = "text";
       newText.textContent = "Neuer Text";
-      // X-Button hinzufügen (sichtbar nur im Bearbeitungsmodus)
       const closeBtn = document.createElement("button");
       closeBtn.classList.add("close-btn");
       closeBtn.innerText = "×";
@@ -747,6 +790,14 @@
         document.removeEventListener("mousemove", onTextDrag);
         document.removeEventListener("mouseup", onTextDragEnd);
       }
+    }
+    /* Hilfsfunktion: Umwandlung von Hex in RGBA (für Transparenz) */
+    function hexToRgba(hex, opacity) {
+      let r = parseInt(hex.slice(1,3), 16);
+      let g = parseInt(hex.slice(3,5), 16);
+      let b = parseInt(hex.slice(5,7), 16);
+      let a = opacity / 100;
+      return `rgba(${r},${g},${b},${a})`;
     }
     /* Bewertung */
     function rateCard(rating) {
@@ -808,7 +859,9 @@
       let action = prompt("Gib 'resize' ein, um die Größe anzupassen oder 'crop' zum Zuschneiden:", "resize");
       if (action === "resize") {
         let newWidth = prompt("Neue Breite (z.B. 50% oder 300px):", "50%");
-        if (newWidth) { img.style.width = newWidth; }
+        if (newWidth) {
+          img.style.width = newWidth;
+        }
       } else if (action === "crop") {
         let top = prompt("Zuschneiden: Abstand von oben (z.B. 10px):", "10px");
         let right = prompt("Zuschneiden: Abstand von rechts (z.B. 10px):", "10px");
