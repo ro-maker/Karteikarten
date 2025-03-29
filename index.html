@@ -211,7 +211,7 @@
     .side-buttons-container button:hover {
       opacity: 0.9;
     }
-    /* Neuer Button – statt "Text extra" nun "Text hinzufügen" */
+    /* Neuer Button für "Text hinzufügen" */
     .side-buttons-container button.text-add {
       background-color: #007bff;
     }
@@ -289,11 +289,10 @@
       padding: 4px;
       cursor: move;
       position: absolute;
-      /* Hintergrund wird später via JS (entspricht der Kartenfarbe, evtl. mit Transparenz) */
       user-select: text;
       z-index: 9999;
     }
-    /* Kleiner X-Button am Textfeld – erscheint nur im Bearbeitungsmodus */
+    /* Kleiner X-Button am Textfeld – erscheint nur im Bearbeitungsmodus (Overlay offen) */
     .draggable-text .close-btn {
       position: absolute;
       top: -8px;
@@ -310,17 +309,13 @@
       text-align: center;
     }
     /* Zusätzliche Klassen für Formen */
-    .shape-standard {
-      /* Standard: keine besondere Form */
-    }
-    .shape-comment {
-      border-radius: 20px;
-    }
-    .shape-circle {
-      border-radius: 50%;
-    }
-    .shape-rectangle {
-      border-radius: 0;
+    .shape-standard { /* Standard: keine besondere Form */ }
+    .shape-comment  { border-radius: 20px; }
+    .shape-circle   { border-radius: 50%; }
+    .shape-rectangle { border-radius: 0; }
+    /* Dreieck via clip-path */
+    .shape-triangle {
+      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
     }
     /* ========== ZEICHNEN-KONTROLLOVERLAY ========== */
     #drawControlsOverlay {
@@ -337,7 +332,7 @@
       pointer-events: auto;
       z-index: 99999;
     }
-    /* Neues Overlay für reines Text hinzufügen mit Anpassungsoptionen */
+    /* Neues Overlay für "Text hinzufügen" */
     #textAddOverlay {
       display: none;
       position: fixed;
@@ -358,6 +353,12 @@
     }
     #textAddOverlay h3 {
       margin-bottom: 10px;
+    }
+    /* Slider-Beschriftung für Transparenz */
+    .transparency-display {
+      font-size: 0.9rem;
+      margin-left: 8px;
+      color: #333;
     }
   </style>
 </head>
@@ -403,13 +404,13 @@
             <button onclick="openOverlay('colorOverlay');"><i class="fas fa-palette"></i> Farbe</button>
             <button onclick="toggleProblem();"><i class="fas fa-exclamation-triangle"></i> P</button>
             <button id="patternButton" onclick="cyclePattern(event)"><i class="fas fa-th"></i> Muster&nbsp;Boden</button>
-            <!-- Neuer Button für reines Text hinzufügen -->
+            <!-- Neuer Button für "Text hinzufügen" -->
             <button class="text-add" onclick="openOverlay('textAddOverlay');">
               <i class="fas fa-comment-dots"></i> Text hinzufügen
             </button>
           </div>
         </div>
-        <!-- Untere Bewertungsbuttons – bleiben unverändert -->
+        <!-- Untere Bewertungsbuttons (unverändert) -->
         <div class="bottom-buttons" id="bottomButtons">
           <button class="btn-falsch" onclick="rateCard('Falsch')">Falsch</button>
           <button class="btn-muehsam" onclick="rateCard('Mühsam')">Mühsam</button>
@@ -475,18 +476,18 @@
         <option value="Georgia">Georgia</option>
         <option value="Verdana">Verdana</option>
       </select>
-      <!-- Hier wurde der Button "Text hinzufügen" entfernt, da wir nun den extra Button rechts verwenden -->
     </div>
     <button onclick="closeInlineEditOverlay()">Schließen</button>
   </div>
-  <!-- Neues Overlay für reines Text hinzufügen mit Optionen -->
+  <!-- Neues Overlay für "Text hinzufügen" -->
   <div id="textAddOverlay" class="overlay">
     <h3>Text hinzufügen – Optionen</h3>
     <label for="textBgColor">Hintergrundfarbe:</label>
     <input type="color" id="textBgColor" value="#ffffff">
     <br><br>
-    <label for="textOpacity">Transparenz (0-100):</label>
-    <input type="number" id="textOpacity" value="100" min="0" max="100">
+    <label for="textOpacity">Transparenz:</label>
+    <input type="range" id="textOpacity" min="0" max="100" value="100" oninput="updateTransparencyLabel(this.value)">
+    <span id="transparencyLabel" class="transparency-display">100%</span>
     <br><br>
     <label for="textShape">Form:</label>
     <select id="textShape">
@@ -494,6 +495,7 @@
       <option value="comment">Kommentarblase</option>
       <option value="circle">Kreis</option>
       <option value="rectangle">Rechteck</option>
+      <option value="triangle">Dreieck</option>
     </select>
     <br><br>
     <button onclick="addCustomText()">Hinzufügen</button>
@@ -514,7 +516,8 @@
         <i class="fas fa-eraser"></i> Radierer
       </button>
       <button onclick="setDrawingMode('draw'); getCurrentCanvas().style.cursor='crosshair';">
-        <i class="fas fa-pen"></i> Stift</button>
+        <i class="fas fa-pen"></i> Stift
+      </button>
       <button onclick="saveDrawing()"><i class="fas fa-save"></i> Speichern</button>
       <button onclick="closeDrawControls()"><i class="fas fa-times"></i> Schließen</button>
     </div>
@@ -649,7 +652,7 @@
     function updateBottomButtons() {
       document.getElementById("bottomButtons").style.display = "flex";
     }
-    /* Inline Edit Overlay */
+    /* Inline Edit Overlay (ohne "Text hinzufügen"-Button) */
     function openInlineEditOverlay() {
       let isFlipped = document.getElementById("card").classList.contains("flip");
       editingSide = isFlipped ? "back" : "front";
@@ -701,27 +704,29 @@
       if (!font) return;
       document.execCommand("fontName", false, font);
     }
-    /* Text hinzufügen über das separate Overlay (neuer Button rechts) */
+    /* Text hinzufügen (separates Overlay) */
     function addCustomText() {
       const isFlipped = document.getElementById("card").classList.contains("flip");
       const parentFace = isFlipped 
             ? document.getElementById("cardBackFace") 
             : document.getElementById("cardFrontFace");
       const bgColor = document.getElementById("textBgColor").value;
-      const opacity = document.getElementById("textOpacity").value; // Wert zwischen 0 und 100
-      const shape = document.getElementById("textShape").value; // "standard", "comment", "circle", "rectangle"
+      const opacityVal = document.getElementById("textOpacity").value; // 0-100
+      const shape = document.getElementById("textShape").value; // "standard", "comment", "circle", "rectangle", "triangle"
+
       const newText = document.createElement("div");
       newText.contentEditable = "true";
       newText.classList.add("draggable-text", "shape-" + shape);
-      // Setze Hintergrundfarbe inkl. Transparenz
-      newText.style.backgroundColor = hexToRgba(bgColor, opacity);
+      // Hintergrundfarbe inkl. Transparenz
+      newText.style.backgroundColor = hexToRgba(bgColor, opacityVal);
       newText.style.top = "60px";
       newText.style.left = "60px";
       newText.style.fontSize = "16px";
       newText.style.userSelect = "text";
       newText.textContent = "Neuer Text";
-      // Füge einen Close-Button hinzu – der X-Button erscheint nur im Bearbeitungsmodus
-      if (isEditing) {
+
+      // X-Button hinzufügen – nur solange das Overlay geöffnet ist
+      if (!isEditing && document.getElementById("textAddOverlay").classList.contains("active")) {
         const closeBtn = document.createElement("button");
         closeBtn.classList.add("close-btn");
         closeBtn.innerText = "×";
@@ -731,40 +736,34 @@
         };
         newText.appendChild(closeBtn);
       }
-      // Verhindere, dass Klicks in das Textfeld ein Flip-Event auslösen
-      newText.addEventListener("mousedown", (e) => { e.stopPropagation(); });
+
+      // Verhindere Flip beim Klicken
+      newText.addEventListener("mousedown", (e) => {
+        e.stopPropagation();
+      });
+
       parentFace.appendChild(newText);
       makeTextDraggable(newText);
       newText.focus();
+
+      // Overlay schließen
       closeOverlay("textAddOverlay");
     }
-    /* Text hinzufügen im Inline-Edit Overlay (wie bisher) – bleibt unverändert */
-    function addDraggableText() {
-      const isFlipped = document.getElementById("card").classList.contains("flip");
-      const parentFace = isFlipped 
-            ? document.getElementById("cardBackFace") 
-            : document.getElementById("cardFrontFace");
-      const newText = document.createElement("div");
-      newText.contentEditable = "true";
-      newText.classList.add("draggable-text", "shape-standard");
-      newText.style.backgroundColor = getComputedStyle(document.getElementById("card")).backgroundColor;
-      newText.style.top = "80px";
-      newText.style.left = "80px";
-      newText.style.fontSize = "16px";
-      newText.style.userSelect = "text";
-      newText.textContent = "Neuer Text";
-      const closeBtn = document.createElement("button");
-      closeBtn.classList.add("close-btn");
-      closeBtn.innerText = "×";
-      closeBtn.onclick = (e) => {
-        e.stopPropagation();
-        newText.remove();
-      };
-      newText.appendChild(closeBtn);
-      parentFace.appendChild(newText);
-      makeTextDraggable(newText);
-      newText.focus();
+
+    // Hilfsfunktion: Hex-Farbe + Transparenz -> RGBA
+    function hexToRgba(hex, opacityVal) {
+      let r = parseInt(hex.slice(1,3), 16);
+      let g = parseInt(hex.slice(3,5), 16);
+      let b = parseInt(hex.slice(5,7), 16);
+      let a = opacityVal / 100;
+      return `rgba(${r},${g},${b},${a})`;
     }
+    // Beim Slider-Eingabewert die Prozentzahl aktualisieren
+    function updateTransparencyLabel(val) {
+      document.getElementById("transparencyLabel").textContent = val + "%";
+    }
+
+    /* Draggable Bilder / Textfelder */
     function makeTextDraggable(elem) {
       let dragText = null, textOffsetX = 0, textOffsetY = 0;
       elem.addEventListener("mousedown", (e) => {
@@ -791,14 +790,7 @@
         document.removeEventListener("mouseup", onTextDragEnd);
       }
     }
-    /* Hilfsfunktion: Umwandlung von Hex in RGBA (für Transparenz) */
-    function hexToRgba(hex, opacity) {
-      let r = parseInt(hex.slice(1,3), 16);
-      let g = parseInt(hex.slice(3,5), 16);
-      let b = parseInt(hex.slice(5,7), 16);
-      let a = opacity / 100;
-      return `rgba(${r},${g},${b},${a})`;
-    }
+
     /* Bewertung */
     function rateCard(rating) {
       if (rating === "Einfach") {
@@ -1125,12 +1117,6 @@
       updateCardSize();
       updateBottomButtonsWidth();
     });
-    function updateBottomButtonsWidth() {
-      let cardEl = document.getElementById("card");
-      let bottom = document.getElementById("bottomButtons");
-      bottom.style.width = cardEl.offsetWidth + "px";
-      bottom.style.marginLeft = cardEl.offsetLeft + "px";
-    }
     /* Drag & Drop Bilder */
     let dragItem = null;
     let offsetX = 0, offsetY = 0;
